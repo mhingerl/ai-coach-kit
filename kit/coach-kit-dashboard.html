@@ -1,0 +1,1978 @@
+<meta name="dash-one-writer">
+<!--
+  COACH KIT: training dashboard template (kit version 2026-10-31).
+  For Claude during setup (see section 2.4 of ai-coach-setup-prompt.md):
+  - Pages (tabs): Today (readiness, today's plan with done badges and workout blocks, two muscle maps: today's
+    workout and what's been missing over 14 or 28 days, coming days), Recovery (HRV, resting HR, sleep, Body Battery,
+    stress, steps, weight), Training load (fitness/fatigue/form, weekly hours by intensity, intensity split, FTP,
+    debriefs), Strength, Season and logs.
+  - Datasets this page reads: strength_sets, exercises, sessions, muscle_targets, area_targets, calendar (strength core);
+    wellness, fitness, activities, planned, planned_steps, readiness, key_sessions, ftp_history (filled by the check-in's
+    dashboard sync; header-only files at first, and every panel shows a one-line empty note until its data arrives);
+    lr_markers and left_calf_log for the optional "asymmetry" module.
+  - Readiness is worked out on the page with the check-in's rules (HRV 7-day mean vs 60-day mean +/- 0.5 SD, resting HR vs
+    30-day mean, sleep, form/ramp, Body Battery/stress); a readiness.csv row for the day (the check-in) takes precedence.
+    It is context, not a gate: the athlete's feel and the plan decide the session. Garmin's Training Readiness is not used.
+  - Lines marked SETUP need the athlete's details (title, constants, key lifts, module texts).
+  - Optional modules sit between <!- - MODULE name - -> and <!- - /MODULE name - -> markers (also as /* MODULE name */ in
+    scripts). Delete a module's HTML to drop it; its drawings then do nothing. Modules: lr-legs, asymmetry, commute.
+  - Write dash/params as {win: 14, mode: "target", range: 60, gapwin: 14}.
+  - Keep the page within the Dashboard type's rules (one-writer, marks, tokens). Remove this comment if you like.
+-->
+<style>
+#dash-root .tdb { display: grid; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+#dash-root .tdb h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+#dash-root .tdb h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+#dash-root .tdb h3 { font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); margin: 0; }
+#dash-root .tdb p { margin: 0; }
+.tdb-head { display: grid; gap: var(--cds-gap-sm); }
+.tdb-lede { color: var(--color-fg-muted); font-size: var(--cds-font-size-body); max-width: 75ch; line-height: 1.5; }
+.tdb .tdb-lede b { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
+.tdb-tabs { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); border-bottom: 1px solid var(--color-border-line); }
+.tdb-tab { font: inherit; font-size: var(--cds-font-size-body); background: transparent; color: var(--color-fg-muted); border: 0; border-bottom: 2px solid transparent; padding: var(--cds-pad-sm) var(--cds-pad-md); cursor: pointer; margin-bottom: -1px; }
+.tdb-tab[aria-selected="true"] { color: var(--color-fg); border-bottom-color: var(--color-fg); }
+.tdb-tab:focus-visible { outline: 2px solid var(--color-fg); outline-offset: -2px; }
+.tdb-page { display: grid; gap: var(--cds-gap-xl); }
+.tdb [hidden] { display: none !important; }
+.tdb-tiles { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); }
+.tdb-tile { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; gap: var(--cds-gap-xs); align-content: start; }
+.tdb-tile .tdb-k { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.tdb-tile .tdb-v { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.tdb-tile .tdb-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+.tdb-section { display: grid; gap: var(--cds-gap-md); }
+.tdb-grid { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
+.tdb-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-md); align-content: start; min-width: 0; }
+.tdb-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.45; max-width: 75ch; }
+.tdb-cardhead { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm) var(--cds-gap-lg); align-items: flex-start; justify-content: space-between; }
+.tdb-cardhead > div { display: grid; gap: var(--cds-gap-xs); min-width: 0; flex: 1 1 18rem; }
+.tdb-seg { display: inline-flex; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
+.tdb-seg button { font: inherit; font-size: var(--cds-font-size-caption); background: transparent; color: var(--color-fg-muted); border: 0; padding: var(--cds-pad-xs) var(--cds-pad-sm); cursor: pointer; }
+.tdb-seg button + button { border-left: 1px solid var(--color-border-line); }
+.tdb-seg button[aria-pressed="true"] { background: var(--color-fg); color: var(--color-bg); }
+.tdb-seg button:focus-visible { outline: 2px solid var(--color-fg); outline-offset: -2px; }
+.tdb-controls { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); }
+.tdb-mapwrap { display: grid; gap: var(--cds-gap-lg); grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); align-items: start; }
+.tdb-map { position: relative; min-height: 18rem; }
+.tdb-needs { position: relative; min-height: 18rem; }
+.tdb-freq { position: relative; min-height: 14rem; }
+.tdb-lift { position: relative; min-height: 9rem; }
+.tdb-lr { position: relative; min-height: 10rem; }
+.tdb-timeline { position: relative; min-height: 8rem; }
+.tdb-trend { position: relative; min-height: 10rem; }
+.tdb-fitness { position: relative; min-height: 16rem; }
+.tdb-weekly { position: relative; min-height: 13rem; }
+.tdb-dist { position: relative; min-height: 4rem; }
+.tdb-ftp { position: relative; min-height: 10rem; }
+.tdb-strip { position: relative; min-height: 2.5rem; }
+.tdb-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); line-height: 1.4; z-index: 2; max-width: 16rem; }
+.tdb-tip .tdb-tipd { color: var(--cds-text-secondary); }
+.tdb-lifts { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); }
+.tdb-liftcard { display: grid; gap: var(--cds-gap-xs); min-width: 0; }
+.tdb-liftcard .tdb-unit { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.tdb-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.tdb-legend span { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); }
+.tdb-sw { width: .625rem; height: .625rem; border-radius: 50%; display: inline-block; background: var(--cds-chart-muted); }
+.tdb-tablebox { max-height: 22rem; overflow: auto; min-width: 0; }
+.tdb-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.tdb-table th { text-align: left; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); position: sticky; top: 0; background: var(--color-panel); white-space: nowrap; }
+.tdb-table td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+.tdb-t-num td:nth-child(n+4):nth-child(-n+6) { text-align: right; }
+.tdb-t-sessions td:nth-child(4), .tdb-t-sessions td:nth-child(5) { text-align: right; }
+.tdb-t-debrief td:nth-child(n+4):nth-child(-n+6) { text-align: right; }
+@media (max-width: 40rem) { .tdb-t-sessions th:nth-child(7), .tdb-t-sessions td:nth-child(7), .tdb-t-debrief th:nth-child(7), .tdb-t-debrief td:nth-child(7) { display: none; } }
+.tdb-soon { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+.tdb-soon .tdb-card { border-style: dashed; background: transparent; gap: var(--cds-gap-xs); }
+.tdb-soon .tdb-src { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.tdb-up { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-caption); }
+.tdb-up li { display: grid; grid-template-columns: 6.5rem 1fr; gap: var(--cds-gap-sm); }
+.tdb-up .tdb-d { color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+.tdb-badge { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); font-weight: 400; text-transform: capitalize; line-height: 1.1; }
+.tdb-badge::before { content: ""; width: .75rem; height: .75rem; border-radius: 50%; background: var(--tdb-status, var(--cds-chart-grid)); }
+.tdb-markers { display: grid; gap: var(--cds-gap-sm); grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); }
+.tdb-mk { display: grid; gap: 2px; padding: var(--cds-pad-sm) var(--cds-pad-md); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); min-width: 0; }
+.tdb-mk .tdb-k { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: flex; align-items: center; gap: var(--cds-gap-xs); }
+.tdb-mk .tdb-mv { font-size: var(--cds-font-size-heading); font-variant-numeric: tabular-nums; }
+.tdb-mk .tdb-mv b { font-weight: var(--cds-font-weight-medium); }
+.tdb-mk .tdb-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+.tdb-dot { display: inline-block; width: .5rem; height: .5rem; border-radius: 50%; background: var(--cds-chart-grid); font-size: 0; overflow: hidden; flex: none; }
+.tdb-today { display: grid; gap: var(--cds-gap-md); min-height: 6rem; position: relative; }
+.tdb-sess { display: grid; gap: var(--cds-gap-sm); padding-bottom: var(--cds-gap-md); border-bottom: 1px solid var(--color-border-line); min-width: 0; }
+.tdb-sess:last-child { border-bottom: 0; padding-bottom: 0; }
+.tdb-sesshead { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); align-items: baseline; justify-content: space-between; }
+.tdb-pills { display: inline-flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
+.tdb-pill { display: inline-flex; align-items: center; gap: 4px; font-size: var(--cds-font-size-caption); padding: 1px var(--cds-pad-sm); border-radius: 999px; border: 1px solid var(--color-border-line); color: var(--color-fg-muted); white-space: nowrap; }
+.tdb-pill.is-done { border-color: var(--color-ok); color: var(--color-ok); }
+.tdb-pill.is-partial { border-color: var(--color-warn); color: var(--color-warn); }
+.tdb-pill.is-missed { border-color: var(--color-bad); color: var(--color-bad); }
+.tdb-blocks { position: relative; min-height: 9rem; }
+.tdb-exlist { margin: 0; padding-left: 1.2rem; font-size: var(--cds-font-size-caption); display: grid; gap: 2px; }
+.tdb-tlist { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-caption); }
+.tdb-tlist li { display: grid; grid-template-columns: 1fr auto; gap: var(--cds-gap-sm); padding: 2px 0; border-bottom: 1px solid var(--color-border-line); }
+.tdb-tlist .tdb-tl-sub { color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+.tdb-split { display: grid; gap: var(--cds-gap-xs); }
+[data-dash-source-state=empty] { color: transparent; }
+[data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+.tdb-fail { display: flex; align-items: center; justify-content: center; gap: var(--cds-gap-xs); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); min-height: inherit; }
+.tdb-fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
+</style>
+
+<div class="tdb">
+  <header class="tdb-head" id="top">
+    <h1>Training dashboard</h1><!-- SETUP: "<Name>'s training dashboard" -->
+    <p class="tdb-lede">Day <b data-draw="phase_day" data-source="status_now" data-field="phase_day" data-row="0">—</b> of <b data-draw="phase_days" data-source="status_now" data-field="phase_days" data-row="0">—</b> in <b data-draw="phase" data-source="status_now" data-field="phase" data-row="0">—</b>.<span class="tdb-rd-today" hidden> Readiness today is <b data-draw="rd_word" data-source="readiness_now" data-field="status" data-row="0">—</b><span class="tdb-rd-checkin" hidden>, from your check-in</span><span class="tdb-rd-data" hidden>, from your data so far; how you feel comes in at the check-in</span>.</span><span class="tdb-rd-none" hidden> No readiness for today yet.</span><span class="tdb-plan-some" hidden> Planned today: <b data-draw="today_titles" data-source="today_summary" data-field="titles" data-row="0">—</b>.</span><span class="tdb-plan-none" hidden> Nothing is planned for today.</span></p>
+  </header>
+
+  <nav class="tdb-tabs" role="tablist" aria-label="Pages">
+    <button type="button" role="tab" class="tdb-tab" id="tab-today" data-tab="today" aria-controls="today" aria-selected="true">Today</button>
+    <button type="button" role="tab" class="tdb-tab" id="tab-recovery" data-tab="recovery" aria-controls="recovery" aria-selected="false">Recovery</button>
+    <button type="button" role="tab" class="tdb-tab" id="tab-load" data-tab="load" aria-controls="load" aria-selected="false">Training load</button>
+    <button type="button" role="tab" class="tdb-tab" id="tab-strength" data-tab="strength" aria-controls="strength" aria-selected="false">Strength</button>
+    <button type="button" role="tab" class="tdb-tab" id="tab-season" data-tab="season" aria-controls="season" aria-selected="false">Season and logs</button>
+  </nav>
+
+  <!-- ===================== TODAY ===================== -->
+  <section class="tdb-page" id="today" data-page="today" role="tabpanel" aria-labelledby="tab-today">
+    <div class="tdb-grid">
+      <div class="tdb-card" id="readiness">
+        <div class="tdb-cardhead">
+          <div>
+            <h2>Readiness</h2>
+            <p class="tdb-note">Worked out here from your overnight data and training load with the same rules as your check-in, not Garmin's Training Readiness. HRV counts as a 7-day average against your normal range from the last 60 days. It's context for the day, not a verdict: how you feel and the plan decide the session.</p>
+          </div>
+          <span class="tdb-badge" data-draw="rd_badge" data-source="readiness_now" data-field="status" data-row="0">—</span>
+        </div>
+        <p class="tdb-note" data-needs="readiness_now">Why: <span data-draw="rd_reasons" data-source="readiness_now" data-field="reasons" data-row="0">—</span>. Markers from <span data-draw="rd_asof" data-source="readiness_now" data-field="data_date" data-row="0">—</span>.</p>
+        <div class="tdb-markers" data-needs="readiness_now">
+          <div class="tdb-mk" data-needs="readiness_now:hrv7">
+            <span class="tdb-k"><i class="tdb-dot" data-draw="mk_dot" data-source="readiness_now" data-field="hrv_status" data-row="0">—</i>HRV, 7-day average</span>
+            <span class="tdb-mv"><b data-draw="mk_num" data-source="readiness_now" data-field="hrv7" data-row="0">—</b> ms</span>
+            <span class="tdb-sub">Normal <span data-draw="mk_num" data-source="readiness_now" data-field="band_low" data-row="0">—</span>–<span data-draw="mk_num" data-source="readiness_now" data-field="band_high" data-row="0">—</span> · last night <span data-draw="mk_num" data-source="readiness_now" data-field="hrv_ms" data-row="0">—</span></span>
+          </div>
+          <div class="tdb-mk" data-needs="readiness_now:rhr_bpm">
+            <span class="tdb-k"><i class="tdb-dot" data-draw="mk_dot" data-source="readiness_now" data-field="rhr_status" data-row="0">—</i>Resting heart rate</span>
+            <span class="tdb-mv"><b data-draw="mk_num" data-source="readiness_now" data-field="rhr_bpm" data-row="0">—</b> bpm</span>
+            <span class="tdb-sub">30-day baseline <span data-draw="mk_num" data-source="readiness_now" data-field="rhr_base" data-row="0">—</span></span>
+          </div>
+          <div class="tdb-mk" data-needs="readiness_now:sleep_h">
+            <span class="tdb-k"><i class="tdb-dot" data-draw="mk_dot" data-source="readiness_now" data-field="sleep_status" data-row="0">—</i>Sleep</span>
+            <span class="tdb-mv"><b data-draw="mk_num" data-source="readiness_now" data-field="sleep_h" data-row="0">—</b> h</span>
+            <span class="tdb-sub">Score <span data-draw="mk_num" data-source="readiness_now" data-field="sleep_score" data-row="0">—</span></span>
+          </div>
+          <div class="tdb-mk" data-needs="readiness_now:form_pct">
+            <span class="tdb-k"><i class="tdb-dot" data-draw="mk_dot" data-source="readiness_now" data-field="load_status" data-row="0">—</i>Form</span>
+            <span class="tdb-mv"><b data-draw="mk_num" data-source="readiness_now" data-field="form_pct" data-row="0">—</b> %</span>
+            <span class="tdb-sub">Ramp <span data-draw="mk_signed" data-source="readiness_now" data-field="ramp" data-row="0">—</span> fitness a week</span>
+          </div>
+          <div class="tdb-mk" data-needs="readiness_now:body_battery">
+            <span class="tdb-k"><i class="tdb-dot" data-draw="mk_dot" data-source="readiness_now" data-field="garmin_status" data-row="0">—</i>Body Battery</span>
+            <span class="tdb-mv"><b data-draw="mk_num" data-source="readiness_now" data-field="body_battery" data-row="0">—</b></span>
+            <span class="tdb-sub">On waking</span>
+          </div>
+          <div class="tdb-mk" data-needs="readiness_now:stress">
+            <span class="tdb-k"><i class="tdb-dot" data-draw="mk_dot" data-source="readiness_now" data-field="garmin_status" data-row="0">—</i>Stress</span>
+            <span class="tdb-mv"><b data-draw="mk_num" data-source="readiness_now" data-field="stress" data-row="0">—</b></span>
+            <span class="tdb-sub">Daily average</span>
+          </div>
+        </div>
+        <div data-needs="readiness_log">
+          <h3>Last 28 days</h3>
+          <div class="tdb-strip dash-skeleton" id="readiness-strip" data-draw="rd_strip" data-source="readiness_log"></div>
+        </div>
+        <p class="tdb-note" data-empty="readiness_now" hidden>No overnight data yet. Readiness appears once a check-in brings in your HRV, resting heart rate and sleep.</p>
+      </div>
+
+      <div class="tdb-card" id="today-plan">
+        <div>
+          <h2>Today's plan</h2>
+          <p class="tdb-note">From your intervals.icu calendar. Done sessions get a badge, and the debrief verdict once it's in. Block height is the target intensity as a share of FTP or threshold; darker is harder.</p>
+        </div>
+        <div class="tdb-today dash-skeleton" id="today-sessions" data-draw="today" data-source="today_plan planned_steps ftp_now exercises" data-needs="today_plan"></div>
+        <p class="tdb-note" data-empty="today_plan" hidden>Nothing planned for today. A rest day, or ask for a check-in to plan one.</p>
+      </div>
+    </div>
+
+    <div class="tdb-card" id="today-muscles">
+      <div class="tdb-cardhead">
+        <div>
+          <h2>Muscles to target today</h2>
+          <p class="tdb-note">Left: what today's strength session works, from its planned exercises (a full set for main muscles, half for helpers). Right: what you've been missing, as sets per week below each muscle's weekly target over the window, per side.</p>
+        </div>
+        <div class="tdb-seg" role="group" aria-label="Missing over">
+          <button type="button" class="tdb-gapwin" data-gapwin="14" aria-pressed="true">14 days</button>
+          <button type="button" class="tdb-gapwin" data-gapwin="28" aria-pressed="false">28 days</button>
+        </div>
+      </div>
+      <div class="tdb-mapwrap">
+        <div class="tdb-split" id="today-workout-muscles">
+          <h3>Today's workout</h3>
+          <div class="tdb-map dash-skeleton tdb-mt-plan" id="today-map" data-draw="todaymap" data-source="muscle_today"></div>
+          <ol class="tdb-tlist tdb-mt-plan" data-draw="todaylist" data-source="muscle_today"></ol>
+          <p class="tdb-note tdb-mt-noplan" hidden>No strength session planned today.</p>
+        </div>
+        <div class="tdb-split" id="missing-muscles">
+          <h3>Missing over the last <span data-draw="gapwin_label">—</span> days</h3>
+          <div class="tdb-map dash-skeleton" id="gap-map" data-draw="gapmap" data-source="muscle_today"></div>
+          <ol class="tdb-tlist" data-draw="gaplist" data-source="muscle_today"></ol>
+          <p class="tdb-note tdb-mt-allmet" hidden>Every muscle met its weekly target over this window.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tdb-card" id="coming-days">
+      <div>
+        <h2>Coming days</h2>
+        <p class="tdb-note">Planned sessions for the next six days, from your intervals.icu calendar.</p>
+      </div>
+      <ul class="tdb-up" data-draw="weekplan" data-source="week_plan" data-needs="week_plan"></ul>
+      <p class="tdb-note" data-empty="week_plan" hidden>Nothing planned yet for the coming days.</p>
+    </div>
+  </section>
+
+  <!-- ===================== RECOVERY ===================== -->
+  <section class="tdb-page" id="recovery" data-page="recovery" role="tabpanel" aria-labelledby="tab-recovery" hidden>
+    <div class="tdb-cardhead">
+      <div>
+        <h2>Recovery</h2>
+        <p class="tdb-note">Your overnight and daily data from your watch, through intervals.icu and the Garmin connection if you have it, against your own baselines.</p>
+      </div>
+      <div class="tdb-seg" role="group" aria-label="Time range">
+        <button type="button" class="tdb-range" data-range="30" aria-pressed="false">30 days</button>
+        <button type="button" class="tdb-range" data-range="60" aria-pressed="true">60 days</button>
+        <button type="button" class="tdb-range" data-range="90" aria-pressed="false">90 days</button>
+      </div>
+    </div>
+    <p class="tdb-note" data-empty="readiness_days" hidden>No overnight data yet. These charts fill in once check-ins bring your wellness data in.</p>
+    <div class="tdb-grid" data-needs="readiness_days">
+      <div class="tdb-card" id="trend-hrv" data-needs="readiness_days:hrv_ms">
+        <div><h2>Overnight HRV</h2><p class="tdb-note">Dots are nightly readings in ms, the line the 7-day average, the band your normal range (60-day average ± half a standard deviation).</p></div>
+        <div class="tdb-trend dash-skeleton" data-draw="trend" data-metric="hrv" data-source="readiness_days"></div>
+      </div>
+      <div class="tdb-card" id="trend-rhr" data-needs="readiness_days:rhr_bpm">
+        <div><h2>Resting heart rate</h2><p class="tdb-note">Beats per minute; the dashed line is your 30-day baseline. Five or more above it counts against readiness.</p></div>
+        <div class="tdb-trend dash-skeleton" data-draw="trend" data-metric="rhr" data-source="readiness_days"></div>
+      </div>
+      <div class="tdb-card" id="trend-sleep" data-needs="readiness_days:sleep_h">
+        <div><h2>Sleep</h2><p class="tdb-note">Hours per night; hover for the sleep score.</p></div>
+        <div class="tdb-trend dash-skeleton" data-draw="trend" data-metric="sleep" data-source="readiness_days"></div>
+      </div>
+      <div class="tdb-card" id="trend-bb" data-needs="readiness_days:body_battery">
+        <div><h2>Body Battery on waking</h2><p class="tdb-note">From the Garmin connection, 0 to 100. Under 50 counts against readiness.</p></div>
+        <div class="tdb-trend dash-skeleton" data-draw="trend" data-metric="bb" data-source="readiness_days"></div>
+      </div>
+      <div class="tdb-card" id="trend-stress" data-needs="readiness_days:stress">
+        <div><h2>Stress</h2><p class="tdb-note">Garmin's daily average stress, 0 to 100. A quarter above your 30-day average counts against readiness.</p></div>
+        <div class="tdb-trend dash-skeleton" data-draw="trend" data-metric="stress" data-source="readiness_days"></div>
+      </div>
+      <div class="tdb-card" id="trend-steps" data-needs="readiness_days:steps">
+        <div><h2>Daily steps</h2><p class="tdb-note">Steps per day.</p></div>
+        <div class="tdb-trend dash-skeleton" data-draw="trend" data-metric="steps" data-source="readiness_days"></div>
+      </div>
+      <div class="tdb-card" id="trend-weight" data-needs="readiness_days:weight_kg">
+        <div><h2>Morning weight</h2><p class="tdb-note">Kilograms, with the 7-day average. Read the trend, not single days.</p></div>
+        <div class="tdb-trend dash-skeleton" data-draw="trend" data-metric="weight" data-source="readiness_days"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TRAINING LOAD ===================== -->
+  <section class="tdb-page" id="load" data-page="load" role="tabpanel" aria-labelledby="tab-load" hidden>
+    <p class="tdb-note" data-empty="load_now" hidden>No training load data yet. Fitness, fatigue, form and weekly hours fill in once check-ins bring in your intervals.icu activities.</p>
+    <div class="tdb-tiles" id="load-tiles" data-needs="load_now">
+      <div class="tdb-tile">
+        <span class="tdb-k">Fitness (CTL)</span>
+        <span class="tdb-v" data-draw="ld_num" data-source="load_now" data-field="ctl" data-row="0">—</span>
+        <span class="tdb-sub"><span data-draw="ld_signed" data-source="load_now" data-field="ctl_change" data-row="0">—</span> on 7 days ago · intervals.icu shows <span data-draw="ld_num" data-source="load_now" data-field="icu_ctl" data-row="0">—</span></span>
+      </div>
+      <div class="tdb-tile">
+        <span class="tdb-k">Fatigue (ATL)</span>
+        <span class="tdb-v" data-draw="ld_num" data-source="load_now" data-field="atl" data-row="0">—</span>
+        <span class="tdb-sub">7-day weighted load · intervals.icu shows <span data-draw="ld_num" data-source="load_now" data-field="icu_atl" data-row="0">—</span></span>
+      </div>
+      <div class="tdb-tile">
+        <span class="tdb-k">Form</span>
+        <span class="tdb-v"><span data-draw="ld_num" data-source="load_now" data-field="form_pct" data-row="0">—</span>%</span>
+        <span class="tdb-sub">Fitness minus fatigue, <span data-draw="ld_signed" data-source="load_now" data-field="form" data-row="0">—</span></span>
+      </div>
+      <div class="tdb-tile">
+        <span class="tdb-k">Ramp rate</span>
+        <span class="tdb-v" data-draw="ld_signed" data-source="load_now" data-field="ramp" data-row="0">—</span>
+        <span class="tdb-sub">Fitness gained in 7 days; about +3 to +6 in a build</span>
+      </div>
+      <div class="tdb-tile">
+        <span class="tdb-k">Hours this week</span>
+        <span class="tdb-v" data-draw="ld_num" data-source="load_now" data-field="hours_week" data-row="0">—</span>
+        <span class="tdb-sub">Last week <span data-draw="ld_num" data-source="load_now" data-field="hours_last" data-row="0">—</span> h · about <span data-draw="const" data-k="WEEKLY_HOURS">—</span> h is comfortable</span>
+      </div>
+      <div class="tdb-tile">
+        <span class="tdb-k">Load this week</span>
+        <span class="tdb-v" data-draw="ld_num" data-source="load_now" data-field="load_week" data-row="0">—</span>
+        <span class="tdb-sub">Last week <span data-draw="ld_num" data-source="load_now" data-field="load_last" data-row="0">—</span> · <span data-draw="ld_num" data-source="load_now" data-field="load_planned_left" data-row="0">—</span> still planned</span>
+      </div>
+    </div>
+
+    <div class="tdb-card" id="fitness" data-needs="load_series">
+      <div class="tdb-cardhead">
+        <div>
+          <h2>Fitness, fatigue and form</h2>
+          <p class="tdb-note">Worked out here from your daily training load, not taken from intervals.icu: fitness (CTL) is your 42-day training load, fatigue (ATL) the 7-day load; strength sessions add to fatigue only. Form is fitness minus fatigue as a share of fitness: −10% to −30% is the productive training range, below −30% high risk, above +5% fresh.</p>
+        </div>
+        <div class="tdb-seg" role="group" aria-label="Time range">
+          <button type="button" class="tdb-range" data-range="30" aria-pressed="false">30 days</button>
+          <button type="button" class="tdb-range" data-range="60" aria-pressed="true">60 days</button>
+          <button type="button" class="tdb-range" data-range="90" aria-pressed="false">90 days</button>
+        </div>
+      </div>
+      <div class="tdb-fitness dash-skeleton" data-draw="fitness" data-source="load_series"></div>
+    </div>
+
+    <div class="tdb-grid">
+      <div class="tdb-card" id="weekly" data-needs="weekly_volume">
+        <div class="tdb-cardhead">
+          <div>
+            <h2>Weekly hours by intensity</h2>
+            <p class="tdb-note">Endurance hours per Monday-to-Sunday week, commutes included, split into easy (zones 1–2), moderate (zone 3) and hard (zone 4 and up). The dashed line is the comfortable weekly volume.</p>
+          </div>
+          <div class="tdb-legend">
+            <span><i class="tdb-sw tdb-sw-low"></i>Easy</span>
+            <span><i class="tdb-sw tdb-sw-mid"></i>Moderate</span>
+            <span><i class="tdb-sw tdb-sw-high"></i>Hard</span>
+            <span><i class="tdb-sw"></i>No zone data</span>
+          </div>
+        </div>
+        <div class="tdb-weekly dash-skeleton" data-draw="weekly" data-source="weekly_volume"></div>
+      </div>
+      <div class="tdb-card" id="intensity" data-needs="intensity_28">
+        <div>
+          <h2>Intensity, last 28 days</h2>
+          <p class="tdb-note"><b data-draw="pct" data-source="intensity_28" data-field="low_pct" data-row="0">—</b>% easy, <b data-draw="pct" data-source="intensity_28" data-field="mid_pct" data-row="0">—</b>% moderate and <b data-draw="pct" data-source="intensity_28" data-field="high_pct" data-row="0">—</b>% hard, by time. The polarized aim is about <span data-draw="const" data-k="LOW_SHARE">—</span>% easy with little moderate work.</p>
+        </div>
+        <div class="tdb-dist dash-skeleton" data-draw="dist" data-source="intensity_28"></div>
+      </div>
+    </div>
+
+    <div class="tdb-grid">
+      <div class="tdb-card" id="ftp">
+        <div>
+          <h2>FTP</h2>
+          <p class="tdb-note">What Claude has set in intervals.icu from your tests and rides, outdoor and indoor. Hover a point for the method and the evidence.</p>
+        </div>
+        <div class="tdb-tiles" data-needs="ftp_now">
+          <div class="tdb-split"><span class="tdb-note">Outdoor</span><span class="tdb-badge"><span data-draw="ftp_w" data-source="ftp_now" data-field="watts" data-where="setting=ftp">—</span> W</span><span class="tdb-note">since <span data-draw="ftp_d" data-source="ftp_now" data-field="date" data-where="setting=ftp">—</span></span></div>
+          <div class="tdb-split"><span class="tdb-note">Indoor</span><span class="tdb-badge"><span data-draw="ftp_w" data-source="ftp_now" data-field="watts" data-where="setting=indoor_ftp">—</span> W</span><span class="tdb-note">since <span data-draw="ftp_d" data-source="ftp_now" data-field="date" data-where="setting=indoor_ftp">—</span></span></div>
+        </div>
+        <div class="tdb-ftp dash-skeleton" data-draw="ftpchart" data-source="ftp_history" data-needs="ftp_now"></div>
+        <p class="tdb-note" data-empty="ftp_now" hidden>No FTP recorded yet. The first check-in records your current values.</p>
+      </div>
+      <!-- MODULE commute (optional): power per heartbeat on a repeated climbing commute or route. Drawing: commute; calc: commute_benchmark (set its 150 m and 8 km thresholds, COMMUTE_MIN_ELEV and COMMUTE_MAX_KM to the athlete's climb). -->
+      <div class="tdb-card" id="commute">
+        <div>
+          <h2>Commute benchmark</h2>
+          <p class="tdb-note">Watts per heartbeat on your climbing commute (rides marked as commutes with at least <span data-draw="const" data-k="COMMUTE_MIN_ELEV">—</span> m of climbing over at most <span data-draw="const" data-k="COMMUTE_MAX_KM">—</span> km). Higher means your legs make more power for the same effort.</p>
+        </div>
+        <div class="tdb-trend dash-skeleton" data-draw="commute" data-source="commute_benchmark" data-needs="commute_benchmark"></div>
+        <p class="tdb-note" data-empty="commute_benchmark" hidden>No uphill commutes with power and heart rate yet.</p>
+      </div>
+      <!-- /MODULE commute -->
+    </div>
+
+    <div class="tdb-card" id="debriefs">
+      <div>
+        <h2>Session debriefs</h2>
+        <p class="tdb-note">Key sessions with their verdict: compliance is average work-interval power against target, fade the last rep against the first, decoupling the heart-rate drift on long rides (under 5% is good).</p>
+      </div>
+      <div class="tdb-tablebox" data-needs="key_sessions">
+        <table class="tdb-table tdb-t-debrief" data-source="key_sessions" data-row-key="date,session">
+          <thead><tr><th data-field="date">Date</th><th data-field="session">Session</th><th data-field="verdict">Verdict</th><th data-field="compliance_pct">Compliance %</th><th data-field="fade_pct">Fade %</th><th data-field="decoupling_pct">Decoupling %</th><th data-field="next_step">Next step</th></tr></thead>
+          <tbody data-draw="debrieftable" data-source="key_sessions"></tbody>
+        </table>
+      </div>
+      <p class="tdb-note" data-empty="key_sessions" hidden>No debriefs yet. They start with your next key session.</p>
+    </div>
+  </section>
+
+  <!-- ===================== STRENGTH ===================== -->
+  <section class="tdb-page" id="strength" data-page="strength" role="tabpanel" aria-labelledby="tab-strength" hidden>
+    <p class="tdb-lede"><span class="tdb-behind-some">Over the last <span data-draw="win_label">—</span> days, the muscles furthest behind target are <b data-draw="behind" data-rank="1" data-source="behind_now" data-field="label">—</b> and <b data-draw="behind" data-rank="2" data-source="behind_now" data-field="label">—</b>.</span><span class="tdb-behind-none" hidden>Over the last <span data-draw="win_label">—</span> days, every muscle is at or above its target.</span></p>
+
+    <section class="tdb-tiles" id="summary" aria-label="Strength summary">
+      <div class="tdb-tile">
+        <span class="tdb-k">Strength sessions, last 7 days</span>
+        <span class="tdb-v" data-draw="num" data-source="status_now" data-field="sessions_7d" data-row="0">—</span>
+        <span class="tdb-sub">Plan: <span data-draw="plan_sessions">—</span> a week</span>
+      </div>
+      <div class="tdb-tile">
+        <span class="tdb-k">Days since last session</span>
+        <span class="tdb-v" data-draw="num" data-source="status_now" data-field="days_since_last" data-row="0">—</span>
+        <span class="tdb-sub">Counted from your strength log</span>
+      </div>
+      <div class="tdb-tile">
+        <span class="tdb-k">Muscles below target</span>
+        <span class="tdb-v" data-draw="below" data-source="below_count" data-field="below">—</span>
+        <span class="tdb-sub"><span data-draw="below_key" data-source="below_count" data-field="key_below">—</span> of them key muscles, last <span data-draw="win_label">—</span> days</span>
+      </div>
+      <div class="tdb-tile">
+        <span class="tdb-k">Next milestone</span>
+        <span class="tdb-v" data-draw="num" data-source="status_now" data-field="days_to_next" data-row="0">—</span>
+        <span class="tdb-sub">days until <span data-draw="text" data-source="status_now" data-field="next" data-row="0">—</span></span>
+      </div>
+    </section>
+
+    <section class="tdb-section" id="muscles">
+      <div class="tdb-card">
+        <div class="tdb-cardhead">
+          <div>
+            <h2>Muscle load</h2>
+            <p class="tdb-note">Hard sets per week, averaged over the window. A set counts fully for its main muscles and half for helpers. One-sided work counts per side, so extra sets on one side show on that half of the figure.</p>
+          </div>
+          <div class="tdb-controls">
+            <div class="tdb-seg" role="group" aria-label="Window">
+              <button type="button" class="tdb-win" data-win="7" aria-pressed="false">7 days</button>
+              <button type="button" class="tdb-win" data-win="14" aria-pressed="true">14 days</button>
+              <button type="button" class="tdb-win" data-win="28" aria-pressed="false">28 days</button>
+            </div>
+            <div class="tdb-seg" role="group" aria-label="Colour by">
+              <button type="button" class="tdb-mode" data-mode="target" aria-pressed="true">Share of target</button>
+              <button type="button" class="tdb-mode" data-mode="sets" aria-pressed="false">Sets per week</button>
+            </div>
+          </div>
+        </div>
+        <div class="tdb-mapwrap">
+          <div class="tdb-map dash-skeleton" id="body-map" data-draw="bodymap" data-source="muscle_load"></div>
+          <div class="tdb-needs dash-skeleton" id="needs" data-draw="needs" data-source="muscle_load"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tdb-section" id="targets">
+      <div class="tdb-grid">
+        <div class="tdb-card">
+          <div>
+            <h2>Weekly targets</h2>
+            <p class="tdb-note">Days that trained each area, Monday to Sunday. Filled dots are sessions done, hollow dots are what's still open to reach the minimum. Targets come from your training plan.</p>
+          </div>
+          <div class="tdb-freq dash-skeleton" id="freq" data-draw="freq" data-source="area_freq"></div>
+        </div>
+        <!-- MODULE lr-legs (optional): per-side leg volume and re-test date. For athletes with a weaker or priority side. Drawings: lrbars, retest, const. -->
+        <div class="tdb-card">
+          <div>
+            <h2>Left vs right legs</h2>
+            <p class="tdb-note">Hard sets per week over the last <span data-draw="const" data-k="LR_WINDOW">—</span> days for each leg. The plan puts the weaker side first with one extra set.</p><!-- SETUP: adapt to the athlete's rule -->
+          </div>
+          <div class="tdb-lr dash-skeleton" id="lr-legs" data-draw="lrbars" data-source="muscle_load"></div>
+          <h3>Next re-test</h3>
+          <p class="tdb-note"><span data-draw="retest" data-source="calendar">—</span>. Single-leg calf raise to failure and eyes-closed balance, every <span data-draw="const" data-k="RETEST_WEEKS">—</span> weeks. Target: left at least <span data-draw="const" data-k="RETEST_TARGET">—</span>% of right.</p><!-- SETUP: the athlete's re-test and target; the date comes from a calendar milestone whose label contains "re-test" -->
+        </div>
+        <!-- /MODULE lr-legs -->
+      </div>
+    </section>
+
+    <section class="tdb-section" id="progress">
+      <div class="tdb-card">
+        <div class="tdb-cardhead">
+          <div>
+            <h2>Strength progression</h2>
+            <p class="tdb-note">Loaded lifts show an estimated one-rep max from your best set (Epley formula, external load only); bodyweight lifts show best reps in a set. Colour shows where you trained, because the equipment changed the loads you could use.</p>
+          </div>
+          <div class="tdb-legend">
+            <span><i class="tdb-sw tdb-sw-home"></i>Home</span>
+            <span><i class="tdb-sw tdb-sw-gym"></i>Gym or physio</span>
+            <span><i class="tdb-sw tdb-sw-travel"></i>Travel</span>
+          </div>
+        </div>
+        <!-- SETUP: 4-6 key lifts; each data-lift must also be in the metric map of the lift_points calculation -->
+        <div class="tdb-lifts">
+          <div class="tdb-liftcard"><h3>Single-leg RDL</h3><span class="tdb-unit">kg, estimated 1RM</span><div class="tdb-lift dash-skeleton" data-draw="lift" data-lift="sl_rdl" data-source="lift_points"></div></div>
+          <div class="tdb-liftcard"><h3>Bulgarian split squat</h3><span class="tdb-unit">kg, estimated 1RM</span><div class="tdb-lift dash-skeleton" data-draw="lift" data-lift="bss" data-source="lift_points"></div></div>
+          <div class="tdb-liftcard"><h3>Single-leg calf raise</h3><span class="tdb-unit">kg, estimated 1RM (loaded sets only)</span><div class="tdb-lift dash-skeleton" data-draw="lift" data-lift="sl_calf_raise" data-source="lift_points"></div></div>
+          <div class="tdb-liftcard"><h3>Kettlebell overhead press</h3><span class="tdb-unit">kg, estimated 1RM</span><div class="tdb-lift dash-skeleton" data-draw="lift" data-lift="kb_ohp" data-source="lift_points"></div></div>
+          <div class="tdb-liftcard"><h3>Pull-ups (band-assisted)</h3><span class="tdb-unit">best reps in a set</span><div class="tdb-lift dash-skeleton" data-draw="lift" data-lift="pull_up" data-source="lift_points"></div></div>
+          <div class="tdb-liftcard"><h3>Push-ups</h3><span class="tdb-unit">best reps in a set</span><div class="tdb-lift dash-skeleton" data-draw="lift" data-lift="push_up" data-source="lift_points"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tdb-section" id="sessions">
+      <div class="tdb-card">
+        <div>
+          <h2>Strength sessions</h2>
+          <p class="tdb-note">Every session in your strength log, newest first. "Not yet logged" means the description still needs to go onto the intervals.icu activity.</p>
+        </div>
+        <div class="tdb-tablebox">
+          <table class="tdb-table tdb-t-sessions" data-source="session_summary" data-row-key="date">
+            <thead><tr><th data-field="date">Date</th><th data-field="weekday">Day</th><th data-field="where">Where</th><th data-field="exercises">Exercises</th><th data-field="sets">Sets</th><th data-field="intervals">intervals.icu</th><th data-field="context">Context</th></tr></thead>
+            <tbody data-draw="sessiontable" data-source="session_summary"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ===================== SEASON AND LOGS ===================== -->
+  <section class="tdb-page" id="season" data-page="season" role="tabpanel" aria-labelledby="tab-season" hidden>
+    <section class="tdb-section" id="plan">
+      <div class="tdb-card">
+        <div>
+          <h2>Season plan</h2>
+          <p class="tdb-note">Phases from your annual plan, with milestones. Hover for dates; approximate ones are marked.</p>
+        </div>
+        <div class="tdb-timeline dash-skeleton" id="timeline" data-draw="timeline" data-source="calendar"></div>
+        <h3>Coming up</h3>
+        <ul class="tdb-up" data-draw="upcoming" data-source="calendar"></ul>
+      </div>
+    </section>
+
+    <!-- MODULE asymmetry (optional): pedal-stroke angles from FIT files and a symptom log. Needs datasets lr_markers (date,marker,condition,left,right,unit,gap,note) and left_calf_log (date,trigger,left_calf,bike_effect,decision,status; rename the heading for the athlete's body part). Drawings: lrtable, calftable. -->
+    <section class="tdb-section" id="asymmetry">
+      <div class="tdb-grid">
+        <div class="tdb-card">
+          <div>
+            <h2>Pedal stroke asymmetry</h2>
+            <p class="tdb-note">Where each leg's power phase starts, in degrees, from your FIT files. A smaller gap means the left leg is recruiting earlier. Power split is left/right share of power.</p>
+          </div>
+          <div class="tdb-tablebox">
+            <table class="tdb-table tdb-t-num" data-source="lr_markers" data-row-key="date,condition">
+              <thead><tr><th data-field="date">Date</th><th data-field="marker">Marker</th><th data-field="condition">Condition</th><th data-field="left">Left</th><th data-field="right">Right</th><th data-field="gap">Gap</th><th data-field="unit">Unit</th></tr></thead>
+              <tbody data-draw="lrtable" data-source="lr_markers"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="tdb-card">
+          <div>
+            <h2>Symptom log</h2>
+            <p class="tdb-note">Readings after the activities that trigger your symptom checks, with the rating from your plan.</p>
+          </div>
+          <div class="tdb-tablebox">
+            <table class="tdb-table" data-source="left_calf_log" data-row-key="date">
+              <thead><tr><th data-field="date">Date</th><th data-field="trigger">Trigger</th><th data-field="left_calf">Reading</th><th data-field="status">Rating</th></tr></thead>
+              <tbody data-draw="calftable" data-source="left_calf_log"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- /MODULE asymmetry -->
+
+    <section class="tdb-section" id="next">
+      <div>
+        <h2>Coming next</h2>
+        <p class="tdb-note">Panels that fill in once the data exists.</p>
+      </div>
+      <!-- SETUP: keep the cards that match the athlete's plans; replace a card with a real panel once its data exists -->
+      <div class="tdb-soon">
+        <div class="tdb-card"><h3>Sweat rate</h3><p class="tdb-note">Sweat loss per hour from weigh-ins before and after sessions.</p><p class="tdb-src">From a smart scale</p></div>
+        <div class="tdb-card"><h3>Fuelling</h3><p class="tdb-note">Daily protein per kg and carbs against training load, from your food photos.</p><p class="tdb-src">From the nutrition log</p></div>
+        <div class="tdb-card"><h3>Block reviews</h3><p class="tdb-note">Each finished phase's review: what it built, what worked, what changes next.</p><p class="tdb-src">From the block reviews in your project</p></div>
+      </div>
+    </section>
+  </section>
+</div>
+
+<script>
+/* ---------- strength calculations ---------- */
+dash.calc('muscle_sets_daily', {
+  inputs: ['strength_sets', 'exercises'],
+  title: 'Hard sets per muscle and side',
+  description: 'Each logged set times the exercise weight for that muscle (1 main, 0.5 helper, 0.25 minor); one-sided work counts per side, extra left sets on the left.',
+  fn: (strength_sets, exercises) => {
+    const muscles = new Map(exercises.map((e) => [e.exercise_id, e.muscles]));
+    const out = [];
+    for (const s of strength_sets) {
+      const list = muscles.get(s.exercise_id);
+      if (!list) continue;
+      const sets = Number(s.sets) || 0;
+      const extraLeft = Number(s.extra_left_sets) || 0;
+      for (const part of list.split('|')) {
+        const [muscle, w] = part.split(':');
+        out.push({ date: s.date, muscle, side: 'L', sets: (sets + extraLeft) * Number(w) });
+        out.push({ date: s.date, muscle, side: 'R', sets: sets * Number(w) });
+      }
+    }
+    return out;
+  },
+});
+
+dash.calc('muscle_load', {
+  inputs: ['muscle_sets_daily', 'muscle_targets'],
+  title: 'Muscle load against target',
+  description: 'Hard sets per week for each muscle and side over the last 7, 14 and 28 days ending today, and the weaker side as a share of the weekly target.',
+  fn: (muscle_sets_daily, muscle_targets) => {
+    const day = (d) => Date.parse(d + 'T00:00:00Z') / 864e5;
+    const t = day(new Date().toLocaleDateString('sv-SE'));
+    const rows = [];
+    for (const window of [7, 14, 28]) {
+      for (const m of muscle_targets) {
+        const mine = muscle_sets_daily.filter((r) => r.muscle === m.muscle && day(r.date) <= t);
+        const inWin = mine.filter((r) => t - day(r.date) < window);
+        const sum = (side) => inWin.filter((r) => r.side === side).reduce((a, r) => a + r.sets, 0);
+        const weeks = window / 7;
+        const target = Number(m.target_sets_week);
+        const L = sum('L') / weeks, R = sum('R') / weeks;
+        const last = mine.map((r) => r.date).sort().pop() || null;
+        rows.push({
+          id: window + '-' + m.muscle, window, muscle: m.muscle, label: m.label, view: m.view, priority: m.priority, target,
+          weekly_L: Math.round(L * 10) / 10, weekly_R: Math.round(R * 10) / 10,
+          pct: Math.round(Math.min(L, R) / target * 100),
+          last_date: last, days_since: last ? t - day(last) : null,
+        });
+      }
+    }
+    return rows;
+  },
+});
+
+dash.calc('behind_now', {
+  inputs: ['muscle_load'],
+  title: 'Muscles furthest behind',
+  description: 'Muscles under their weekly target in each window: key muscles first, then the lowest share of target.',
+  fn: (muscle_load) => [7, 14, 28].flatMap((window) => muscle_load
+    .filter((r) => r.window === window && r.pct < 100)
+    .sort((a, b) => (a.priority === 'key' ? 0 : 1) - (b.priority === 'key' ? 0 : 1) || a.pct - b.pct)
+    .map((r, i) => ({ id: window + '-' + (i + 1), window, rank: i + 1, label: r.label, pct: r.pct }))),
+});
+
+dash.calc('below_count', {
+  inputs: ['muscle_load'],
+  title: 'Muscles below target',
+  description: 'How many muscles are under their weekly target in each window, and how many of those are key muscles.',
+  fn: (muscle_load) => [7, 14, 28].map((window) => {
+    const below = muscle_load.filter((r) => r.window === window && r.pct < 100);
+    return { window, below: below.length, key_below: below.filter((r) => r.priority === 'key').length };
+  }),
+});
+
+dash.calc('area_freq', {
+  inputs: ['strength_sets', 'exercises', 'area_targets'],
+  title: 'Sessions per area, this week and last',
+  description: 'Distinct training days with an exercise for each area, Monday to Sunday, against the targets in your plan.',
+  fn: (strength_sets, exercises, area_targets) => {
+    const today = new Date().toLocaleDateString('sv-SE');
+    const day = (d) => Date.parse(d + 'T00:00:00Z') / 864e5;
+    const t = day(today);
+    const monday = t - ((new Date(today + 'T00:00:00Z').getUTCDay() + 6) % 7);
+    const areas = new Map(exercises.map((e) => [e.exercise_id, e.areas.split('|')]));
+    const days = (area, from, to) => new Set(strength_sets
+      .filter((s) => (areas.get(s.exercise_id) || []).includes(area) && day(s.date) >= from && day(s.date) < to)
+      .map((s) => s.date)).size;
+    return area_targets.map((a) => ({
+      area: a.area, label: a.label, group: a.group,
+      min: Number(a.min_per_week), max: a.max_per_week === '' ? null : Number(a.max_per_week),
+      this_week: days(a.area, monday, monday + 7), last_week: days(a.area, monday - 7, monday),
+    }));
+  },
+});
+
+dash.calc('lift_points', {
+  inputs: ['strength_sets', 'sessions'],
+  title: 'Key lifts over time',
+  description: 'Estimated one-rep max from the best loaded set (load x (1 + reps / 30), external load only) or best reps per set for bodyweight lifts, with where you trained.',
+  fn: (strength_sets, sessions) => {
+    const metric = { sl_rdl: 'e1rm', bss: 'e1rm', sl_calf_raise: 'e1rm', kb_ohp: 'e1rm', pull_up: 'reps', push_up: 'reps' }; // SETUP: the athlete's key lifts, e1rm for loaded, reps for bodyweight
+    const where = new Map(sessions.map((s) => [s.date, s.location]));
+    return strength_sets
+      .filter((s) => metric[s.exercise_id] && s.reps && (metric[s.exercise_id] === 'reps' || s.load_kg !== ''))
+      .map((s) => {
+        const best = Math.max(...s.reps.split('|').map(Number));
+        const load = s.load_kg === '' ? null : Number(s.load_kg);
+        return {
+          id: s.date + '-' + s.exercise_id, date: s.date, exercise_id: s.exercise_id, load_kg: load, best_reps: best,
+          sets: Number(s.sets), note: s.load_note, location: where.get(s.date) || 'unclear',
+          value: load ? Math.round(load * (1 + best / 30) * 10) / 10 : best,
+        };
+      });
+  },
+});
+
+dash.calc('session_summary', {
+  inputs: ['sessions', 'strength_sets'],
+  title: 'Strength sessions',
+  description: 'Each logged session with its number of exercises and sets, and whether its description is on intervals.icu yet.',
+  fn: (sessions, strength_sets) => {
+    const where = { gym: 'Gym', home: 'Home', pt: 'Physio', hotel_gym: 'Hotel gym', travel: 'Travel', unclear: 'Unclear' };
+    const logged = { logged: 'Logged', check: 'Check description', pending: 'Not yet logged' };
+    return sessions.map((s) => {
+      const rows = strength_sets.filter((r) => r.date === s.date);
+      return {
+        date: s.date, weekday: s.weekday, where: where[s.location] || s.location, exercises: rows.length,
+        sets: rows.reduce((a, r) => a + Number(r.sets) + (Number(r.extra_left_sets) || 0), 0),
+        intervals: logged[s.intervals_status] || s.intervals_status, context: s.context,
+      };
+    }).sort((a, b) => b.date.localeCompare(a.date));
+  },
+});
+
+dash.calc('status_now', {
+  inputs: ['calendar', 'sessions'],
+  title: 'Where you are in the plan',
+  description: 'Today’s phase and day within it, days to the next milestone, and strength sessions in the last 7 days.',
+  fn: (calendar, sessions) => {
+    const day = (d) => Date.parse(d + 'T00:00:00Z') / 864e5;
+    const t = day(new Date().toLocaleDateString('sv-SE'));
+    const phase = calendar.find((c) => c.kind === 'phase' && day(c.start) <= t && t <= day(c.end));
+    const next = calendar.filter((c) => c.kind === 'milestone' && day(c.start) > t).sort((a, b) => a.start.localeCompare(b.start))[0];
+    const past = sessions.map((s) => s.date).filter((d) => day(d) <= t).sort();
+    const last = past[past.length - 1];
+    return [{
+      phase: phase ? phase.label : 'between phases',
+      phase_day: phase ? t - day(phase.start) + 1 : null,
+      phase_days: phase ? day(phase.end) - day(phase.start) + 1 : null,
+      next: next ? next.label : null,
+      days_to_next: next ? day(next.start) - t : null,
+      sessions_7d: past.filter((d) => t - day(d) < 7).length,
+      days_since_last: last ? t - day(last) : null,
+    }];
+  },
+});
+
+/* ---------- readiness (own rules, not Garmin's Training Readiness) ---------- */
+dash.calc('readiness_days', {
+  inputs: ['wellness', 'load_series'],
+  title: 'Daily readiness from your data',
+  description: 'Per day: HRV 7-day average against your 60-day normal range (mean ± 0.5 SD), resting HR against its 30-day average, sleep, form and ramp rate, Body Battery and stress, each green, amber or red, combined as in the check-in: one amber is still green, two ambers or one lone red are amber, a red with company is red.',
+  fn: (wellness, load_series) => {
+    const num = (v) => (v === '' || v == null || isNaN(Number(v)) ? null : Number(v));
+    const day = (d) => Date.parse(String(d).slice(0, 10) + 'T00:00:00Z') / 864e5;
+    const mean = (a) => (a.length ? a.reduce((s, v) => s + v, 0) / a.length : null);
+    const sd = (a) => { const m = mean(a); return a.length > 1 ? Math.sqrt(a.reduce((s, v) => s + (v - m) ** 2, 0) / (a.length - 1)) : null; };
+    const r1 = (v) => (v == null ? null : Math.round(v * 10) / 10);
+    const W = wellness.map((r) => ({ t: day(r.date), date: String(r.date).slice(0, 10), hrv: num(r.hrv_ms), rhr: num(r.rhr_bpm), sleep: num(r.sleep_h), score: num(r.sleep_score), bb: num(r.body_battery_wake), stress: num(r.stress_avg), steps: num(r.steps), weight: num(r.weight_kg) }))
+      .filter((r) => !isNaN(r.t)).sort((a, b) => a.t - b.t);
+    const byT = new Map(W.map((r) => [r.t, r]));
+    const F = new Map(load_series.map((r) => [day(r.date), { ctl: r.ctl, atl: r.atl }]));
+    const vals = (from, to, k) => W.filter((r) => r.t >= from && r.t <= to && r[k] != null).map((r) => r[k]);
+    const avg7 = (t, k) => { const a = vals(t - 6, t, k); return a.length >= 3 ? mean(a) : null; };
+    return W.map((r) => {
+      const t = r.t, st = {}, why = [];
+      const base = vals(t - 59, t, 'hrv');
+      const mu = base.length >= 14 ? mean(base) : null, s = base.length >= 14 ? sd(base) : null;
+      const lo = mu != null ? mu - 0.5 * s : null, hi = mu != null ? mu + 0.5 * s : null;
+      const h7 = avg7(t, 'hrv');
+      if (h7 != null && mu != null) {
+        const falling = [0, 1, 2].every((k) => { const a = avg7(t - k, 'hrv'), b = avg7(t - k - 1, 'hrv'); return a != null && b != null && a < b; });
+        st.hrv = h7 < mu - s || (h7 < lo && falling) ? 'red' : h7 < lo ? 'amber' : 'green';
+        if (st.hrv !== 'green') why.push('HRV 7-day ' + Math.round(h7) + ' ms, normal ' + Math.round(lo) + '–' + Math.round(hi));
+      }
+      if (r.hrv != null && mu != null) {
+        st.hrv_today = r.hrv < mu - s ? 'amber' : 'green';
+        if (st.hrv_today !== 'green') why.push('HRV last night ' + Math.round(r.hrv) + ' ms');
+      }
+      const rb = vals(t - 30, t - 1, 'rhr'), rbase = rb.length >= 7 ? mean(rb) : null, r7 = avg7(t, 'rhr');
+      if (r.rhr != null && rbase != null) {
+        st.rhr = r.rhr - rbase >= 8 || (r7 != null && r7 - rbase >= 3) ? 'red' : r.rhr - rbase >= 5 ? 'amber' : 'green';
+        if (st.rhr !== 'green') why.push('resting HR ' + Math.round(r.rhr) + ' bpm, baseline ' + Math.round(rbase));
+      }
+      const prev = byT.get(t - 1);
+      if (r.sleep != null) {
+        st.sleep = r.sleep < 5 ? 'red' : r.sleep < 6 || (r.score != null && r.score < 60) || (r.sleep < 6.5 && prev && prev.sleep != null && prev.sleep < 6.5) ? 'amber' : 'green';
+        if (st.sleep !== 'green') why.push(r1(r.sleep) + ' h sleep' + (r.score != null ? ', score ' + r.score : ''));
+      }
+      const f = F.get(t), f7 = F.get(t - 7);
+      const form = f && f.ctl ? (f.ctl - f.atl) / f.ctl * 100 : null;
+      const ramp = f && f7 && f.ctl != null && f7.ctl != null ? f.ctl - f7.ctl : null;
+      if (form != null) {
+        st.load = form < -30 || (ramp != null && ramp > 8) ? 'amber' : 'green';
+        if (form < -30 && ['amber', 'red'].some((v) => v === st.hrv || v === st.rhr)) st.load = 'red';
+        if (st.load !== 'green') why.push(form < -30 ? 'form ' + Math.round(form) + '%' : 'ramp +' + r1(ramp) + ' a week');
+      }
+      const sb = vals(t - 30, t - 1, 'stress'), sbase = sb.length >= 7 ? mean(sb) : null;
+      if (r.bb != null || r.stress != null) {
+        const lowBb = r.bb != null && r.bb < 50, highStress = r.stress != null && sbase != null && r.stress >= 1.25 * sbase;
+        st.garmin = lowBb || highStress ? 'amber' : 'green';
+        if (lowBb) why.push('Body Battery ' + r.bb);
+        if (highStress) why.push('stress ' + r.stress + ', usual ' + Math.round(sbase));
+      }
+      const marks = Object.values(st);
+      const reds = marks.filter((v) => v === 'red').length, ambers = marks.filter((v) => v === 'amber').length;
+      const status = !marks.length ? null : reds && reds + ambers >= 2 ? 'red' : reds || ambers >= 2 ? 'amber' : 'green';
+      return {
+        date: r.date, status, reasons: why.length ? why.join(' · ') : 'all markers in range',
+        hrv_ms: r.hrv, hrv7: r1(h7), band_low: r1(lo), band_high: r1(hi), hrv_status: st.hrv || null,
+        rhr_bpm: r.rhr, rhr_base: r1(rbase), rhr_status: st.rhr || null,
+        sleep_h: r.sleep, sleep_score: r.score, sleep_status: st.sleep || null,
+        ctl: f ? f.ctl : null, atl: f ? f.atl : null, form_pct: form == null ? null : Math.round(form), ramp: r1(ramp), load_status: st.load || null,
+        body_battery: r.bb, stress: r.stress, garmin_status: st.garmin || null,
+        steps: r.steps, weight_kg: r.weight, weight7: r1(avg7(t, 'weight')),
+      };
+    });
+  },
+});
+
+dash.calc('readiness_log', {
+  inputs: ['readiness_days', 'readiness'],
+  title: 'Readiness per day',
+  description: 'Your check-in rating where there was a check-in (it adds how you felt), otherwise the rating from your data alone.',
+  fn: (readiness_days, readiness) => {
+    const checkin = new Map(readiness.filter((r) => r.status).map((r) => [String(r.date).slice(0, 10), r]));
+    const data = new Map(readiness_days.map((r) => [r.date, r]));
+    return [...new Set([...data.keys(), ...checkin.keys()])].sort().map((d) => {
+      const c = checkin.get(d), x = data.get(d);
+      return { date: d, status: c ? c.status : x ? x.status : null, source: c ? 'check-in' : 'data', data_status: x ? x.status : null, reasons: c && c.reasons ? c.reasons : x ? x.reasons : '' };
+    }).filter((r) => r.status);
+  },
+});
+
+dash.calc('readiness_now', {
+  inputs: ['readiness_days', 'readiness_log'],
+  title: 'Readiness today',
+  description: 'Today’s rating (from the check-in if there was one, else from your data) and the latest markers up to today.',
+  fn: (readiness_days, readiness_log) => {
+    const today = new Date().toLocaleDateString('sv-SE');
+    const x = readiness_days.filter((r) => r.date <= today).pop();
+    const log = readiness_log.find((r) => r.date === today);
+    if (!x && !log) return [];
+    return [{ ...(x || {}), date: today, data_date: x ? x.date : null, status: log ? log.status : null, source: log ? log.source : 'none', reasons: log ? log.reasons : (x ? x.reasons : '') }];
+  },
+});
+
+/* ---------- training load ---------- */
+dash.calc('load_series', {
+  inputs: ['fitness'],
+  title: 'Fitness, fatigue and form per day',
+  description: 'Worked out from the daily training load: fitness (CTL) is the 42-day and fatigue (ATL) the 7-day exponentially weighted average (strength load counts toward fatigue only unless STRENGTH_IN_FITNESS is on); form = fitness − fatigue, also as % of fitness; ramp = fitness gained over 7 days. Days without a row count as no training. intervals.icu’s own values ride along as icu_ctl/icu_atl for cross-checking only.',
+  fn: (fitness) => {
+    const num = (v) => (v === '' || v == null || isNaN(Number(v)) ? null : Number(v));
+    const day = (d) => Date.parse(String(d).slice(0, 10) + 'T00:00:00Z') / 864e5;
+    const r1 = (v) => (v == null ? null : Math.round(v * 10) / 10);
+    const withStrength = !!(window.tdb && window.tdb.STRENGTH_IN_FITNESS);
+    const rows = fitness.map((r) => ({ t: day(r.date), load: num(r.load), sl: num(r.strength_load) || 0, ictl: num(r.ctl), iatl: num(r.atl) }))
+      .filter((r) => !isNaN(r.t) && r.load != null).sort((a, b) => a.t - b.t);
+    if (!rows.length) return [];
+    const byT = new Map(rows.map((r) => [r.t, r]));
+    const kc = 1 - Math.exp(-1 / 42), ka = 1 - Math.exp(-1 / 7);
+    const out = [];
+    let ctl = 0, atl = 0;
+    for (let t = rows[0].t; t <= rows[rows.length - 1].t; t++) {
+      const r = byT.get(t), load = r ? r.load : 0, fl = r ? (withStrength ? r.load : Math.max(0, r.load - r.sl)) : 0;
+      ctl += (fl - ctl) * kc; atl += (load - atl) * ka;
+      out.push({ t, ctl, atl, load, ictl: r ? r.ictl : null, iatl: r ? r.iatl : null });
+    }
+    const at = new Map(out.map((r) => [r.t, r]));
+    return out.map((r) => {
+      const p = at.get(r.t - 7), form = r.ctl - r.atl;
+      return { date: new Date(r.t * 864e5).toISOString().slice(0, 10), ctl: r1(r.ctl), atl: r1(r.atl), form: r1(form), form_pct: r.ctl ? Math.round(form / r.ctl * 100) : null, ramp: p ? r1(r.ctl - p.ctl) : null, load: r.load, icu_ctl: r1(r.ictl), icu_atl: r1(r.iatl) };
+    });
+  },
+});
+
+dash.calc('load_now', {
+  inputs: ['load_series', 'activities', 'planned'],
+  title: 'Training load now',
+  description: 'Latest fitness, fatigue, form and ramp (worked out from daily load, with intervals.icu’s values for comparison); endurance hours and total load this week (Monday to today) and last week; planned load for the rest of this week.',
+  fn: (load_series, activities, planned) => {
+    const today = new Date().toLocaleDateString('sv-SE');
+    const day = (d) => Date.parse(String(d).slice(0, 10) + 'T00:00:00Z') / 864e5;
+    const r1 = (v) => Math.round(v * 10) / 10;
+    const t = day(today), monday = t - ((new Date(today + 'T00:00:00Z').getUTCDay() + 6) % 7);
+    const cur = load_series.filter((r) => r.date <= today).pop();
+    if (!cur && !activities.length) return [];
+    const prev = cur ? load_series.find((r) => day(r.date) === day(cur.date) - 7) : null;
+    const endurance = (a) => !/weight|strength|yoga|pilates|workout|walk/i.test(a.type || '');
+    const sum = (from, to, k, only) => activities.filter((a) => day(a.date) >= from && day(a.date) < to && (!only || only(a))).reduce((s, a) => s + (Number(a[k]) || 0), 0);
+    const left = planned.filter((p) => p.category !== 'NOTE' && day(p.date) > t && day(p.date) < monday + 7).reduce((s, p) => s + (Number(p.planned_load) || 0), 0);
+    return [{
+      date: cur ? cur.date : null, ctl: cur ? cur.ctl : null, atl: cur ? cur.atl : null, form: cur ? cur.form : null, form_pct: cur ? cur.form_pct : null, ramp: cur ? cur.ramp : null,
+      icu_ctl: cur ? cur.icu_ctl : null, icu_atl: cur ? cur.icu_atl : null,
+      ctl_change: cur && prev ? r1(cur.ctl - prev.ctl) : null,
+      hours_week: r1(sum(monday, t + 1, 'moving_min', endurance) / 60), hours_last: r1(sum(monday - 7, monday, 'moving_min', endurance) / 60),
+      load_week: Math.round(sum(monday, t + 1, 'load')), load_last: Math.round(sum(monday - 7, monday, 'load')), load_planned_left: Math.round(left),
+    }];
+  },
+});
+
+dash.calc('weekly_volume', {
+  inputs: ['activities'],
+  title: 'Weekly endurance hours by intensity',
+  description: 'Endurance hours per Monday-to-Sunday week for the last 12 weeks, split into easy (zones 1–2), moderate (zone 3), hard (zone 4+) and time without zone data.',
+  fn: (activities) => {
+    const today = new Date().toLocaleDateString('sv-SE');
+    const day = (d) => Date.parse(String(d).slice(0, 10) + 'T00:00:00Z') / 864e5;
+    const r1 = (v) => Math.round(v * 10) / 10;
+    const t = day(today), monday = t - ((new Date(today + 'T00:00:00Z').getUTCDay() + 6) % 7);
+    if (!activities.length) return [];
+    const endurance = (a) => !/weight|strength|yoga|pilates|workout|walk/i.test(a.type || '');
+    const out = [];
+    for (let i = 11; i >= 0; i--) {
+      const from = monday - 7 * i;
+      const acts = activities.filter((a) => day(a.date) >= from && day(a.date) < from + 7 && endurance(a));
+      const s = (k) => acts.reduce((a, x) => a + (Number(x[k]) || 0), 0) / 60;
+      const total = s('moving_min'), low = s('low_min'), mid = s('mid_min'), high = s('high_min');
+      out.push({ week: new Date(from * 864e5).toISOString().slice(0, 10), hours: r1(total), low_h: r1(low), mid_h: r1(mid), high_h: r1(high), other_h: r1(Math.max(0, total - low - mid - high)), sessions: acts.length, load: Math.round(acts.reduce((a, x) => a + (Number(x.load) || 0), 0)) });
+    }
+    return out;
+  },
+});
+
+dash.calc('intensity_28', {
+  inputs: ['activities'],
+  title: 'Intensity distribution, last 28 days',
+  description: 'Share of endurance time in easy (zones 1–2), moderate (zone 3) and hard (zone 4+) over the last 28 days, by time in zone.',
+  fn: (activities) => {
+    const day = (d) => Date.parse(String(d).slice(0, 10) + 'T00:00:00Z') / 864e5;
+    const t = day(new Date().toLocaleDateString('sv-SE'));
+    const acts = activities.filter((a) => t - day(a.date) < 28 && t >= day(a.date) && !/weight|strength|yoga|pilates|workout|walk/i.test(a.type || ''));
+    const s = (k) => acts.reduce((a, x) => a + (Number(x[k]) || 0), 0);
+    const low = s('low_min'), mid = s('mid_min'), high = s('high_min'), total = low + mid + high;
+    if (!total) return [];
+    return [{ low_min: Math.round(low), mid_min: Math.round(mid), high_min: Math.round(high), low_pct: Math.round(low / total * 100), mid_pct: Math.round(mid / total * 100), high_pct: Math.round(high / total * 100) }];
+  },
+});
+
+dash.calc('ftp_now', {
+  inputs: ['ftp_history'],
+  title: 'Current FTP',
+  description: 'The latest outdoor and indoor FTP that is set in intervals.icu (applied or baseline rows of the FTP log).',
+  fn: (ftp_history) => ['ftp', 'indoor_ftp'].map((setting) => {
+    const rows = ftp_history.filter((r) => r.setting === setting && (r.applied === 'Y' || r.applied === 'baseline') && r.new_w !== '')
+      .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    const last = rows[rows.length - 1];
+    return last ? { setting, watts: Number(last.new_w), date: String(last.date).slice(0, 10), method: last.method } : null;
+  }).filter(Boolean),
+});
+
+/* MODULE commute */
+dash.calc('commute_benchmark', {
+  inputs: ['activities'],
+  title: 'Uphill commute watts per heartbeat',
+  description: 'Average power divided by average heart rate for rides marked as commutes with at least 150 m of climbing over at most 8 km (the climb itself, not longer rides home).',
+  fn: (activities) => activities
+    .filter((a) => a.commute === 'Y' && Number(a.elevation_m) >= 150 && Number(a.distance_km) > 0 && Number(a.distance_km) <= 8 && Number(a.avg_w) > 0 && Number(a.avg_hr) > 0)
+    .map((a) => ({ date: String(a.date).slice(0, 10), activity_id: a.activity_id, avg_w: Number(a.avg_w), avg_hr: Number(a.avg_hr), w_per_bpm: Math.round(Number(a.avg_w) / Number(a.avg_hr) * 100) / 100 }))
+    .sort((a, b) => a.date.localeCompare(b.date)),
+});
+/* /MODULE commute */
+
+/* ---------- today ---------- */
+dash.calc('today_plan', {
+  inputs: ['planned', 'activities', 'sessions', 'key_sessions'],
+  title: 'Today’s sessions and what’s done',
+  description: 'Today’s planned events, each matched to a completed activity (linked event first, else same sport that day, commutes excluded) or a logged strength session; done counts as partial under 80% of the planned time. Unplanned activities today are added.',
+  fn: (planned, activities, sessions, key_sessions) => {
+    const today = new Date().toLocaleDateString('sv-SE');
+    const num = (v) => (v === '' || v == null || isNaN(Number(v)) ? null : Number(v));
+    const fam = (t) => (/ride|cycl|bike/i.test(t) ? 'ride' : /run/i.test(t) ? 'run' : /weight|strength/i.test(t) ? 'strength' : /swim/i.test(t) ? 'swim' : String(t || '').toLowerCase());
+    const acts = activities.filter((a) => String(a.date).slice(0, 10) === today);
+    const used = new Set();
+    const pack = (a) => (a ? { activity_id: a.activity_id, actual_min: num(a.moving_min), actual_load: num(a.load), avg_w: num(a.avg_w), np_w: num(a.np_w), avg_hr: num(a.avg_hr) } : { activity_id: null, actual_min: null, actual_load: null, avg_w: null, np_w: null, avg_hr: null });
+    const verdict = (a) => { const k = a ? key_sessions.find((s) => s.activity_id === a.activity_id) : null; return { verdict: k ? k.verdict : null, next_step: k ? k.next_step : null }; };
+    const rows = planned.filter((p) => String(p.date).slice(0, 10) === today).map((p) => {
+      const a = acts.find((x) => x.event_id && x.event_id === p.event_id) || acts.find((x) => !used.has(x.activity_id) && fam(x.type) === fam(p.type) && x.commute !== 'Y');
+      if (a) used.add(a.activity_id);
+      const strengthDone = fam(p.type) === 'strength' && sessions.some((s) => s.date === today);
+      const pm = num(p.planned_min), am = a ? num(a.moving_min) : null;
+      const status = p.category === 'NOTE' ? 'note' : a || strengthDone ? (pm && am != null && am < 0.8 * pm ? 'partial' : 'done') : 'planned';
+      return { event_id: p.event_id, name: p.name, type: p.type, family: fam(p.type), category: p.category, planned_min: pm, planned_load: num(p.planned_load), target: p.target, strength_plan: p.strength_plan, notes: p.notes, status, ...pack(a), ...verdict(a) };
+    });
+    const extra = acts.filter((a) => !used.has(a.activity_id)).map((a) => ({ event_id: 'activity-' + a.activity_id, name: a.name, type: a.type, family: fam(a.type), category: 'UNPLANNED', planned_min: null, planned_load: null, target: '', strength_plan: '', notes: a.commute === 'Y' ? 'commute' : '', status: 'done', ...pack(a), ...verdict(a) }));
+    return rows.concat(extra);
+  },
+});
+
+dash.calc('today_summary', {
+  inputs: ['today_plan'],
+  title: 'Today in one line',
+  description: 'Names of today’s planned sessions, and how many are done.',
+  fn: (today_plan) => {
+    const p = today_plan.filter((r) => r.category !== 'UNPLANNED' && r.category !== 'NOTE');
+    return p.length ? [{ titles: p.map((r) => r.name).join(' and '), planned: p.length, done: p.filter((r) => r.status === 'done' || r.status === 'partial').length }] : [];
+  },
+});
+
+dash.calc('week_plan', {
+  inputs: ['planned'],
+  title: 'Planned for the coming days',
+  description: 'Planned sessions and notes from tomorrow through the next six days.',
+  fn: (planned) => {
+    const day = (d) => Date.parse(String(d).slice(0, 10) + 'T00:00:00Z') / 864e5;
+    const t = day(new Date().toLocaleDateString('sv-SE'));
+    return planned.filter((p) => day(p.date) > t && day(p.date) <= t + 6)
+      .map((p) => ({ event_id: p.event_id, date: String(p.date).slice(0, 10), name: p.name, type: p.type, category: p.category, planned_min: p.planned_min === '' ? null : Number(p.planned_min), planned_load: p.planned_load === '' ? null : Number(p.planned_load), target: p.target }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  },
+});
+
+dash.calc('muscle_today', {
+  inputs: ['muscle_load', 'planned', 'exercises'],
+  title: 'Muscles: today’s session and what’s missing',
+  description: 'Per muscle: the sets today’s planned strength session gives it (exercise sets × muscle weight), and per side the sets per week below its weekly target, averaged over the last 14 and 28 days; trained in the last two days flagged.',
+  fn: (muscle_load, planned, exercises) => {
+    const today = new Date().toLocaleDateString('sv-SE');
+    const ex = new Map(exercises.map((e) => [e.exercise_id, e.muscles || '']));
+    const plan = planned.filter((p) => String(p.date).slice(0, 10) === today && p.strength_plan).flatMap((p) => p.strength_plan.split('|'));
+    const sets = {};
+    for (const item of plan) {
+      const [id, n] = item.split(':');
+      for (const part of (ex.get(id) || '').split('|').filter(Boolean)) {
+        const [m, w] = part.split(':');
+        sets[m] = (sets[m] || 0) + (Number(n) || 0) * Number(w);
+      }
+    }
+    const r1 = (v) => Math.round(v * 10) / 10;
+    const gap = (r, side) => (r ? r1(Math.max(0, r.target - r['weekly_' + side])) : 0);
+    const w28 = new Map(muscle_load.filter((r) => r.window === 28).map((r) => [r.muscle, r]));
+    return muscle_load.filter((r) => r.window === 14).map((r) => ({
+      muscle: r.muscle, label: r.label, view: r.view, priority: r.priority, target: r.target,
+      gap14_L: gap(r, 'L'), gap14_R: gap(r, 'R'), gap28_L: gap(w28.get(r.muscle), 'L'), gap28_R: gap(w28.get(r.muscle), 'R'),
+      recovering: r.days_since != null && r.days_since < 2, last_date: r.last_date,
+      planned_sets: r1(sets[r.muscle] || 0), has_plan: plan.length > 0,
+    }));
+  },
+});
+</script>
+
+<script>
+/* ---------- shared helpers and constants ---------- */
+window.tdb = {
+  PLAN_SESSIONS: 3, // SETUP: weekly strength sessions in the athlete's plan
+  LR_WINDOW: 28, // module lr-legs
+  RETEST_WEEKS: 4,
+  RETEST_TARGET: 90,
+  WEEKLY_HOURS: 10, // SETUP: the athlete's comfortable weekly endurance hours (dashed line, Training load page)
+  LOW_SHARE: 80, // SETUP: target share of easy time in %; 80 for a polarized plan
+  COMMUTE_MIN_ELEV: 150, // SETUP (module commute): minimum climbing in m for a commute to count; match the commute_benchmark calc
+  COMMUTE_MAX_KM: 8, // SETUP (module commute): longest ride in km that still counts as the climb itself; match the commute_benchmark calc
+  STRENGTH_IN_FITNESS: false, // SETUP: false = strength load counts toward fatigue only. After the first sync, compare the Fitness tile with 'intervals.icu shows'; if they differ, flip this and the fitness card note
+  win: () => Number(dash.params().win) || 14,
+  mode: () => (dash.params().mode === 'sets' ? 'sets' : 'target'),
+  range: () => Number(dash.params().range) || 60,
+  gapwin: () => (Number(dash.params().gapwin) === 28 ? 28 : 14),
+  today: () => new Date().toLocaleDateString('sv-SE'),
+  fmtDay: (d) => d3.utcFormat('%b %-d')(new Date(String(d).slice(0, 10) + 'T00:00:00Z')),
+  fmtWeekday: (d) => d3.utcFormat('%a %b %-d')(new Date(String(d).slice(0, 10) + 'T00:00:00Z')),
+  parse: (d) => new Date(String(d).slice(0, 10) + 'T00:00:00Z'),
+  num: (v) => (v === '' || v == null || isNaN(Number(v)) ? null : Number(v)),
+  statusColor: (s) => (s === 'green' ? 'var(--color-ok)' : s === 'amber' ? 'var(--color-warn)' : s === 'red' ? 'var(--color-bad)' : 'var(--cds-chart-grid)'),
+  fail: (el) => { el.replaceChildren(); const f = document.createElement('div'); f.className = 'tdb-fail'; f.textContent = 'Failed to load'; el.append(f); },
+  tip: (el) => { let t = el.querySelector(':scope > .tdb-tip'); if (!t) { t = document.createElement('div'); t.className = 'tdb-tip'; t.hidden = true; el.append(t); } return t; },
+  showTip: (el, tip, event, lines) => {
+    tip.replaceChildren();
+    lines.filter((l) => l != null && l !== '').forEach((l, i) => { const d = document.createElement('div'); if (i === 0) d.className = 'tdb-tipd'; d.textContent = l; tip.append(d); });
+    tip.hidden = false;
+    const box = el.getBoundingClientRect();
+    const x = event.clientX - box.left, y = event.clientY - box.top;
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = Math.max(0, Math.min(box.width - w, x + 12)) + 'px';
+    tip.style.top = Math.max(0, Math.min(box.height - h, y - h - 8)) + 'px';
+  },
+  locColor: (loc) => (loc === 'home' ? dash.colors[0] : loc === 'travel' ? dash.colors[2] : dash.colors[1]),
+  // a dataset or calc is "empty" when loaded with no rows, or (with :field) when no row has that field
+  isEmpty: (spec) => spec.split(' ').some((s) => {
+    const [id, f] = s.split(':');
+    const g = dash.data(id);
+    if (g.status !== 'ok') return false;
+    const rows = Array.isArray(g.data) ? g.data : [];
+    return !rows.length || (f ? !rows.some((r) => r[f] != null && r[f] !== '') : false);
+  }),
+  // start of a drawing: skeleton while loading, failure line on error; returns rows or null
+  begin: (el, id) => {
+    const g = dash.data(id);
+    el.classList.toggle('dash-skeleton', g.status === 'loading');
+    if (g.status === 'error') { tdb.fail(el); return null; }
+    el.replaceChildren();
+    return g.status === 'ok' ? g.data : null;
+  },
+};
+
+/* ---------- pages (tabs) ---------- */
+const showPage = (name) => {
+  document.querySelectorAll('.tdb-page').forEach((p) => { p.hidden = p.dataset.page !== name; });
+  document.querySelectorAll('.tdb-tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+};
+document.querySelectorAll('.tdb-tab').forEach((b) => b.addEventListener('click', () => { showPage(b.dataset.tab); dash.setLink(b.dataset.tab); }));
+{
+  const named = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+  const page = named ? named.closest('.tdb-page') : null;
+  if (page) { showPage(page.dataset.page); requestAnimationFrame(() => named.scrollIntoView()); }
+}
+
+/* ---------- controls (outside drawings: listen and set aria, style, hidden only) ---------- */
+document.querySelectorAll('.tdb-win').forEach((b) => b.addEventListener('click', () => dash.setParams({ win: Number(b.dataset.win) })));
+document.querySelectorAll('.tdb-mode').forEach((b) => b.addEventListener('click', () => dash.setParams({ mode: b.dataset.mode })));
+document.querySelectorAll('.tdb-range').forEach((b) => b.addEventListener('click', () => dash.setParams({ range: Number(b.dataset.range) })));
+document.querySelectorAll('.tdb-gapwin').forEach((b) => b.addEventListener('click', () => dash.setParams({ gapwin: Number(b.dataset.gapwin) })));
+dash.onData(() => {
+  const w = tdb.win(), m = tdb.mode(), rg = tdb.range();
+  document.querySelectorAll('.tdb-win').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.win) === w)));
+  document.querySelectorAll('.tdb-mode').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+  document.querySelectorAll('.tdb-range').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.range) === rg)));
+  document.querySelectorAll('.tdb-gapwin').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.gapwin) === tdb.gapwin())));
+  const sw = { 'tdb-sw-home': 0, 'tdb-sw-gym': 1, 'tdb-sw-travel': 2, 'tdb-sw-low': 0, 'tdb-sw-mid': 2, 'tdb-sw-high': 3 };
+  Object.entries(sw).forEach(([c, i]) => document.querySelectorAll('.' + c).forEach((s) => { s.style.background = dash.colors[i]; }));
+  // empty states
+  document.querySelectorAll('[data-needs]').forEach((el) => { el.hidden = tdb.isEmpty(el.dataset.needs); });
+  document.querySelectorAll('[data-empty]').forEach((el) => { el.hidden = !tdb.isEmpty(el.dataset.empty); });
+  // strength sentence
+  const bc = dash.data('below_count');
+  const row = bc.status === 'ok' ? bc.data.find((r) => r.window === w) : null;
+  const none = row ? row.below === 0 : false;
+  document.querySelectorAll('.tdb-behind-some').forEach((s) => { s.hidden = none; });
+  document.querySelectorAll('.tdb-behind-none').forEach((s) => { s.hidden = !none; });
+  // header sentences
+  const rn = dash.data('readiness_now');
+  const rr = rn.status === 'ok' && rn.data.length ? rn.data[0] : null;
+  const rdKnown = rn.status === 'ok';
+  document.querySelectorAll('.tdb-rd-today').forEach((s) => { s.hidden = !(rr && rr.status); });
+  document.querySelectorAll('.tdb-rd-checkin').forEach((s) => { s.hidden = !(rr && rr.source === 'check-in'); });
+  document.querySelectorAll('.tdb-rd-data').forEach((s) => { s.hidden = !(rr && rr.source === 'data'); });
+  document.querySelectorAll('.tdb-rd-none').forEach((s) => { s.hidden = !rdKnown || !!(rr && rr.status); });
+  const ts = dash.data('today_summary');
+  const tsKnown = ts.status === 'ok', hasPlan = tsKnown && ts.data.length > 0;
+  document.querySelectorAll('.tdb-plan-some').forEach((s) => { s.hidden = !hasPlan; });
+  document.querySelectorAll('.tdb-plan-none').forEach((s) => { s.hidden = !tsKnown || hasPlan; });
+  // muscles-to-target wording
+  const mt = dash.data('muscle_today');
+  const mtKnown = mt.status === 'ok', planned = mtKnown && mt.data.some((r) => r.has_plan);
+  document.querySelectorAll('.tdb-mt-plan').forEach((s) => { s.hidden = mtKnown && !planned; });
+  document.querySelectorAll('.tdb-mt-noplan').forEach((s) => { s.hidden = !mtKnown || planned; });
+  const gw = tdb.gapwin();
+  const allMet = mtKnown && mt.data.length > 0 && mt.data.every((r) => r['gap' + gw + '_L'] <= 0 && r['gap' + gw + '_R'] <= 0);
+  document.querySelectorAll('.tdb-mt-allmet').forEach((s) => { s.hidden = !allMet; });
+});
+</script>
+
+<script>
+/* ---------- small text drawings ---------- */
+const field = (el) => {
+  const g = dash.data(el.dataset.source);
+  if (g.status !== 'ok' || !g.data.length) return null;
+  let row;
+  if (el.dataset.where) {
+    const pairs = el.dataset.where.split('&').map((p) => p.split('=').map(decodeURIComponent));
+    row = g.data.find((r) => pairs.every(([k, v]) => String(r[k]) === v));
+  } else row = g.data[Number(el.dataset.row || 0)];
+  return row ? row[el.dataset.field] : null;
+};
+const showNum = (el, fmt) => { const v = field(el); el.textContent = v == null || v === '' ? '—' : fmt(Number(v)); };
+dash.draw('phase_day', (el) => { const v = field(el); el.textContent = v == null ? '—' : String(v); });
+dash.draw('phase_days', (el) => { const v = field(el); el.textContent = v == null ? '—' : String(v); });
+dash.draw('phase', (el) => { const v = field(el); el.textContent = v == null ? '—' : v; });
+dash.draw('num', (el) => showNum(el, d3.format(',')));
+dash.draw('text', (el) => { const v = field(el); el.textContent = v == null ? '—' : v; });
+dash.draw('plan_sessions', (el) => { el.textContent = String(tdb.PLAN_SESSIONS); });
+dash.draw('const', (el) => { const v = tdb[el.dataset.k]; el.textContent = v == null ? '—' : String(v); });
+dash.draw('win_label', (el) => { el.textContent = String(tdb.win()); });
+dash.draw('gapwin_label', (el) => { el.textContent = String(tdb.gapwin()); });
+dash.draw('behind', (el) => {
+  const w = tdb.win();
+  el.dataset.where = 'window=' + w + '&rank=' + el.dataset.rank;
+  const g = dash.data('behind_now');
+  const row = g.status === 'ok' ? g.data.find((r) => r.window === w && r.rank === Number(el.dataset.rank)) : null;
+  el.textContent = row ? row.label : '—';
+});
+const byWindow = (el, id) => {
+  const w = tdb.win();
+  el.dataset.where = 'window=' + w;
+  const g = dash.data(id);
+  const row = g.status === 'ok' ? g.data.find((r) => r.window === w) : null;
+  return row ? row[el.dataset.field] : null;
+};
+dash.draw('below', (el) => { const v = byWindow(el, 'below_count'); el.textContent = v == null ? '—' : String(v); });
+dash.draw('below_key', (el) => { const v = byWindow(el, 'below_count'); el.textContent = v == null ? '—' : String(v); });
+dash.draw('retest', (el) => {
+  const g = dash.data('calendar');
+  if (g.status !== 'ok') { el.textContent = '—'; return; }
+  const today = tdb.today();
+  const m = g.data.filter((r) => r.kind === 'milestone' && /re-test/i.test(r.label) && (r.end || r.start) >= today).sort((a, b) => a.start.localeCompare(b.start))[0];
+  el.textContent = m ? (m.end ? tdb.fmtDay(m.start) + '–' + tdb.fmtDay(m.end) : tdb.fmtDay(m.start)) + ' (' + m.label.toLowerCase() + ')' : 'No re-test scheduled';
+});
+// readiness and load
+dash.draw('rd_word', (el) => { const v = field(el); el.textContent = v || '—'; });
+dash.draw('rd_badge', (el) => { const v = field(el); el.textContent = v || '—'; el.style.setProperty('--tdb-status', tdb.statusColor(v)); });
+dash.draw('rd_reasons', (el) => { const v = field(el); el.textContent = v || '—'; });
+dash.draw('rd_asof', (el) => { const v = field(el); el.textContent = v ? tdb.fmtDay(v) : '—'; });
+dash.draw('mk_dot', (el) => { const v = field(el); el.textContent = v || '—'; el.style.background = tdb.statusColor(v); });
+dash.draw('mk_num', (el) => showNum(el, (v) => d3.format(',')(Math.round(v * 10) / 10)));
+dash.draw('mk_signed', (el) => showNum(el, d3.format('+')));
+dash.draw('ld_num', (el) => showNum(el, d3.format(',')));
+dash.draw('ld_signed', (el) => showNum(el, d3.format('+')));
+dash.draw('pct', (el) => showNum(el, String));
+dash.draw('today_titles', (el) => { const v = field(el); el.textContent = v || '—'; });
+dash.draw('ftp_w', (el) => showNum(el, String));
+dash.draw('ftp_d', (el) => { const v = field(el); el.textContent = v ? tdb.fmtDay(v) : '—'; });
+</script>
+
+<script>
+/* ---------- body map (shared by Strength and Today) ---------- */
+window.tdbBody = {
+  BODY: {
+    neutral: {
+      front: [
+        'M70,176 Q66,190 70,200 L100,208 L100,184 Z',
+        'M80,291 Q70,296 72,306 Q78,314 88,312 Q94,304 90,294 Z',
+        'M74,314 Q70,342 74,372 Q78,392 82,400 L89,400 Q91,370 89,342 Q88,322 86,314 Z',
+        'M75,402 Q68,412 71,421 L91,421 Q91,408 89,402 Z',
+        'M44,210 Q38,222 42,236 Q48,244 53,236 Q55,222 52,210 Z',
+      ],
+      back: [
+        'M80,293 Q70,298 72,308 Q80,312 90,310 Q94,302 90,295 Z',
+        'M80,370 Q76,386 80,400 L89,400 Q91,386 90,370 Z',
+        'M75,402 Q68,412 71,421 L91,421 Q91,408 89,402 Z',
+        'M44,210 Q38,222 42,236 Q48,244 53,236 Q55,222 52,210 Z',
+      ],
+    },
+    head: 'M100,10 C112,10 117,20 117,32 C117,46 110,54 100,54 C90,54 83,46 83,32 C83,20 88,10 100,10 Z',
+    neck: 'M91,50 L109,50 L111,64 L89,64 Z',
+    muscles: {
+      front: {
+        traps: 'M93,60 L72,70 L93,72 Z',
+        front_delts: 'M72,70 Q56,70 52,86 Q52,98 56,104 Q62,92 73,86 Z',
+        chest: 'M98,74 L77,74 Q66,82 64,96 Q66,110 80,114 Q92,116 98,110 Z',
+        biceps: 'M56,107 Q50,118 50,134 Q52,146 58,149 Q64,136 64,121 Q62,110 56,107 Z',
+        forearms: 'M51,153 Q44,170 44,190 Q45,202 49,207 Q58,192 60,171 Q60,159 56,153 Z',
+        abs: 'M98,118 L87,118 Q85,140 87,165 Q91,178 98,182 Z',
+        obliques: 'M83,118 Q71,122 69,134 Q70,156 74,171 Q78,181 85,184 Q82,158 83,118 Z',
+        quads: 'M86,198 Q72,199 68,215 Q64,244 70,271 Q76,288 86,291 Q92,280 92,262 Q90,238 89,218 Z',
+        adductors: 'M98,206 L90,202 Q87,218 89,236 Q92,249 98,253 Z',
+      },
+      back: {
+        traps: 'M100,56 L92,60 Q82,66 72,72 Q84,78 90,88 L100,100 Z',
+        rear_delts: 'M72,72 Q56,72 52,88 Q52,100 56,106 Q62,94 74,88 Z',
+        mid_back: 'M100,103 L90,91 Q82,87 76,89 Q76,104 82,117 L100,125 Z',
+        lats: 'M74,93 Q64,101 64,116 Q66,140 76,159 Q82,167 88,169 L88,150 Q84,138 82,122 Q78,108 74,93 Z',
+        lower_back: 'M100,129 L84,124 Q88,140 90,150 L90,182 L100,186 Z',
+        triceps: 'M56,108 Q50,120 50,136 Q52,146 58,150 Q64,138 64,122 Q62,112 56,108 Z',
+        forearms: 'M51,154 Q44,170 44,190 Q45,202 49,207 Q58,192 60,171 Q60,160 56,154 Z',
+        glute_med: 'M72,174 Q67,184 69,195 Q80,190 89,186 L89,178 Q82,174 72,174 Z',
+        glute_max: 'M89,189 Q76,193 70,203 Q68,219 78,229 Q90,235 100,231 L100,190 Z',
+        hamstrings: 'M98,236 Q80,234 74,249 Q70,271 76,288 Q84,295 92,293 Q96,274 98,256 Z',
+        calves: 'M78,313 Q70,329 72,350 Q76,364 82,368 Q88,360 92,344 Q94,326 90,313 Z',
+      },
+    },
+  },
+  // opts: value(muscle, side) -> 0..1, muted(muscle) -> bool, tip(muscle, side) -> lines, aria, legendEnd
+  draw: (el, opts) => {
+    const B = tdbBody.BODY;
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', '0 0 420 470').attr('role', 'img').attr('aria-label', opts.aria);
+    const tip = tdb.tip(el);
+    const accent = dash.colors[0];
+    for (const [view, ox, sides] of [['front', 0, ['R', 'L']], ['back', 220, ['L', 'R']]]) {
+      const fig = svg.append('g').attr('transform', `translate(${ox},0)`);
+      const mass = fig.append('g').attr('fill', 'var(--cds-chart-grid)').attr('stroke', 'var(--cds-chart-grid)').attr('stroke-linejoin', 'round');
+      mass.append('path').attr('d', B.head).attr('stroke-width', 6);
+      mass.append('path').attr('d', B.neck).attr('stroke-width', 6);
+      sides.forEach((side, i) => {
+        const half = mass.append('g').attr('transform', i ? 'translate(200,0) scale(-1,1)' : null);
+        B.neutral[view].forEach((d) => half.append('path').attr('d', d).attr('stroke-width', 6));
+        Object.values(B.muscles[view]).forEach((d) => half.append('path').attr('d', d).attr('stroke-width', 7));
+      });
+      sides.forEach((side, i) => {
+        const half = fig.append('g').attr('transform', i ? 'translate(200,0) scale(-1,1)' : null);
+        Object.entries(B.muscles[view]).forEach(([muscle, d]) => {
+          const grp = half.append('g').style('cursor', 'default');
+          grp.append('path').attr('d', d).attr('fill', 'var(--cds-chart-grid)').attr('stroke', 'var(--color-panel)').attr('stroke-width', 1.6);
+          const muted = opts.muted ? opts.muted(muscle) : false;
+          grp.append('path').attr('d', d).attr('fill', muted ? 'var(--cds-chart-muted)' : accent).attr('fill-opacity', muted ? 0.35 : opts.value(muscle, side));
+          grp.on('pointermove', (event) => { const lines = opts.tip(muscle, side); if (lines) tdb.showTip(el, tip, event, lines); })
+            .on('pointerleave', () => { tip.hidden = true; });
+        });
+      });
+      fig.append('text').attr('x', 100).attr('y', 446).attr('text-anchor', 'middle').attr('fill', 'var(--color-fg-muted)').attr('font-size', 12).text(view === 'front' ? 'Front' : 'Back');
+      fig.append('text').attr('x', 40).attr('y', 446).attr('text-anchor', 'middle').attr('fill', 'var(--color-fg-muted)').attr('font-size', 11).text(sides[0]);
+      fig.append('text').attr('x', 160).attr('y', 446).attr('text-anchor', 'middle').attr('fill', 'var(--color-fg-muted)').attr('font-size', 11).text(sides[1]);
+    }
+    const lg = svg.append('g').attr('transform', 'translate(110,458)');
+    [0.12, 0.3, 0.5, 0.75, 1].forEach((o, i) => lg.append('rect').attr('x', i * 26).attr('y', -6).attr('width', 24).attr('height', 8).attr('rx', 2).attr('fill', accent).attr('fill-opacity', o));
+    lg.append('rect').attr('x', -30).attr('y', -6).attr('width', 24).attr('height', 8).attr('rx', 2).attr('fill', 'var(--cds-chart-grid)');
+    lg.append('text').attr('x', -34).attr('y', 1).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text('none');
+    lg.append('text').attr('x', 134).attr('y', 1).attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(opts.legendEnd);
+  },
+};
+
+dash.draw('bodymap', (el) => {
+  const data = tdb.begin(el, 'muscle_load');
+  if (!data) return;
+  const w = tdb.win(), mode = tdb.mode();
+  const rows = new Map(data.filter((r) => r.window === w).map((r) => [r.muscle, r]));
+  tdbBody.draw(el, {
+    aria: 'Body map coloured by hard sets per week for each muscle and side',
+    legendEnd: mode === 'sets' ? '10+ sets/week' : 'at target',
+    value: (muscle, side) => {
+      const r = rows.get(muscle);
+      if (!r) return 0;
+      const v = side === 'L' ? r.weekly_L : r.weekly_R;
+      const share = mode === 'sets' ? v / 10 : v / r.target;
+      return v > 0 ? Math.max(0.12, Math.min(1, share)) : 0;
+    },
+    tip: (muscle, side) => {
+      const r = rows.get(muscle);
+      if (!r) return null;
+      return [r.label + (side === 'L' ? ', left' : ', right'), 'Left ' + r.weekly_L.toFixed(1) + ' · Right ' + r.weekly_R.toFixed(1) + ' sets per week',
+        'Target ' + r.target + ' per week · ' + r.pct + '% (weaker side)', r.last_date ? 'last trained ' + tdb.fmtDay(r.last_date) : 'not trained yet'];
+    },
+  });
+});
+
+dash.draw('needs', (el) => {
+  const data = tdb.begin(el, 'muscle_load');
+  if (!data) return;
+  const w = tdb.win();
+  const rows = data.filter((r) => r.window === w).sort((a, b) => (a.priority === 'key' ? 0 : 1) - (b.priority === 'key' ? 0 : 1) || a.pct - b.pct);
+  const width = Math.max(260, el.clientWidth || 320);
+  const rowH = 22, top = 22, labelW = 92, valueW = 64;
+  const height = top + rows.length * rowH + 8;
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`).attr('role', 'img').attr('aria-label', 'Each muscle’s weaker side as a share of its weekly target');
+  const x = d3.scaleLinear([0, 1.5], [labelW, width - valueW]);
+  svg.append('text').attr('x', labelW).attr('y', 12).attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text('Weaker side, share of weekly target');
+  svg.append('line').attr('x1', x(1)).attr('x2', x(1)).attr('y1', top - 4).attr('y2', height - 6).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '3 3');
+  const tip = tdb.tip(el);
+  rows.forEach((r, i) => {
+    const y = top + i * rowH;
+    const gr = svg.append('g');
+    if (i > 0 && rows[i - 1].priority === 'key' && r.priority !== 'key') svg.append('line').attr('x1', 0).attr('x2', width).attr('y1', y - 2).attr('y2', y - 2).attr('stroke', 'var(--cds-chart-grid)');
+    gr.append('text').attr('x', 0).attr('y', y + 13).attr('font-size', 12).attr('fill', 'var(--color-fg)').text(r.label);
+    gr.append('rect').attr('x', labelW).attr('y', y + 4).attr('width', x(1.5) - labelW).attr('height', 12).attr('rx', 3).attr('fill', 'var(--cds-chart-grid)');
+    const share = Math.min(1.5, r.pct / 100);
+    gr.append('rect').attr('x', labelW).attr('y', y + 4).attr('width', Math.max(0, x(share) - labelW)).attr('height', 12).attr('rx', 3)
+      .attr('fill', r.pct >= 100 ? dash.colors[0] : r.priority === 'key' ? 'var(--cds-chart-status-critical)' : 'var(--cds-chart-muted)');
+    gr.append('text').attr('x', width).attr('y', y + 13).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').style('font-variant-numeric', 'tabular-nums').text(r.pct + '%');
+    gr.append('rect').attr('x', 0).attr('y', y).attr('width', width).attr('height', rowH).attr('fill', 'transparent')
+      .on('pointermove', (event) => tdb.showTip(el, tip, event, [r.label + (r.priority === 'key' ? ' · key muscle' : ''), 'Left ' + r.weekly_L.toFixed(1) + ' · Right ' + r.weekly_R.toFixed(1) + ' sets per week', 'Target ' + r.target + ' per week', r.last_date ? 'Last trained ' + tdb.fmtDay(r.last_date) : 'Not trained yet']))
+      .on('pointerleave', () => { tip.hidden = true; });
+  });
+});
+
+/* ---------- today: muscles (today's workout | missing over 14 or 28 days) ---------- */
+dash.draw('todaymap', (el) => {
+  const data = tdb.begin(el, 'muscle_today');
+  if (!data) return;
+  const rows = new Map(data.map((r) => [r.muscle, r]));
+  const maxPlanned = Math.max(1, ...data.map((r) => r.planned_sets));
+  tdbBody.draw(el, {
+    aria: 'Body map of the sets today’s strength session gives each muscle',
+    legendEnd: Math.round(maxPlanned * 10) / 10 + ' sets',
+    value: (muscle) => { const r = rows.get(muscle); return r && r.planned_sets > 0 ? Math.max(0.12, r.planned_sets / maxPlanned) : 0; },
+    tip: (muscle) => { const r = rows.get(muscle); return r ? [r.label + (r.priority === 'key' ? ' · key muscle' : ''), r.planned_sets ? 'Today: ' + r.planned_sets + ' sets' : 'Not in today’s session'] : null; },
+  });
+});
+
+dash.draw('gapmap', (el) => {
+  const data = tdb.begin(el, 'muscle_today');
+  if (!data) return;
+  const w = tdb.gapwin();
+  const rows = new Map(data.map((r) => [r.muscle, r]));
+  tdbBody.draw(el, {
+    aria: 'Body map of the sets per week each muscle is missing from its target over the last ' + w + ' days',
+    legendEnd: 'whole target missing',
+    value: (muscle, side) => {
+      const r = rows.get(muscle);
+      if (!r) return 0;
+      const g = r['gap' + w + '_' + side];
+      return g > 0 ? Math.max(0.12, Math.min(1, g / r.target)) : 0;
+    },
+    tip: (muscle, side) => {
+      const r = rows.get(muscle);
+      if (!r) return null;
+      return [r.label + (side === 'L' ? ', left' : ', right') + (r.priority === 'key' ? ' · key muscle' : ''),
+        'Missing per week, last ' + w + ' days: left ' + r['gap' + w + '_L'] + ' · right ' + r['gap' + w + '_R'] + ' of ' + r.target + ' sets',
+        r.last_date ? 'Last trained ' + tdb.fmtDay(r.last_date) : 'Not trained yet'];
+    },
+  });
+});
+
+const tdbList = (el, rows, text) => {
+  rows.slice(0, 8).forEach((r) => {
+    const li = document.createElement('li');
+    const name = document.createElement('span');
+    const v = document.createElement('span');
+    v.className = 'tdb-tl-sub';
+    [name.textContent, v.textContent] = text(r);
+    li.append(name, v);
+    el.append(li);
+  });
+};
+dash.draw('todaylist', (el) => {
+  const g = dash.data('muscle_today');
+  el.replaceChildren();
+  if (g.status !== 'ok') return;
+  tdbList(el, g.data.filter((r) => r.planned_sets > 0).sort((a, b) => b.planned_sets - a.planned_sets),
+    (r) => [r.label + (r.priority === 'key' ? ' · key' : ''), r.planned_sets + ' sets']);
+});
+dash.draw('gaplist', (el) => {
+  const g = dash.data('muscle_today');
+  el.replaceChildren();
+  if (g.status !== 'ok') return;
+  const w = tdb.gapwin();
+  const L = (r) => r['gap' + w + '_L'], R = (r) => r['gap' + w + '_R'], gap = (r) => Math.max(L(r), R(r));
+  tdbList(el, g.data.filter((r) => gap(r) > 0).sort((a, b) => (a.priority === 'key' ? 0 : 1) - (b.priority === 'key' ? 0 : 1) || gap(b) / b.target - gap(a) / a.target),
+    (r) => [r.label + (r.priority === 'key' ? ' · key' : '') + (r.recovering ? ' · trained in the last 2 days' : ''), (L(r) === R(r) ? L(r) : 'L ' + L(r) + ' · R ' + R(r)) + ' sets/week short']);
+});
+
+/* ---------- today: sessions with status badges and block structure ---------- */
+window.tdbBlocks = (box, steps, ftp) => {
+  const width = Math.max(240, box.clientWidth || 320), height = 150;
+  const m = { t: 12, r: 8, b: 22, l: 36 };
+  const seq = steps.slice().sort((a, b) => Number(a.seq) - Number(b.seq)).map((s) => ({ ...s, dur: Number(s.duration_s) || 0, lo: Number(s.lo_pct) || 0, hi: Number(s.hi_pct === '' ? s.lo_pct : s.hi_pct) || 0 }));
+  let at = 0;
+  seq.forEach((s) => { s.start = at; at += s.dur; });
+  const total = at || 1;
+  const unit = seq[0] ? seq[0].unit : 'pct_ftp';
+  const yMax = Math.max(120, d3.max(seq, (s) => Math.max(s.lo, s.hi)) + 10);
+  const x = d3.scaleLinear([0, total], [m.l, width - m.r]);
+  const y = d3.scaleLinear([0, yMax], [height - m.b, m.t]);
+  const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`).attr('role', 'img').attr('aria-label', 'Workout structure: target intensity over time');
+  const ticks = [50, 75, 100, 120].filter((v) => v < yMax);
+  svg.append('g').selectAll('line').data(ticks).join('line').attr('x1', m.l).attr('x2', width - m.r).attr('y1', y).attr('y2', y).attr('stroke', 'var(--cds-chart-grid)');
+  svg.append('g').selectAll('text').data(ticks).join('text').attr('x', m.l - 4).attr('y', (v) => y(v) + 3).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text((v) => v + '%');
+  const zone = (v) => (v < 56 ? 0.25 : v < 76 ? 0.4 : v < 91 ? 0.55 : v < 106 ? 0.72 : v < 121 ? 0.86 : 1);
+  const tip = tdb.tip(box);
+  const unitName = unit === 'pct_lthr' ? 'threshold HR' : unit === 'pct_pace' ? 'threshold pace' : 'FTP';
+  const fmtDur = (s) => ((s >= 3600 ? Math.floor(s / 3600) + 'h ' : '') + (Math.floor(s / 60) % 60 ? (Math.floor(s / 60) % 60) + 'm' : '') + (s % 60 ? ' ' + (s % 60) + 's' : '')).trim() || '0m';
+  seq.forEach((s) => {
+    const x0 = x(s.start), x1 = Math.max(x0 + 1, x(s.start + s.dur) - 1), mid = (s.lo + s.hi) / 2;
+    const g = svg.append('g');
+    if (s.ramp === 'Y') {
+      g.append('path').attr('d', `M${x0},${y(0)} L${x0},${y(s.lo)} L${x1},${y(s.hi)} L${x1},${y(0)} Z`).attr('fill', dash.colors[0]).attr('fill-opacity', zone(mid));
+    } else {
+      if (s.hi > s.lo) g.append('rect').attr('x', x0).attr('width', x1 - x0).attr('y', y(s.hi)).attr('height', Math.max(1, y(s.lo) - y(s.hi))).attr('fill', dash.colors[0]).attr('fill-opacity', 0.15);
+      g.append('rect').attr('x', x0).attr('width', x1 - x0).attr('y', y(mid)).attr('height', Math.max(1, y(0) - y(mid))).attr('rx', 1).attr('fill', dash.colors[0]).attr('fill-opacity', zone(mid));
+    }
+    g.append('rect').attr('x', x0).attr('width', x1 - x0).attr('y', m.t).attr('height', y(0) - m.t).attr('fill', 'transparent')
+      .on('pointermove', (event) => {
+        const watts = unit === 'pct_ftp' && ftp ? ' (' + Math.round(s.lo * ftp / 100) + (s.hi !== s.lo ? '–' + Math.round(s.hi * ftp / 100) : '') + ' W)' : '';
+        tdb.showTip(box, tip, event, [s.label || s.kind || 'Step', fmtDur(s.dur) + (s.ramp === 'Y' ? ', ramp' : ''), (s.lo === s.hi ? s.lo : s.lo + '–' + s.hi) + '% of ' + unitName + watts]);
+      }).on('pointerleave', () => { tip.hidden = true; });
+  });
+  svg.append('line').attr('x1', m.l).attr('x2', width - m.r).attr('y1', y(100)).attr('y2', y(100)).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 3');
+  const step = total > 5400 ? 1800 : total > 2700 ? 900 : 600;
+  const xt = d3.range(0, total + 1, step);
+  svg.append('g').selectAll('text').data(xt).join('text').attr('x', x).attr('y', height - 6).attr('text-anchor', (v, i) => (i === 0 ? 'start' : 'middle')).attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text((v) => Math.round(v / 60) + 'm');
+  svg.append('line').attr('x1', m.l).attr('x2', width - m.r).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', 'var(--cds-chart-axis)');
+};
+
+dash.draw('today', (el) => {
+  const data = tdb.begin(el, 'today_plan');
+  if (!data) return;
+  const stepsG = dash.data('planned_steps'), ftpG = dash.data('ftp_now'), exG = dash.data('exercises');
+  const steps = stepsG.status === 'ok' ? stepsG.data : [];
+  const ftps = ftpG.status === 'ok' ? ftpG.data : [];
+  const names = new Map((exG.status === 'ok' ? exG.data : []).map((e) => [e.exercise_id, e.name]));
+  const ftpFor = (r) => { const f = ftps.find((x) => x.setting === (/virtual|indoor/i.test(r.type) ? 'indoor_ftp' : 'ftp')) || ftps.find((x) => x.setting === 'ftp'); return f ? f.watts : null; };
+  const pillText = { done: 'Done', partial: 'Partly done', planned: 'Planned', note: 'Note' };
+  const mk = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const fmtMin = (v) => (v == null ? null : v >= 60 ? Math.floor(v / 60) + ' h ' + String(Math.round(v % 60)).padStart(2, '0') + ' min' : Math.round(v) + ' min');
+  const order = { planned: 0, partial: 1, done: 2, note: 3 };
+  data.slice().sort((a, b) => (a.category === 'UNPLANNED') - (b.category === 'UNPLANNED') || order[a.status] - order[b.status]).forEach((r) => {
+    const card = mk('article', 'tdb-sess');
+    el.append(card);
+    const head = mk('div', 'tdb-sesshead');
+    const left = mk('div', 'tdb-split');
+    left.append(mk('h3', null, r.name || r.type || 'Session'));
+    const meta = [r.category === 'UNPLANNED' ? 'Not planned' : null, r.type, r.planned_min ? fmtMin(r.planned_min) + ' planned' : null, r.planned_load ? 'load ' + r.planned_load : null, r.notes || null].filter(Boolean).join(' · ');
+    if (meta) left.append(mk('p', 'tdb-note', meta));
+    const pills = mk('span', 'tdb-pills');
+    const pill = mk('span', 'tdb-pill' + (r.status === 'done' ? ' is-done' : r.status === 'partial' ? ' is-partial' : ''), (r.status === 'done' ? '✓ ' : '') + pillText[r.status]);
+    pills.append(pill);
+    if (r.verdict) pills.append(mk('span', 'tdb-pill' + (r.verdict === 'nailed' || r.verdict === 'done' ? ' is-done' : r.verdict === 'partial' ? ' is-partial' : r.verdict === 'missed' ? ' is-missed' : ''), 'Debrief: ' + r.verdict));
+    head.append(left, pills);
+    card.append(head);
+    if (r.target) card.append(mk('p', 'tdb-note', 'Target: ' + r.target));
+    if (r.status === 'done' || r.status === 'partial') {
+      const did = [r.actual_min != null ? fmtMin(r.actual_min) : null, r.actual_load != null ? 'load ' + r.actual_load : null, r.avg_w ? r.avg_w + ' W average' + (r.np_w ? ', ' + r.np_w + ' W normalized' : '') : null, r.avg_hr ? r.avg_hr + ' bpm' : null].filter(Boolean).join(' · ');
+      if (did) card.append(mk('p', 'tdb-note', 'Done: ' + did));
+      if (r.next_step) card.append(mk('p', 'tdb-note', 'Next time: ' + r.next_step));
+    }
+    const mine = steps.filter((s) => s.event_id === r.event_id);
+    if (mine.length) { const box = mk('div', 'tdb-blocks'); card.append(box); tdbBlocks(box, mine, ftpFor(r)); }
+    if (r.strength_plan) {
+      const ol = mk('ul', 'tdb-exlist');
+      r.strength_plan.split('|').forEach((item) => { const [id, n] = item.split(':'); ol.append(mk('li', null, (names.get(id) || id) + (n ? ' · ' + n + ' sets' : ''))); });
+      card.append(ol);
+    }
+  });
+});
+
+dash.draw('weekplan', (el) => {
+  const g = dash.data('week_plan');
+  el.replaceChildren();
+  if (g.status !== 'ok') return;
+  g.data.forEach((r) => {
+    const li = document.createElement('li');
+    const d = document.createElement('span'); d.className = 'tdb-d'; d.textContent = tdb.fmtWeekday(r.date);
+    const t = document.createElement('span');
+    t.textContent = [r.name, r.planned_min ? Math.round(r.planned_min) + ' min' : null, r.planned_load ? 'load ' + r.planned_load : null].filter(Boolean).join(' · ');
+    li.append(d, t); el.append(li);
+  });
+});
+
+/* ---------- today: readiness strip ---------- */
+dash.draw('rd_strip', (el) => {
+  const data = tdb.begin(el, 'readiness_log');
+  if (!data) return;
+  const end = tdb.parse(tdb.today());
+  const days = d3.utcDay.range(d3.utcDay.offset(end, -27), d3.utcDay.offset(end, 1));
+  const by = new Map(data.map((r) => [r.date, r]));
+  const width = Math.max(240, el.clientWidth || 320), height = 40;
+  const cell = (width - 2) / 28;
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`).attr('role', 'img').attr('aria-label', 'Readiness for each of the last 28 days');
+  const tip = tdb.tip(el);
+  days.forEach((d, i) => {
+    const key = d.toISOString().slice(0, 10), r = by.get(key);
+    svg.append('rect').attr('x', 1 + i * cell).attr('y', 2).attr('width', Math.max(1, cell - 2)).attr('height', 20).attr('rx', 2)
+      .attr('fill', r ? tdb.statusColor(r.status) : 'var(--cds-chart-grid)').attr('fill-opacity', r ? (r.source === 'check-in' ? 1 : 0.55) : 0.5)
+      .on('pointermove', (event) => tdb.showTip(el, tip, event, [tdb.fmtWeekday(key), r ? r.status + (r.source === 'check-in' ? ', check-in' : ', from data') : 'no data', r ? r.reasons : null]))
+      .on('pointerleave', () => { tip.hidden = true; });
+  });
+  svg.append('text').attr('x', 1).attr('y', 36).attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(tdb.fmtDay(days[0].toISOString()));
+  svg.append('text').attr('x', width - 1).attr('y', 36).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text('Today');
+});
+</script>
+
+<script>
+/* ---------- chart helpers ---------- */
+window.tdbChart = {
+  // widest text width of labels drawn at a font size, measured in the svg
+  measure: (svg, labels, size) => {
+    const g = svg.append('g').attr('visibility', 'hidden');
+    let w = 0;
+    labels.forEach((l) => { const t = g.append('text').attr('font-size', size).text(l); w = Math.max(w, t.node().getComputedTextLength()); });
+    g.remove();
+    return w;
+  },
+  // nearest row to the pointer on a utc x scale
+  nearest: (rows, x, event, svgNode) => {
+    const [px] = d3.pointer(event, svgNode);
+    const t = x.invert(px);
+    return d3.least(rows, (r) => Math.abs(r.d - t));
+  },
+  xTicks: (x, width) => x.ticks(width < 420 ? 3 : 5),
+};
+
+/* ---------- recovery trends ---------- */
+const TRENDS = {
+  hrv: { y: 'hrv_ms', avg: 'hrv7', band: ['band_low', 'band_high'], unit: 'ms', dots: true, label: 'HRV' },
+  rhr: { y: 'rhr_bpm', base: 'rhr_base', unit: 'bpm', label: 'Resting HR' },
+  sleep: { y: 'sleep_h', unit: 'h', bars: true, zero: true, label: 'Sleep', extra: (r) => (r.sleep_score != null ? 'Score ' + r.sleep_score : null) },
+  bb: { y: 'body_battery', unit: '', zero: true, max: 100, label: 'Body Battery' },
+  stress: { y: 'stress', unit: '', zero: true, max: 100, label: 'Stress' },
+  steps: { y: 'steps', unit: 'steps', bars: true, zero: true, label: 'Steps' },
+  weight: { y: 'weight_kg', avg: 'weight7', unit: 'kg', dots: true, label: 'Weight' },
+};
+dash.draw('trend', (el) => {
+  const data = tdb.begin(el, 'readiness_days');
+  if (!data) return;
+  const cfg = TRENDS[el.dataset.metric];
+  if (!cfg) return;
+  const end = tdb.parse(tdb.today()), start = d3.utcDay.offset(end, -(tdb.range() - 1));
+  const rows = data.map((r) => ({ ...r, d: tdb.parse(r.date) })).filter((r) => r.d >= start && r.d <= end);
+  const pts = rows.filter((r) => r[cfg.y] != null);
+  if (!pts.length) return;
+  const fmt = (v) => d3.format(',')(Math.round(v * 10) / 10);
+  const width = Math.max(240, el.clientWidth || 320), height = 150;
+  const extra = [].concat(cfg.band ? rows.flatMap((r) => [r[cfg.band[0]], r[cfg.band[1]]]) : [], cfg.base ? rows.map((r) => r[cfg.base]) : [], cfg.avg ? rows.map((r) => r[cfg.avg]) : []).filter((v) => v != null);
+  const vals = pts.map((r) => r[cfg.y]).concat(extra);
+  let lo = cfg.zero ? 0 : d3.min(vals), hi = cfg.max != null ? cfg.max : d3.max(vals);
+  if (!cfg.zero) { const pad = (hi - lo) * 0.15 || 2; lo -= pad; hi += pad; } else if (cfg.max == null) hi *= 1.1;
+  const y = d3.scaleLinear([lo, hi], [height - 20, 10]).nice();
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`).attr('role', 'img').attr('aria-label', cfg.label + ' over the last ' + tdb.range() + ' days');
+  const yt = y.ticks(3);
+  const last = pts[pts.length - 1];
+  const endLabel = fmt(cfg.avg && last[cfg.avg] != null ? last[cfg.avg] : last[cfg.y]);
+  const ml = tdbChart.measure(svg, yt.map(fmt), 10) + 8, mr = tdbChart.measure(svg, [endLabel], 11) + 10;
+  const x = d3.scaleUtc([start, end], [ml, width - mr]);
+  svg.append('g').selectAll('line').data(yt).join('line').attr('x1', ml).attr('x2', width - mr).attr('y1', y).attr('y2', y).attr('stroke', 'var(--cds-chart-grid)');
+  svg.append('g').selectAll('text').data(yt).join('text').attr('x', ml - 6).attr('y', (v) => y(v) + 3).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(fmt);
+  svg.append('g').selectAll('text').data(tdbChart.xTicks(x, width)).join('text').attr('x', x).attr('y', height - 5).attr('text-anchor', 'middle').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(d3.utcFormat('%b %-d'));
+  if (cfg.band) {
+    const b = rows.filter((r) => r[cfg.band[0]] != null);
+    svg.append('path').datum(b).attr('fill', dash.colors[0]).attr('fill-opacity', 0.12).attr('d', d3.area((r) => x(r.d), (r) => y(r[cfg.band[0]]), (r) => y(r[cfg.band[1]])));
+  }
+  if (cfg.base) svg.append('path').datum(rows.filter((r) => r[cfg.base] != null)).attr('fill', 'none').attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 3').attr('d', d3.line((r) => x(r.d), (r) => y(r[cfg.base])));
+  if (cfg.bars) {
+    const bw = Math.max(1, (x(d3.utcDay.offset(start, 1)) - x(start)) - 1);
+    svg.append('g').selectAll('rect').data(pts).join('rect').attr('x', (r) => x(r.d) - bw / 2).attr('width', bw).attr('y', (r) => y(r[cfg.y])).attr('height', (r) => Math.max(0, y(lo < 0 ? 0 : y.domain()[0]) - y(r[cfg.y]))).attr('rx', Math.min(2, bw / 2)).attr('fill', dash.colors[0]);
+  } else if (cfg.dots) {
+    svg.append('g').selectAll('circle').data(pts).join('circle').attr('cx', (r) => x(r.d)).attr('cy', (r) => y(r[cfg.y])).attr('r', 2.5).attr('fill', 'var(--cds-chart-muted)');
+  } else {
+    svg.append('path').datum(rows).attr('fill', 'none').attr('stroke', dash.colors[0]).attr('stroke-width', 2).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').attr('d', d3.line((r) => x(r.d), (r) => y(r[cfg.y])).defined((r) => r[cfg.y] != null));
+  }
+  if (cfg.avg) svg.append('path').datum(rows).attr('fill', 'none').attr('stroke', dash.colors[0]).attr('stroke-width', 2).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').attr('d', d3.line((r) => x(r.d), (r) => y(r[cfg.avg])).defined((r) => r[cfg.avg] != null));
+  const endV = cfg.avg && last[cfg.avg] != null ? last[cfg.avg] : last[cfg.y];
+  svg.append('text').attr('x', width - mr + 4).attr('y', y(endV) + 4).attr('font-size', 11).attr('fill', 'var(--color-fg)').style('font-variant-numeric', 'tabular-nums').text(endLabel);
+  const tip = tdb.tip(el);
+  const dot = svg.append('circle').attr('r', 4).attr('fill', dash.colors[0]).attr('visibility', 'hidden');
+  svg.append('rect').attr('x', ml).attr('y', 0).attr('width', width - ml - mr).attr('height', height - 18).attr('fill', 'transparent')
+    .on('pointermove', (event) => {
+      const r = tdbChart.nearest(pts, x, event, svg.node(), width);
+      if (!r) return;
+      dot.attr('cx', x(r.d)).attr('cy', y(r[cfg.y])).attr('visibility', 'visible');
+      tdb.showTip(el, tip, event, [tdb.fmtWeekday(r.date), cfg.label + ' ' + fmt(r[cfg.y]) + (cfg.unit ? ' ' + cfg.unit : ''),
+        cfg.avg && r[cfg.avg] != null ? '7-day average ' + fmt(r[cfg.avg]) : null,
+        cfg.band && r[cfg.band[0]] != null ? 'Normal ' + fmt(r[cfg.band[0]]) + '–' + fmt(r[cfg.band[1]]) : null,
+        cfg.base && r[cfg.base] != null ? 'Baseline ' + fmt(r[cfg.base]) : null, cfg.extra ? cfg.extra(r) : null]);
+    }).on('pointerleave', () => { tip.hidden = true; dot.attr('visibility', 'hidden'); });
+});
+
+/* ---------- training load ---------- */
+dash.draw('fitness', (el) => {
+  const data = tdb.begin(el, 'load_series');
+  if (!data) return;
+  const end = tdb.parse(tdb.today()), start = d3.utcDay.offset(end, -(tdb.range() - 1));
+  const rows = data.map((r) => ({ ...r, d: tdb.parse(r.date) })).filter((r) => r.d >= start && r.d <= end);
+  if (!rows.length) return;
+  const width = Math.max(280, el.clientWidth || 600), h1 = 170, gap = 16, h2 = 80, height = h1 + gap + h2 + 20;
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`).attr('role', 'img').attr('aria-label', 'Fitness, fatigue and form over time');
+  const y1 = d3.scaleLinear([0, d3.max(rows, (r) => Math.max(r.ctl, r.atl)) * 1.1 || 10], [h1, 8]).nice();
+  const fmin = Math.min(-40, d3.min(rows, (r) => r.form_pct)), fmax = Math.max(25, d3.max(rows, (r) => r.form_pct));
+  const y2 = d3.scaleLinear([fmin, fmax], [h1 + gap + h2, h1 + gap]);
+  const last = rows[rows.length - 1];
+  const ends = ['Fitness ' + Math.round(last.ctl), 'Fatigue ' + Math.round(last.atl), 'High risk', 'Optimal', 'Fresh'];
+  const t1 = y1.ticks(4), t2 = [-30, -10, 5, 20].filter((v) => v > fmin && v < fmax);
+  const ml = tdbChart.measure(svg, t1.map(String).concat(t2.map((v) => v + '%')), 10) + 8;
+  const mr = tdbChart.measure(svg, ends, 11) + 10;
+  const x = d3.scaleUtc([start, end], [ml, width - mr]);
+  svg.append('g').selectAll('line').data(t1).join('line').attr('x1', ml).attr('x2', width - mr).attr('y1', y1).attr('y2', y1).attr('stroke', 'var(--cds-chart-grid)');
+  svg.append('g').selectAll('text').data(t1).join('text').attr('x', ml - 6).attr('y', (v) => y1(v) + 3).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(String);
+  // form zones
+  const zones = [[fmin, -30, 'var(--cds-chart-status-critical)', 0.1, 'High risk'], [-30, -10, dash.colors[0], 0.12, 'Optimal'], [5, 20, dash.colors[2], 0.12, 'Fresh']];
+  zones.forEach(([a, b, c, o, l]) => {
+    const lo = Math.max(a, fmin), hi = Math.min(b, fmax);
+    if (hi <= lo) return;
+    svg.append('rect').attr('x', ml).attr('width', width - ml - mr).attr('y', y2(hi)).attr('height', y2(lo) - y2(hi)).attr('fill', c).attr('fill-opacity', o);
+    svg.append('text').attr('x', width - mr + 4).attr('y', (y2(hi) + y2(lo)) / 2 + 3).attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(l);
+  });
+  svg.append('g').selectAll('text').data(t2).join('text').attr('x', ml - 6).attr('y', (v) => y2(v) + 3).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text((v) => v + '%');
+  svg.append('line').attr('x1', ml).attr('x2', width - mr).attr('y1', y2(0)).attr('y2', y2(0)).attr('stroke', 'var(--cds-chart-axis)');
+  const bw = Math.max(1, (x(d3.utcDay.offset(start, 1)) - x(start)) - 1);
+  const zc = (v) => (v < -30 ? 'var(--cds-chart-status-critical)' : v < -10 ? dash.colors[0] : v < 5 ? 'var(--cds-chart-muted)' : dash.colors[2]);
+  svg.append('g').selectAll('rect').data(rows.filter((r) => r.form_pct != null)).join('rect').attr('x', (r) => x(r.d) - bw / 2).attr('width', bw)
+    .attr('y', (r) => y2(Math.max(0, r.form_pct))).attr('height', (r) => Math.abs(y2(r.form_pct) - y2(0))).attr('fill', (r) => zc(r.form_pct));
+  const line = (k, c, w) => svg.append('path').datum(rows).attr('fill', 'none').attr('stroke', c).attr('stroke-width', w).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').attr('d', d3.line((r) => x(r.d), (r) => y1(r[k])));
+  line('atl', 'var(--cds-chart-muted)', 1.5);
+  line('ctl', dash.colors[0], 2);
+  let yA = y1(last.ctl) + 4, yB = y1(last.atl) + 4;
+  if (Math.abs(yA - yB) < 12) { if (yA <= yB) yB = yA + 12; else yA = yB + 12; }
+  svg.append('text').attr('x', width - mr + 4).attr('y', yA).attr('font-size', 11).attr('fill', 'var(--color-fg)').text(ends[0]);
+  svg.append('text').attr('x', width - mr + 4).attr('y', yB).attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text(ends[1]);
+  svg.append('g').selectAll('text').data(tdbChart.xTicks(x, width)).join('text').attr('x', x).attr('y', height - 4).attr('text-anchor', 'middle').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(d3.utcFormat('%b %-d'));
+  const tip = tdb.tip(el);
+  const rule = svg.append('line').attr('y1', 8).attr('y2', h1 + gap + h2).attr('stroke', 'var(--cds-chart-axis)').attr('visibility', 'hidden');
+  svg.append('rect').attr('x', ml).attr('y', 0).attr('width', width - ml - mr).attr('height', h1 + gap + h2).attr('fill', 'transparent')
+    .on('pointermove', (event) => {
+      const r = tdbChart.nearest(rows, x, event, svg.node(), width);
+      if (!r) return;
+      rule.attr('x1', x(r.d)).attr('x2', x(r.d)).attr('visibility', 'visible');
+      tdb.showTip(el, tip, event, [tdb.fmtWeekday(r.date), 'Fitness ' + r.ctl + ' · fatigue ' + r.atl, 'Form ' + d3.format('+')(r.form) + ' (' + r.form_pct + '%)', r.ramp != null ? 'Ramp ' + d3.format('+')(r.ramp) + ' in 7 days' : null, r.load != null ? 'Load that day ' + r.load : null]);
+    }).on('pointerleave', () => { tip.hidden = true; rule.attr('visibility', 'hidden'); });
+});
+
+dash.draw('weekly', (el) => {
+  const data = tdb.begin(el, 'weekly_volume');
+  if (!data || !data.length) return;
+  const width = Math.max(260, el.clientWidth || 360), height = 190, mb = 20, mt = 10;
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`).attr('role', 'img').attr('aria-label', 'Endurance hours per week by intensity');
+  const ymax = Math.max(tdb.WEEKLY_HOURS * 1.15, d3.max(data, (r) => r.hours) * 1.1);
+  const y = d3.scaleLinear([0, ymax], [height - mb, mt]).nice();
+  const yt = y.ticks(4);
+  const ml = tdbChart.measure(svg, yt.map((v) => v + ' h'), 10) + 8, mr = tdbChart.measure(svg, [tdb.WEEKLY_HOURS + ' h'], 10) + 8;
+  const x = d3.scaleBand(data.map((r) => r.week), [ml, width - mr]).padding(0.25);
+  svg.append('g').selectAll('line').data(yt).join('line').attr('x1', ml).attr('x2', width - mr).attr('y1', y).attr('y2', y).attr('stroke', 'var(--cds-chart-grid)');
+  svg.append('g').selectAll('text').data(yt).join('text').attr('x', ml - 6).attr('y', (v) => y(v) + 3).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text((v) => v + ' h');
+  const parts = [['low_h', dash.colors[0]], ['mid_h', dash.colors[2]], ['high_h', dash.colors[3]], ['other_h', 'var(--cds-chart-muted)']];
+  const bw = Math.min(32, x.bandwidth());
+  const tip = tdb.tip(el);
+  data.forEach((r) => {
+    let acc = 0;
+    const g = svg.append('g');
+    parts.forEach(([k, c]) => { const v = r[k] || 0; if (v <= 0) return; g.append('rect').attr('x', x(r.week) + (x.bandwidth() - bw) / 2).attr('width', bw).attr('y', y(acc + v)).attr('height', y(acc) - y(acc + v)).attr('fill', c); acc += v; });
+    g.append('rect').attr('x', x(r.week)).attr('width', x.bandwidth()).attr('y', mt).attr('height', height - mb - mt).attr('fill', 'transparent')
+      .on('pointermove', (event) => tdb.showTip(el, tip, event, ['Week of ' + tdb.fmtDay(r.week), r.hours + ' h, ' + r.sessions + ' sessions, load ' + r.load, 'Easy ' + r.low_h + ' h · moderate ' + r.mid_h + ' h · hard ' + r.high_h + ' h', r.other_h ? 'No zone data ' + r.other_h + ' h' : null]))
+      .on('pointerleave', () => { tip.hidden = true; });
+  });
+  svg.append('line').attr('x1', ml).attr('x2', width - mr).attr('y1', y(tdb.WEEKLY_HOURS)).attr('y2', y(tdb.WEEKLY_HOURS)).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 3');
+  svg.append('text').attr('x', width - mr + 4).attr('y', y(tdb.WEEKLY_HOURS) + 3).attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(tdb.WEEKLY_HOURS + ' h');
+  const every = width < 420 ? 4 : 2;
+  svg.append('g').selectAll('text').data(data.filter((r, i) => (data.length - 1 - i) % every === 0)).join('text').attr('x', (r) => x(r.week) + x.bandwidth() / 2).attr('y', height - 5).attr('text-anchor', 'middle').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text((r) => tdb.fmtDay(r.week));
+});
+
+dash.draw('dist', (el) => {
+  const data = tdb.begin(el, 'intensity_28');
+  if (!data || !data.length) return;
+  const r = data[0];
+  const width = Math.max(240, el.clientWidth || 320), height = 58;
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`).attr('role', 'img').attr('aria-label', 'Share of easy, moderate and hard time over 28 days');
+  const x = d3.scaleLinear([0, 100], [0, width]);
+  let acc = 0;
+  [['low_pct', dash.colors[0], 'Easy'], ['mid_pct', dash.colors[2], 'Moderate'], ['high_pct', dash.colors[3], 'Hard']].forEach(([k, c, l]) => {
+    const v = r[k] || 0;
+    svg.append('rect').attr('x', x(acc)).attr('width', Math.max(0, x(acc + v) - x(acc) - 1)).attr('y', 14).attr('height', 22).attr('fill', c);
+    if (x(v) > 44) svg.append('text').attr('x', x(acc) + 6).attr('y', 29).attr('font-size', 11).attr('fill', 'var(--color-bg)').text(v + '%');
+    acc += v;
+  });
+  svg.append('line').attr('x1', x(tdb.LOW_SHARE)).attr('x2', x(tdb.LOW_SHARE)).attr('y1', 8).attr('y2', 42).attr('stroke', 'var(--color-fg)').attr('stroke-width', 1.5);
+  svg.append('text').attr('x', x(tdb.LOW_SHARE)).attr('y', 54).attr('text-anchor', x(tdb.LOW_SHARE) > width - 60 ? 'end' : 'middle').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text('aim ' + tdb.LOW_SHARE + '% easy');
+});
+
+dash.draw('ftpchart', (el) => {
+  const data = tdb.begin(el, 'ftp_history');
+  if (!data) return;
+  const rows = data.filter((r) => (r.applied === 'Y' || r.applied === 'baseline') && r.new_w !== '').map((r) => ({ ...r, d: tdb.parse(r.date), w: Number(r.new_w) })).sort((a, b) => a.d - b.d);
+  if (!rows.length) return;
+  const end = tdb.parse(tdb.today());
+  const width = Math.max(240, el.clientWidth || 320), height = 150;
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`).attr('role', 'img').attr('aria-label', 'Outdoor and indoor FTP over time');
+  const y = d3.scaleLinear([d3.min(rows, (r) => r.w) - 15, d3.max(rows, (r) => r.w) + 15], [height - 20, 10]).nice();
+  const yt = y.ticks(3);
+  const series = [['ftp', 'Outdoor', dash.colors[0]], ['indoor_ftp', 'Indoor', dash.colors[1]]].map(([k, l, c]) => ({ k, l, c, pts: rows.filter((r) => r.setting === k) })).filter((s) => s.pts.length);
+  const labels = series.map((s) => s.l + ' ' + s.pts[s.pts.length - 1].w);
+  const ml = tdbChart.measure(svg, yt.map(String), 10) + 8, mr = tdbChart.measure(svg, labels, 11) + 10;
+  const startD = d3.min(rows, (r) => r.d);
+  const x = d3.scaleUtc([startD < end ? startD : d3.utcDay.offset(end, -30), end], [ml, width - mr]);
+  svg.append('g').selectAll('line').data(yt).join('line').attr('x1', ml).attr('x2', width - mr).attr('y1', y).attr('y2', y).attr('stroke', 'var(--cds-chart-grid)');
+  svg.append('g').selectAll('text').data(yt).join('text').attr('x', ml - 6).attr('y', (v) => y(v) + 3).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(String);
+  svg.append('g').selectAll('text').data(tdbChart.xTicks(x, width)).join('text').attr('x', x).attr('y', height - 5).attr('text-anchor', 'middle').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(d3.utcFormat('%b %-d'));
+  const tip = tdb.tip(el);
+  const ys = [];
+  series.forEach((s, i) => {
+    const pts = s.pts.concat([{ ...s.pts[s.pts.length - 1], d: end, ghost: true }]);
+    svg.append('path').datum(pts).attr('fill', 'none').attr('stroke', s.c).attr('stroke-width', 2).attr('d', d3.line((r) => x(r.d), (r) => y(r.w)).curve(d3.curveStepAfter));
+    svg.append('g').selectAll('circle').data(s.pts).join('circle').attr('cx', (r) => x(r.d)).attr('cy', (r) => y(r.w)).attr('r', 4).attr('fill', s.c).attr('stroke', 'var(--color-panel)').attr('stroke-width', 1.5)
+      .on('pointermove', (event, r) => tdb.showTip(el, tip, event, [tdb.fmtDay(r.date) + ' · ' + s.l, (r.old_w ? r.old_w + ' → ' : '') + r.w + ' W' + (r.change_pct ? ' (' + r.change_pct + '%)' : ''), r.method, r.estimates, r.notes]))
+      .on('pointerleave', () => { tip.hidden = true; });
+    let ly = y(s.pts[s.pts.length - 1].w) + 4;
+    if (ys.some((v) => Math.abs(v - ly) < 12)) ly += 12;
+    ys.push(ly);
+    svg.append('text').attr('x', width - mr + 4).attr('y', ly).attr('font-size', 11).attr('fill', i ? 'var(--color-fg-muted)' : 'var(--color-fg)').text(labels[i]);
+  });
+});
+
+/* MODULE commute */
+dash.draw('commute', (el) => {
+  const data = tdb.begin(el, 'commute_benchmark');
+  if (!data || !data.length) return;
+  const end = tdb.parse(tdb.today()), start = d3.utcDay.offset(end, -Math.max(tdb.range(), 60) + 1);
+  const pts = data.map((r) => ({ ...r, d: tdb.parse(r.date) })).filter((r) => r.d >= start);
+  if (!pts.length) return;
+  const width = Math.max(240, el.clientWidth || 320), height = 150;
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`).attr('role', 'img').attr('aria-label', 'Uphill commute watts per heartbeat over time');
+  const ext = d3.extent(pts, (r) => r.w_per_bpm), pad = (ext[1] - ext[0]) * 0.2 || 0.1;
+  const y = d3.scaleLinear([ext[0] - pad, ext[1] + pad], [height - 20, 10]).nice();
+  const yt = y.ticks(3), fmt = d3.format('.2f');
+  const last = pts[pts.length - 1];
+  const ml = tdbChart.measure(svg, yt.map(fmt), 10) + 8, mr = tdbChart.measure(svg, [fmt(last.w_per_bpm)], 11) + 10;
+  const x = d3.scaleUtc([start, end], [ml, width - mr]);
+  svg.append('g').selectAll('line').data(yt).join('line').attr('x1', ml).attr('x2', width - mr).attr('y1', y).attr('y2', y).attr('stroke', 'var(--cds-chart-grid)');
+  svg.append('g').selectAll('text').data(yt).join('text').attr('x', ml - 6).attr('y', (v) => y(v) + 3).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(fmt);
+  svg.append('g').selectAll('text').data(tdbChart.xTicks(x, width)).join('text').attr('x', x).attr('y', height - 5).attr('text-anchor', 'middle').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(d3.utcFormat('%b %-d'));
+  svg.append('path').datum(pts).attr('fill', 'none').attr('stroke', 'var(--cds-chart-muted)').attr('stroke-width', 1.5).attr('stroke-linejoin', 'round').attr('d', d3.line((r) => x(r.d), (r) => y(r.w_per_bpm)));
+  const tip = tdb.tip(el);
+  svg.append('g').selectAll('circle').data(pts).join('circle').attr('cx', (r) => x(r.d)).attr('cy', (r) => y(r.w_per_bpm)).attr('r', 3.5).attr('fill', dash.colors[0])
+    .on('pointermove', (event, r) => tdb.showTip(el, tip, event, [tdb.fmtWeekday(r.date), fmt(r.w_per_bpm) + ' W per bpm', r.avg_w + ' W at ' + r.avg_hr + ' bpm']))
+    .on('pointerleave', () => { tip.hidden = true; });
+  svg.append('text').attr('x', width - mr + 4).attr('y', y(last.w_per_bpm) + 4).attr('font-size', 11).attr('fill', 'var(--color-fg)').text(fmt(last.w_per_bpm));
+});
+/* /MODULE commute */
+</script>
+
+<script>
+/* ---------- weekly targets ---------- */
+dash.draw('freq', (el) => {
+  const g = dash.data('area_freq');
+  el.classList.toggle('dash-skeleton', g.status === 'loading');
+  if (g.status === 'error') { tdb.fail(el); return; }
+  el.replaceChildren();
+  if (g.status !== 'ok') return;
+  const rows = g.data;
+  const width = Math.max(280, el.clientWidth || 320);
+  const rowH = 24, top = 24, labelW = 110;
+  const colW = (width - labelW) / 2;
+  const height = top + rows.length * rowH + 4;
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`)
+    .attr('role', 'img').attr('aria-label', 'Sessions per area this week and last week against the weekly minimum');
+  [['This week', 0], ['Last week', 1]].forEach(([t, i]) => svg.append('text').attr('x', labelW + i * colW).attr('y', 12)
+    .attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text(t));
+  const r = 5, gap = 14;
+  rows.forEach((a, i) => {
+    const y = top + i * rowH;
+    if (i > 0 && rows[i - 1].group !== a.group) svg.append('line').attr('x1', 0).attr('x2', width).attr('y1', y - 2).attr('y2', y - 2).attr('stroke', 'var(--cds-chart-grid)');
+    svg.append('text').attr('x', 0).attr('y', y + 14).attr('font-size', 12).attr('fill', 'var(--color-fg)').text(a.label);
+    [a.this_week, a.last_week].forEach((n, c) => {
+      const slots = Math.max(a.min, a.max || 0, n);
+      const met = n >= a.min;
+      const ox = labelW + c * colW;
+      for (let k = 0; k < slots; k++) {
+        const filled = k < n;
+        svg.append('circle').attr('cx', ox + r + k * gap).attr('cy', y + 10).attr('r', r)
+          .attr('fill', filled ? (met ? dash.colors[0] : 'var(--cds-chart-status-critical)') : 'transparent')
+          .attr('stroke', filled ? 'none' : k < a.min ? 'var(--cds-chart-status-critical)' : 'var(--cds-chart-axis)')
+          .attr('stroke-width', 1.4).attr('stroke-dasharray', !filled && k >= a.min ? '2 2' : null);
+      }
+      svg.append('text').attr('x', ox + r + slots * gap + 2).attr('y', y + 14).attr('font-size', 11)
+        .attr('fill', 'var(--color-fg-muted)').style('font-variant-numeric', 'tabular-nums')
+        .text(n + '/' + a.min + (a.max && a.max !== a.min ? '–' + a.max : a.max ? '' : '+'));
+    });
+  });
+});
+
+/* ---------- left vs right legs ---------- */
+dash.draw('lrbars', (el) => {
+  const g = dash.data('muscle_load');
+  el.classList.toggle('dash-skeleton', g.status === 'loading');
+  if (g.status === 'error') { tdb.fail(el); return; }
+  el.replaceChildren();
+  if (g.status !== 'ok') return;
+  const legs = ['calves', 'quads', 'hamstrings', 'glute_max', 'glute_med'];
+  const rows = legs.map((m) => g.data.find((r) => r.window === tdb.LR_WINDOW && r.muscle === m)).filter(Boolean);
+  const width = Math.max(260, el.clientWidth || 320);
+  const rowH = 34, top = 18, labelW = 92;
+  const height = top + rows.length * rowH;
+  const max = d3.max(rows, (r) => Math.max(r.weekly_L, r.weekly_R, r.target)) || 1;
+  const x = d3.scaleLinear([0, max], [labelW, width - 40]);
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`)
+    .attr('role', 'img').attr('aria-label', 'Left and right leg hard sets per week over 28 days');
+  svg.append('rect').attr('x', labelW).attr('y', 2).attr('width', 10).attr('height', 8).attr('rx', 2).attr('fill', dash.colors[0]);
+  svg.append('text').attr('x', labelW + 14).attr('y', 10).attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text('Left');
+  svg.append('rect').attr('x', labelW + 50).attr('y', 2).attr('width', 10).attr('height', 8).attr('rx', 2).attr('fill', dash.colors[3]);
+  svg.append('text').attr('x', labelW + 64).attr('y', 10).attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text('Right');
+  svg.append('text').attr('x', labelW + 106).attr('y', 10).attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text('┆ target');
+  const tip = tdb.tip(el);
+  rows.forEach((r, i) => {
+    const y = top + i * rowH;
+    svg.append('text').attr('x', 0).attr('y', y + 16).attr('font-size', 12).attr('fill', 'var(--color-fg)').text(r.label);
+    [['L', r.weekly_L, dash.colors[0], 0], ['R', r.weekly_R, dash.colors[3], 12]].forEach(([s, v, c, dy]) => {
+      svg.append('rect').attr('x', labelW).attr('y', y + 4 + dy).attr('width', Math.max(0, x(v) - labelW)).attr('height', 10).attr('rx', 2).attr('fill', c);
+      svg.append('text').attr('x', x(v) + 4).attr('y', y + 13 + dy).attr('font-size', 10).attr('fill', 'var(--color-fg-muted)')
+        .style('font-variant-numeric', 'tabular-nums').text(v.toFixed(1));
+    });
+    svg.append('line').attr('x1', x(r.target)).attr('x2', x(r.target)).attr('y1', y + 2).attr('y2', y + 28)
+      .attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '3 3');
+    svg.append('rect').attr('x', 0).attr('y', y).attr('width', width).attr('height', rowH).attr('fill', 'transparent')
+      .on('pointermove', (event) => tdb.showTip(el, tip, event, [r.label + ', last ' + tdb.LR_WINDOW + ' days', 'Left ' + r.weekly_L.toFixed(1) + ' · Right ' + r.weekly_R.toFixed(1) + ' sets per week', 'Target ' + r.target + ' per week']))
+      .on('pointerleave', () => { tip.hidden = true; });
+  });
+});
+</script>
+
+<script>
+/* ---------- strength progression ---------- */
+dash.draw('lift', (el) => {
+  const g = dash.data('lift_points');
+  el.classList.toggle('dash-skeleton', g.status === 'loading');
+  if (g.status === 'error') { tdb.fail(el); return; }
+  el.replaceChildren();
+  if (g.status !== 'ok') return;
+  const pts = g.data.filter((r) => r.exercise_id === el.dataset.lift).map((r) => ({ ...r, d: tdb.parse(r.date) })).sort((a, b) => a.d - b.d);
+  if (!pts.length) return;
+  const width = Math.max(200, el.clientWidth || 240), height = 130;
+  const m = { t: 10, r: 34, b: 20, l: 28 };
+  const all = g.data.map((r) => tdb.parse(r.date));
+  const x = d3.scaleUtc([d3.min(all), d3.max(all)], [m.l, width - m.r]);
+  const y = d3.scaleLinear([0, d3.max(pts, (p) => p.value) * 1.15], [height - m.b, m.t]).nice();
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`)
+    .attr('role', 'img').attr('aria-label', 'Progression over time');
+  const yt = y.ticks(3);
+  svg.append('g').selectAll('line').data(yt).join('line').attr('x1', m.l).attr('x2', width - m.r).attr('y1', y).attr('y2', y).attr('stroke', 'var(--cds-chart-grid)');
+  svg.append('g').selectAll('text').data(yt).join('text').attr('x', m.l - 6).attr('y', (d) => y(d) + 3).attr('text-anchor', 'end')
+    .attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text((d) => d3.format(',')(d));
+  const xt = x.ticks(d3.utcMonth.every(1));
+  svg.append('g').selectAll('text').data(xt).join('text').attr('x', x).attr('y', height - 5).attr('text-anchor', 'middle')
+    .attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(d3.utcFormat('%b'));
+  svg.append('path').datum(pts).attr('fill', 'none').attr('stroke', 'var(--cds-chart-muted)').attr('stroke-width', 1.5)
+    .attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').attr('d', d3.line((p) => x(p.d), (p) => y(p.value)));
+  const tip = tdb.tip(el);
+  svg.append('g').selectAll('circle').data(pts).join('circle').attr('cx', (p) => x(p.d)).attr('cy', (p) => y(p.value)).attr('r', 4)
+    .attr('fill', (p) => tdb.locColor(p.location)).attr('stroke', 'var(--color-panel)').attr('stroke-width', 1.5)
+    .on('pointermove', (event, p) => tdb.showTip(el, tip, event, [
+      tdb.fmtDay(p.date),
+      (p.load_kg ? p.load_kg + ' kg × ' : '') + p.best_reps + ' reps, ' + p.sets + ' sets' + (p.note ? ' (' + p.note + ')' : ''),
+      p.load_kg ? 'Estimated 1RM ' + p.value + ' kg' : 'Best set ' + p.value + ' reps',
+    ])).on('pointerleave', () => { tip.hidden = true; });
+  const lastP = pts[pts.length - 1];
+  svg.append('text').attr('x', x(lastP.d) + 7).attr('y', y(lastP.value) + 4).attr('font-size', 11).attr('fill', 'var(--color-fg)')
+    .style('font-variant-numeric', 'tabular-nums').text(d3.format(',')(lastP.value));
+});
+</script>
+
+<script>
+/* ---------- plan timeline ---------- */
+dash.draw('timeline', (el) => {
+  const g = dash.data('calendar');
+  el.classList.toggle('dash-skeleton', g.status === 'loading');
+  if (g.status === 'error') { tdb.fail(el); return; }
+  el.replaceChildren();
+  if (g.status !== 'ok') return;
+  const phases = g.data.filter((r) => r.kind === 'phase');
+  const miles = g.data.filter((r) => r.kind === 'milestone');
+  const width = Math.max(300, el.clientWidth || 600), height = 112;
+  const m = { l: 4, r: 4 };
+  const start = d3.utcMonth.floor(d3.min(phases, (p) => tdb.parse(p.start)));
+  const end = d3.utcMonth.ceil(d3.max(phases, (p) => tdb.parse(p.end)));
+  const x = d3.scaleUtc([start, end], [m.l, width - m.r]);
+  const today = tdb.parse(new Date().toLocaleDateString('sv-SE'));
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`)
+    .attr('role', 'img').attr('aria-label', 'Season phases and milestones');
+  const tip = tdb.tip(el);
+  const months = d3.utcMonth.range(start, end);
+  svg.append('g').selectAll('text').data(months).join('text').attr('x', (d) => x(d) + 2).attr('y', 104)
+    .attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text((d) => (width < 480 ? d3.utcFormat('%b')(d).slice(0, 1) : d3.utcFormat('%b')(d)));
+  svg.append('g').selectAll('line').data(months).join('line').attr('x1', x).attr('x2', x).attr('y1', 10).attr('y2', 92).attr('stroke', 'var(--cds-chart-grid)');
+  phases.forEach((p, i) => {
+    const x0 = x(tdb.parse(p.start)), x1 = x(d3.utcDay.offset(tdb.parse(p.end), 1));
+    const current = today >= tdb.parse(p.start) && today <= tdb.parse(p.end);
+    svg.append('rect').attr('x', x0 + 1).attr('y', 34).attr('width', Math.max(2, x1 - x0 - 2)).attr('height', 26).attr('rx', 4)
+      .attr('fill', current ? dash.colors[0] : 'var(--cds-chart-muted)').attr('fill-opacity', current ? 1 : 0.35)
+      .on('pointermove', (event) => tdb.showTip(el, tip, event, [tdb.fmtDay(p.start) + ' – ' + tdb.fmtDay(p.end) + (p.approx === 'Y' ? ' (approx.)' : ''), p.label, p.detail]))
+      .on('pointerleave', () => { tip.hidden = true; });
+    if (x1 - x0 > 26) svg.append('text').attr('x', x0 + 6).attr('y', 51).attr('font-size', 11).attr('pointer-events', 'none')
+      .attr('fill', current ? 'var(--color-bg)' : 'var(--color-fg)').text(p.id);
+  });
+  miles.forEach((mm) => {
+    const cx = x(tdb.parse(mm.start));
+    svg.append('path').attr('d', d3.symbol(d3.symbolDiamond, 52)()).attr('transform', `translate(${cx},76)`)
+      .attr('fill', 'var(--color-fg-muted)')
+      .on('pointermove', (event) => tdb.showTip(el, tip, event, [tdb.fmtDay(mm.start) + (mm.end ? ' – ' + tdb.fmtDay(mm.end) : '') + (mm.approx === 'Y' ? ' (approx.)' : ''), mm.label, mm.detail]))
+      .on('pointerleave', () => { tip.hidden = true; });
+  });
+  if (today >= start && today <= end) {
+    svg.append('line').attr('x1', x(today)).attr('x2', x(today)).attr('y1', 14).attr('y2', 88).attr('stroke', 'var(--color-fg)').attr('stroke-width', 1.5);
+    svg.append('text').attr('x', x(today)).attr('y', 10).attr('text-anchor', x(today) > width - 40 ? 'end' : 'middle')
+      .attr('font-size', 10).attr('fill', 'var(--color-fg)').text('Today');
+  }
+});
+
+dash.draw('upcoming', (el) => {
+  const g = dash.data('calendar');
+  el.replaceChildren();
+  if (g.status !== 'ok') return;
+  const today = new Date().toLocaleDateString('sv-SE');
+  g.data.filter((r) => (r.end || r.start) >= today).sort((a, b) => a.start.localeCompare(b.start)).slice(0, 5).forEach((r) => {
+    const li = document.createElement('li');
+    const d = document.createElement('span'); d.className = 'tdb-d';
+    d.textContent = (r.approx === 'Y' ? '~' : '') + tdb.fmtDay(r.start) + (r.end && r.kind === 'milestone' ? '–' + tdb.fmtDay(r.end) : '');
+    const t = document.createElement('span');
+    t.textContent = (r.kind === 'phase' ? r.id + ' ' + r.label + ' starts' : r.label) + (r.detail ? '. ' + r.detail : '');
+    li.append(d, t); el.append(li);
+  });
+});
+</script>
+
+<script>
+/* ---------- tables ---------- */
+const fillTable = (el, id, cols, key) => {
+  const g = dash.data(id);
+  el.replaceChildren();
+  if (g.status !== 'ok') return;
+  g.data.forEach((r) => {
+    const tr = document.createElement('tr');
+    tr.dataset.key = key(r);
+    cols.forEach((c) => {
+      const td = document.createElement('td');
+      td.textContent = r[c] == null ? '' : String(r[c]);
+      tr.append(td);
+    });
+    el.append(tr);
+  });
+};
+dash.draw('lrtable', (el) => fillTable(el, 'lr_markers', ['date', 'marker', 'condition', 'left', 'right', 'gap', 'unit'],
+  (r) => encodeURIComponent(r.date) + ',' + encodeURIComponent(r.condition)));
+dash.draw('calftable', (el) => fillTable(el, 'left_calf_log', ['date', 'trigger', 'left_calf', 'status'], (r) => r.date));
+dash.draw('sessiontable', (el) => fillTable(el, 'session_summary', ['date', 'weekday', 'where', 'exercises', 'sets', 'intervals', 'context'], (r) => r.date));
+dash.draw('debrieftable', (el) => {
+  const g = dash.data('key_sessions');
+  el.replaceChildren();
+  if (g.status !== 'ok') return;
+  g.data.slice().sort((a, b) => String(b.date).localeCompare(String(a.date))).forEach((r) => {
+    const tr = document.createElement('tr');
+    tr.dataset.key = encodeURIComponent(r.date) + ',' + encodeURIComponent(r.session);
+    ['date', 'session', 'verdict', 'compliance_pct', 'fade_pct', 'decoupling_pct', 'next_step'].forEach((c) => { const td = document.createElement('td'); td.textContent = r[c] == null ? '' : String(r[c]); tr.append(td); });
+    el.append(tr);
+  });
+});
+</script>
