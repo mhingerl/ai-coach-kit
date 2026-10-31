@@ -35,7 +35,7 @@ Describe what <ATHLETE> already did from **completed activity and wellness data*
    - Wellness (HRV, resting HR, sleep, steps) for the last ~60 days (the readiness baselines) and fitness (CTL/ATL/TSB, ramp rate) for the last 14 days, with explicit YYYY-MM-DD dates where the tools need them.
    - Activities for the last 10-14 days (load, types, the commute's actual power/HR). Note any activity that triggers an athlete-specific check (optional, e.g. runs or long walks for an injury program).
    - Planned events from today to about 6 days out.
-   - (optional) From the Garmin connection: last night's sleep stages, overnight HRV, stress and Body Battery.
+   - (optional) From the Garmin connection: last night's average heart rate and breathing rate asleep, overnight HRV and sleep duration.
    - `claude/data/key_sessions.csv`, `ftp_history.csv`, `readiness.csv`, `calendar.csv` and the list of `claude/reviews/`: open debriefs, last FTP check, phases ended without a review.
 2. **Read the plan docs and strength data.** Phase today and its focus, goals, the weekly volume ceiling, any special program (optional: <e.g. "the knee program in the annual plan">), and from `claude/data/strength_sets.csv` (joined to the `areas` in `exercises.csv`) what's been trained this week against the frequency targets. Flag honestly when the week conflicts with the plan, and suggest revising the plan rather than silently overriding either.
 3. **Debrief** any key session since the last row in `key_sessions.csv` (see "Session debrief").
@@ -56,9 +56,12 @@ Describe what <ATHLETE> already did from **completed activity and wellness data*
 | HRV, 7-day rolling mean | normal band = 60-day mean ± 0.5 SD (one source) | below the band | below the band and falling 3+ days, or >1 SD below the mean |
 | HRV, today | same | >1 SD below the mean (not after a late session or late meal) | only with another flag |
 | Resting HR | 30-day mean | ≥ 5 bpm above | ≥ 8 bpm above, or 7-day mean ≥ 3 bpm above |
-| Sleep | own 30-day norm | under 6 h or poor score, or two nights under 6.5 h | under 5 h |
+| Sleep | own 30-day norm | under 6 h, or two nights under 6.5 h | under 5 h |
+| Heart rate asleep (average) | 30-night median | ≥ 5 bpm above | possible illness: ≥ 8 bpm above, or ≥ 5 with breathing asleep ≥ 1.5 breaths/min or overnight stress ≥ 10 above their medians; makes the day red |
+| (optional) Watch numbers: overnight stress, Body Battery peak | 30-day medians | stress ≥ 10 above, or Body Battery peak ≥ 25 below | only with another flag |
 | Load | form = TSB as % of CTL; ramp | form below -30%, or ramp above ~+8 CTL/week | form below -30% plus an HRV or resting-HR flag |
-| (optional) Garmin | own norms | Body Battery on waking under 50, or high overnight stress | only with another flag |
+
+Work out everything you can from raw measurements (HRV, heart rates, breathing rate, sleep duration, training load). Watch numbers that can't be recomputed from what the watch hands over (e.g. Garmin overnight stress, Body Battery) are used as numbers against the athlete's own 30-day medians: overnight stress 10+ above or Body Battery peak 25+ below is amber, counted only together with another flag. The watch maker's labels and categories ("stressful", HRV status) and its composites of things you calculate yourself (readiness score, sleep score) are never used.
 
 Subjective 1-5 (legs, energy, sleep quality, motivation): any 1, or two 2s, is amber. Illness signs below the neck or fever: red for intensity.
 
@@ -100,7 +103,7 @@ At the first check-in after a phase in `calendar.csv` ends without a review (or 
 
 The dashboard's Today, Recovery and Training load pages read files the check-in keeps current (with a local connection the page can't query intervals.icu itself). At every check-in, after calendar changes, after logging a session, and on request:
 
-1. `wellness.csv`: wellness from the day after the last row through today (first time: 90 days; with icuvisor, include `id` in the wellness fields so each row carries its date): HRV, resting HR, sleep hours and score, steps, weight; (optional) Body Battery on waking and average stress from the Garmin connection. One row per day; replace a day already there.
+1. `wellness.csv`: wellness from the day after the last row through today (first time: 90 days; with icuvisor, include `id` in the wellness fields so each row carries its date): HRV, resting HR, sleep hours and score, steps, weight; (optional) from the Garmin connection: average heart rate, breathing rate and stress asleep, the day's Body Battery peak and average stress (`sleep_hr_bpm`, `resp_sleep`, `sleep_stress`, `body_battery_peak`, `stress_avg`). One row per day; replace a day already there.
 2. `fitness.csv`: the day's total training load (`load`) and the part from strength sessions (`strength_load`) for the same days (first time: a year of daily load, so the dashboard's own fitness calculation starts clean), plus intervals.icu's ctl and atl for comparison. The dashboard works out fitness, fatigue and form from the loads.
 3. `activities.csv`: activities since the last row (first time: 90 days), with type, indoor/commute flags, moving minutes, distance, climbing, load, average and normalized power, average HR, paired event id, and minutes in zones 1–2, 3 and 4+ (power zones when there is power, else HR).
 4. `planned.csv` and `planned_steps.csv`: the calendar from 7 days back to 7 days ahead, replacing that window: planned minutes and load, a one-line target, steps with repeats written out (% of FTP, threshold HR or pace; ramps marked), and `strength_plan` (`exercise_id:sets`) for strength sessions.
