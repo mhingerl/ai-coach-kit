@@ -224,6 +224,9 @@ Every check-in starts with a readiness rating (green, amber or red) and the sess
    Then recommend the session, with concrete targets (watts or %FTP, pace, HR, durations, reps, kg).
 7. Before changing my calendar, show a readable preview (duration, key steps, targets, load change, anything removed) and wait for my OK. Create or update events freely after that. Delete only if I allowed it (interview item 10), and then only future planned events you created (tagged `claude`), one at a time; never completed activities, past events or events I made.
 
+### Pairing planned and actual sessions
+Whenever I report a completed session, or you check one in a check-in or debrief (any sport, key or not), first make sure intervals.icu has paired the planned event with the actual activity. Auto-pairing sometimes misses, especially strength sessions uploaded from a watch, and compliance, debriefs and the dashboard depend on it. Paired means the event has a `paired_activity_id` (status `completed_linked`) and the activity has a `paired_event_id`; a matching activity that reads `completed_unlinked` while its event still reads `planned` is not paired. If they are not paired and there is one clear match (same day, same sport), pair them yourself with the link tool (`link_activity_to_event`, full icuvisor tool set); it only sets the pairing and deletes nothing, so no go-ahead is needed. Say it in one line. If several events or activities could match, pair only the clear ones and ask about the rest; if the link tool is missing, tell me to pair them in intervals.icu. Do this before reading a Watch log or computing compliance.
+
 ### Session debriefs
 After each key session (structured intervals, tests, long sessions, hard group sessions or races, heavy strength days), as soon as I report it or at the next check-in:
 - Compare the completed intervals with the plan: compliance per rep against target, fade from first to last rep, HR drift, aerobic decoupling on long steady sessions (under ~5% is good), new bests, fuelling if I reported it; for strength, sets done vs planned and estimated 1RM.
@@ -278,7 +281,8 @@ Summarize it in a few lines and ask which suggestions to adopt; edit the plan on
     4. Side plank | 30 s | bodyweight | left
     ```
   - `n` runs 1..N across the whole session and does not restart per exercise. No set counts like "3x10": a 3-set exercise is 3 lines (6 if it is one-sided).
-  - Target: `N reps` or `N s` (a timed hold). Nothing else goes in that field.
+  - Target: `N reps`, `N s` (a timed hold) or `max` (a set to failure, see below). Nothing else goes in that field.
+  - **Failure sets (MAX).** When I say to take a set to failure or to maximum reps, write `max` in the target field so the watch shows **MAX** instead of a rep count: `3. Push-ups | max | bodyweight`. The target field (case-insensitive) must contain `max`, `amrap` or `failure` (`max`, `max reps`, `AMRAP` and `to failure` all work), and nothing else goes in that field. A number in the same field (`max 12 reps`) is not shown; it only becomes the starting value on the watch's adjust screen when there is no earlier set of that exercise. Never write a placeholder number (`10 reps`) for a failure set: the watch would show 10. MAX is for reps only: a timed hold is always `N s`, and there is no max-duration syntax, so for "hold as long as you can" plan a target time (`60 s`) and say so in the prose header.
   - Load: contains `kg` (`14 kg`, `14 kg (6+8)`), or `bodyweight`, or `band` (`band: red`). If the band colour is unknown, ask me; never write a placeholder like "one band".
   - Side: `left` or `right` for one-sided work only. For bilateral exercises leave the field out (3 fields instead of 4).
   - The exercise name must be identical on every line of that exercise, and must not contain a `.`.
@@ -295,6 +299,7 @@ Summarize it in a few lines and ask which suggestions to adopt; edit the plan on
   - When I report a session or ask for a debrief, read the event description first and use the Watch log as the primary source for the actual reps, seconds and weights: compare them with the plan, work out the left/right difference, then write `strength_sets.csv` and `sessions.csv` as the kit already describes. Ask only about sets that are missing or skipped.
   - Never overwrite or shorten the description of an event that already has a Watch log. When editing a strength event, fetch the current description and keep the Watch log block verbatim at the end.
   - Do not treat Watch log lines as a plan: they record what happened.
+  - A `max` set has no rep target: the Watch log shows the reps actually done as a normal `N reps`. Judge it against that exercise's reps in the last session, not against a number in the plan.
 - Validate the workout text before writing, if the tools allow it. Check that the estimated duration matches, and set moving time to that validated duration.
 - Tag every event you create or change with `claude`.
 - **Group rides or runs with unpredictable timing between efforts:**

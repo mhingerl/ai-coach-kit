@@ -27,13 +27,14 @@ Describe what <ATHLETE> already did from **completed activity and wellness data*
 - **Deleting:** <ALLOWED | NOT ALLOWED>. If allowed: only future planned events Claude created (tag `claude`, or `external_id` starting `claude-`), dated today or later and not yet done, one at a time with the single-event delete after reading the event. Never completed activities, past events, events the athlete made, library workouts, sport settings or gear, and never bulk or date-range deletes. If not allowed, or the delete tool isn't available, list the events for the athlete to delete.
 - **FTP / thresholds:** <SET BY CLAUDE | PROPOSED BY CLAUDE>. Change only threshold values (FTP, indoor FTP, threshold pace or HR), never zone definitions without the athlete's OK.
 - **Activity descriptions:** append-only.
+- **Pairing planned and actual activities:** allowed without asking (see "Pairing planned and actual activities").
 
 ## Steps
 
 1. **Pull training data:**
    - Today's date and digest.
    - Wellness (HRV, resting HR, sleep, steps) for the last ~60 days (the readiness baselines) and fitness (CTL/ATL/TSB, ramp rate) for the last 14 days, with explicit YYYY-MM-DD dates where the tools need them.
-   - Activities for the last 10-14 days (load, types, the commute's actual power/HR). Note any activity that triggers an athlete-specific check (optional, e.g. runs or long walks for an injury program).
+   - Activities for the last 10-14 days (load, types, the commute's actual power/HR). Check that each one is paired with its planned event and pair any that aren't (see "Pairing planned and actual activities"). Note any activity that triggers an athlete-specific check (optional, e.g. runs or long walks for an injury program).
    - Planned events from today to about 6 days out.
    - (optional) From the Garmin connection: last night's average heart rate and breathing rate asleep, overnight HRV and sleep duration.
    - `claude/data/key_sessions.csv`, `ftp_history.csv`, `readiness.csv`, `calendar.csv` and the list of `claude/reviews/`: open debriefs, last FTP check, phases ended without a review.
@@ -76,11 +77,20 @@ The dashboard works out the data-only part of this rating with the same threshol
 - Never drop a hard session on the markers alone; don't postpone the same key session more than once.
 - Markers amber or red for most of a week together with poor feel or failed sessions: suggest a lighter few days or a plan review.
 
+## Pairing planned and actual activities
+
+Whenever a completed session is checked, reported or debriefed (key or not, any sport), first make sure intervals.icu has paired the planned event with the actual activity. Auto-pairing sometimes misses, notably strength sessions uploaded from a watch, and the debrief, compliance and dashboard all depend on the pairing.
+
+1. Find the day's planned event and the completed activity. Paired means the event shows `paired_activity_id` (`workout_status` `completed_linked`) and the activity shows `paired_event_id`. A matching activity that reads `completed_unlinked` while its event still reads `planned` is not paired.
+2. If they are not paired and there is one clear match (same day, same sport or type), pair them yourself with the link tool (`link_activity_to_event`, full tool set). It only sets the pairing and deletes nothing, so no go-ahead is needed. Don't just point the gap out.
+3. Say it in one line ("Linked the strength activity to the planned Strength A"). If several planned events or activities could match, pair only the clear ones and ask about the rest. If the link tool is missing, say so and tell <ATHLETE> to pair them in intervals.icu.
+4. Do this before reading a Watch log or computing compliance. Re-read the event afterwards if you need its description.
+
 ## Session debrief
 
 Key sessions: structured intervals, tests, long sessions (3 h+), hard group sessions or races, heavy strength days. As soon as reported, or at the next check-in:
 
-1. Find the activity and its planned event; read its details and intervals (if the intervals are auto-laps, say so).
+1. Find the activity and its planned event, make sure they are paired (see "Pairing planned and actual activities"), then read its details and intervals (if the intervals are auto-laps, say so).
 2. Compliance per work rep against target; reps in range; fade first → last rep; HR drift; decoupling on long steady sessions (under ~5% good); new bests at 1/5/20/60 min vs the last 90 days; fuelling if reported; for strength, sets done vs planned and estimated 1RM vs last time.
 3. Verdict: nailed (all in range, fade ≤ 3%), done (~80% in range), partial, missed. Next step: progress after two "nailed" in a row, repeat after "done", step back after "partial"/"missed" if readiness was green (otherwise repeat).
 4. Append "Debrief (Claude, <date>): …" to the activity description (read first, add below), add a row to `claude/data/key_sessions.csv`, and tell <ATHLETE> in 2-3 lines. Note any FTP evidence.
@@ -115,6 +125,7 @@ If the connection isn't reachable, skip it and say the dashboard is as of the la
 
 When <ATHLETE> reports a completed session (inside a check-in or not):
 
+- **Pairing:** first make sure the activity is paired with its planned event, and pair them yourself if not (see "Pairing planned and actual activities").
 - **Activity description on intervals.icu:** read the current description first; if it has content, add the new text below it. Keep it factual: exercises, sets, reps, loads or ride numbers, how it felt, deviations from plan. Key sessions also get the debrief.
 - **Rep shorthand:** parse with the convention in the strength log; ask when ambiguous. It is only for how I report sessions in chat; it is not the format of events written to intervals.icu (those use the per-set lines of the strength event format).
 - **Strength sessions:**
@@ -137,7 +148,8 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
     4. Side plank | 30 s | bodyweight | left
     ```
   - `n` runs 1..N across the whole session and does not restart per exercise. No set counts like "3x10": a 3-set exercise is 3 lines (6 if it is one-sided).
-  - Target: `N reps` or `N s` (a timed hold). Nothing else goes in that field.
+  - Target: `N reps`, `N s` (a timed hold) or `max` (a set to failure, see below). Nothing else goes in that field.
+  - **Failure sets (MAX).** When I say to take a set to failure or to maximum reps, write `max` in the target field so the watch shows **MAX** instead of a rep count: `3. Push-ups | max | bodyweight`. The target field (case-insensitive) must contain `max`, `amrap` or `failure` (`max`, `max reps`, `AMRAP` and `to failure` all work), and nothing else goes in that field. A number in the same field (`max 12 reps`) is not shown; it only becomes the starting value on the watch's adjust screen when there is no earlier set of that exercise. Never write a placeholder number (`10 reps`) for a failure set: the watch would show 10. MAX is for reps only: a timed hold is always `N s`, and there is no max-duration syntax, so for "hold as long as you can" plan a target time (`60 s`) and say so in the prose header.
   - Load: contains `kg` (`14 kg`, `14 kg (6+8)`), or `bodyweight`, or `band` (`band: red`). If the band colour is unknown, ask me; never write a placeholder like "one band".
   - Side: `left` or `right` for one-sided work only. For bilateral exercises leave the field out (3 fields instead of 4).
   - The exercise name must be identical on every line of that exercise, and must not contain a `.`.
@@ -154,6 +166,7 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
   - When I report a session or ask for a debrief, read the event description first and use the Watch log as the primary source for the actual reps, seconds and weights: compare them with the plan, work out the left/right difference, then write `strength_sets.csv` and `sessions.csv` as the kit already describes. Ask only about sets that are missing or skipped.
   - Never overwrite or shorten the description of an event that already has a Watch log. When editing a strength event, fetch the current description and keep the Watch log block verbatim at the end.
   - Do not treat Watch log lines as a plan: they record what happened.
+  - A `max` set has no rep target: the Watch log shows the reps actually done as a normal `N reps`. Judge it against that exercise's reps in the last session, not against a number in the plan.
 - Validate structured workout text before writing it (if the tools offer validation): the estimated duration must match the intended total, and repeats must show their rep count. Set moving time to the validated duration.
 - Add `claude` to the tags of every event created or changed, and give new events an `external_id` starting `claude-` (e.g. `claude-2026-11-04-threshold`).
 
