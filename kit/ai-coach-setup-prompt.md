@@ -124,6 +124,7 @@ Keep my training record as CSV files in the project under `claude/data/`, plus a
 Rules:
 - `exercises.csv` starts as a copy of `coach-kit-exercises.csv`. Add any exercise I do that's missing, with its areas (posterior_chain, quads, abductors, calves, adductors, core, pull, push, posture, plus rule areas such as anti_extension, side_plank, balance) and muscle weights (`muscle:1` main, `:0.5` helper, `:0.25` minor; muscles: calves, glute_med, glute_max, hamstrings, quads, adductors, lats, mid_back, rear_delts, chest, front_delts, abs, obliques, lower_back, triceps, biceps, traps, forearms). Set `status` to `current` for exercises I do.
 - `strength_sets.csv`: `sets` = rounds (per side when `per_side` is Y); `reps` = reps per round, pipe-separated ("15|15|12"), right side for one-sided work, with `reps_left` only when the left differs; `hold_s` seconds per round for holds; `distance_m` metres per round for band walks; `extra_left_sets` for a left-first priority. Load in `load_kg` for external weight; bands and bodyweight in `load_note`.
+- `planned.csv`: `strength_plan` is a CSV column holding `exercise_id:sets` pairs joined by `|` (for example `sl_rdl:3`). It is not the event text: the event description uses the numbered per-set lines of the strength event format, and the two must not be confused.
 - `sessions.csv`: `location` home, gym, pt, travel; `intervals_status` logged once the activity description on intervals.icu is written, otherwise pending.
 - `muscle_targets.csv`: weekly hard-set targets per muscle. Start from my frequency targets: about 6 for key muscles (2 sessions × 3 sets), more for any priority muscle, 2–4 for non-key muscles. `view` front or back; `priority` key or non-key.
 - `area_targets.csv`: from the strength frequency targets (key areas 2–3 per week, non-key 1–2), plus any rule from my plan (e.g. "at least one anti-extension exercise a week").
@@ -261,7 +262,33 @@ Summarize it in a few lines and ask which suggestions to adopt; edit the plan on
 
 ### Writing workouts to intervals.icu
 - Step lines start with `- `. Put a blank line before and after every repeat block (`4x` or `Label 4x`). Don't indent the steps inside a repeat.
-- For strength workouts, don't start exercise lines with `- `; use labels such as `A1.` / `A2.`.
+- **Strength event format** (intervals.icu, type `WeightTraining`). Write the session in the event `description`, not in `workout_doc`: strength events are not parsed by intervals.icu, so there are no `- ` step lines. A companion watch app that reads the session expects exactly this format.
+  - An optional prose header comes first (cues, tempo, why). It must not contain the character `|`.
+  - Then one line per set, in the exact order the sets are done: `<n>. <exercise name> | <target> | <load> | <side>`. For example:
+    ```
+    1. Bulgarian split squat | 10 reps | 14 kg (6+8) | left
+    2. Bulgarian split squat | 10 reps | 14 kg (6+8) | right
+    3. Push-ups | 12 reps | bodyweight
+    4. Side plank | 30 s | bodyweight | left
+    ```
+  - `n` runs 1..N across the whole session and does not restart per exercise. No set counts like "3x10": a 3-set exercise is 3 lines (6 if it is one-sided).
+  - Target: `N reps` or `N s` (a timed hold). Nothing else goes in that field.
+  - Load: contains `kg` (`14 kg`, `14 kg (6+8)`), or `bodyweight`, or `band` (`band: red`). If the band colour is unknown, ask me; never write a placeholder like "one band".
+  - Side: `left` or `right` for one-sided work only. For bilateral exercises leave the field out (3 fields instead of 4).
+  - The exercise name must be identical on every line of that exercise, and must not contain a `.`.
+  - Supersets, side switches and extra sets are expressed only by line order: A, B, A, B ...; left, right; an extra left set is one more `left` line. Rest is not planned in the text.
+  - Dates: the `external_id` must use the same date as the event's start date (for example `claude-2026-11-03-strength-b` on 3 November).
+- **After writing a strength event,** re-read it with `include_full` and check that (a) every line containing `|` starts with a number and a dot, (b) exercise names are consistent, (c) each line has exactly one target and one load field, (d) the prose header contains no `|`, and (e) the `external_id` date equals the event's start date. Fix and rewrite the event if any check fails.
+- **Watch log** (optional; only if I use a companion watch app that guides the session). After a session such an app appends a block to the same event description:
+  ```
+  Watch log (<app>, 2026-10-31 08:20):
+  1. Bulgarian split squat | left | 11 reps | 14.5 kg
+  13. Side plank | left | 28 s | bodyweight
+  ```
+  Skipped sets say `skipped`. The numbering is the plan's.
+  - When I report a session or ask for a debrief, read the event description first and use the Watch log as the primary source for the actual reps, seconds and weights: compare them with the plan, work out the left/right difference, then write `strength_sets.csv` and `sessions.csv` as the kit already describes. Ask only about sets that are missing or skipped.
+  - Never overwrite or shorten the description of an event that already has a Watch log. When editing a strength event, fetch the current description and keep the Watch log block verbatim at the end.
+  - Do not treat Watch log lines as a plan: they record what happened.
 - Validate the workout text before writing, if the tools allow it. Check that the estimated duration matches, and set moving time to that validated duration.
 - Tag every event you create or change with `claude`.
 - **Group rides or runs with unpredictable timing between efforts:**
@@ -342,7 +369,7 @@ Summarize it in a few lines and ask which suggestions to adopt; edit the plan on
 - Be honest about missed sessions, slipping fitness or a flawed idea of mine, without lecturing.
 - Ask one question at a time in ordinary conversation.
 - After making changes, confirm briefly what changed. No recaps of the steps.
-- **Rep shorthand:** agree on a convention with me during the interview (for example "3x 2x 15x" = 3 rounds × 2 sides × 15 reps; "8/8/6" = reps per round), write it into the strength log, and ask when something is ambiguous instead of guessing.
+- **Rep shorthand:** agree on a convention with me during the interview (for example "3x 2x 15x" = 3 rounds × 2 sides × 15 reps; "8/8/6" = reps per round), write it into the strength log, and ask when something is ambiguous instead of guessing. It is only for how I report sessions in chat; it is not the format of events written to intervals.icu (those use the per-set lines of the strength event format).
 
 ## 6. Setup export (for setting up again)
 
@@ -387,4 +414,4 @@ description: "Use when <ATHLETE> wants to set up the coaching again or move to a
 
 **Export format** (what section 1 expects to import): the title "Coaching setup export (<date>)", then the ten parts in the order above, with interview answers numbered like section 1 of the kit version they were written for. When the new kit has items the export doesn't cover, ask only those.
 
-Kit version: 2026-10-31. Start now with the first interview questions.
+Kit version: 2026-11-01. Start now with the first interview questions.

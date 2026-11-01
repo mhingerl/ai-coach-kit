@@ -106,7 +106,7 @@ The dashboard's Today, Recovery and Training load pages read files the check-in 
 1. `wellness.csv`: wellness from the day after the last row through today (first time: 90 days; with icuvisor, include `id` in the wellness fields so each row carries its date): HRV, resting HR, sleep hours and score, steps, weight; (optional) from the Garmin connection: average heart rate, breathing rate and stress asleep, the day's Body Battery peak and average stress (`sleep_hr_bpm`, `resp_sleep`, `sleep_stress`, `body_battery_peak`, `stress_avg`). One row per day; replace a day already there.
 2. `fitness.csv`: the day's total training load (`load`) and the part from strength sessions (`strength_load`) for the same days (first time: a year of daily load, so the dashboard's own fitness calculation starts clean), plus intervals.icu's ctl and atl for comparison. The dashboard works out fitness, fatigue and form from the loads.
 3. `activities.csv`: activities since the last row (first time: 90 days), with type, indoor/commute flags, moving minutes, distance, climbing, load, average and normalized power, average HR, paired event id, and minutes in zones 1–2, 3 and 4+ (power zones when there is power, else HR).
-4. `planned.csv` and `planned_steps.csv`: the calendar from 7 days back to 7 days ahead, replacing that window: planned minutes and load, a one-line target, steps with repeats written out (% of FTP, threshold HR or pace; ramps marked), and `strength_plan` (`exercise_id:sets`) for strength sessions.
+4. `planned.csv` and `planned_steps.csv`: the calendar from 7 days back to 7 days ahead, replacing that window: planned minutes and load, a one-line target, steps with repeats written out (% of FTP, threshold HR or pace; ramps marked), and `strength_plan` (`exercise_id:sets` pairs joined by `|`; a CSV column, not the event text, which uses the per-set lines of the strength event format) for strength sessions.
 5. Write the changed files back to the project, upload them and update their datasets in one batch (see "Logging").
 
 If the connection isn't reachable, skip it and say the dashboard is as of the last sync.
@@ -116,7 +116,7 @@ If the connection isn't reachable, skip it and say the dashboard is as of the la
 When <ATHLETE> reports a completed session (inside a check-in or not):
 
 - **Activity description on intervals.icu:** read the current description first; if it has content, add the new text below it. Keep it factual: exercises, sets, reps, loads or ride numbers, how it felt, deviations from plan. Key sessions also get the debrief.
-- **Rep shorthand:** parse with the convention in the strength log; ask when ambiguous.
+- **Rep shorthand:** parse with the convention in the strength log; ask when ambiguous. It is only for how I report sessions in chat; it is not the format of events written to intervals.icu (those use the per-set lines of the strength event format).
 - **Strength sessions:**
   1. Append one row per exercise to `claude/data/strength_sets.csv` and the session to `claude/data/sessions.csv` (conventions in `claude/data/README.md`). Add a missing exercise to `exercises.csv` first, with areas and muscle weights.
   2. Update the lift's progression line in the strength log when a key lift moved.
@@ -127,7 +127,33 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 ## intervals.icu workout rules
 
 - Leave one blank line before and after every repeat block (a bare `Nx` line or a label ending in `Nx`). Don't indent step lines inside a repeat; they use the same `- ` prefix as other steps.
-- For strength (WeightTraining) descriptions, don't start exercise lines with `- `; use labels such as `A1.` / `A2.`.
+- **Strength event format** (intervals.icu, type `WeightTraining`). Write the session in the event `description`, not in `workout_doc`: strength events are not parsed by intervals.icu, so there are no `- ` step lines. A companion watch app that reads the session expects exactly this format.
+  - An optional prose header comes first (cues, tempo, why). It must not contain the character `|`.
+  - Then one line per set, in the exact order the sets are done: `<n>. <exercise name> | <target> | <load> | <side>`. For example:
+    ```
+    1. Bulgarian split squat | 10 reps | 14 kg (6+8) | left
+    2. Bulgarian split squat | 10 reps | 14 kg (6+8) | right
+    3. Push-ups | 12 reps | bodyweight
+    4. Side plank | 30 s | bodyweight | left
+    ```
+  - `n` runs 1..N across the whole session and does not restart per exercise. No set counts like "3x10": a 3-set exercise is 3 lines (6 if it is one-sided).
+  - Target: `N reps` or `N s` (a timed hold). Nothing else goes in that field.
+  - Load: contains `kg` (`14 kg`, `14 kg (6+8)`), or `bodyweight`, or `band` (`band: red`). If the band colour is unknown, ask me; never write a placeholder like "one band".
+  - Side: `left` or `right` for one-sided work only. For bilateral exercises leave the field out (3 fields instead of 4).
+  - The exercise name must be identical on every line of that exercise, and must not contain a `.`.
+  - Supersets, side switches and extra sets are expressed only by line order: A, B, A, B ...; left, right; an extra left set is one more `left` line. Rest is not planned in the text.
+  - Dates: the `external_id` must use the same date as the event's start date (for example `claude-2026-11-03-strength-b` on 3 November).
+- **After writing a strength event,** re-read it with `include_full` and check that (a) every line containing `|` starts with a number and a dot, (b) exercise names are consistent, (c) each line has exactly one target and one load field, (d) the prose header contains no `|`, and (e) the `external_id` date equals the event's start date. Fix and rewrite the event if any check fails.
+- **Watch log** (optional; only if I use a companion watch app that guides the session). After a session such an app appends a block to the same event description:
+  ```
+  Watch log (<app>, 2026-10-31 08:20):
+  1. Bulgarian split squat | left | 11 reps | 14.5 kg
+  13. Side plank | left | 28 s | bodyweight
+  ```
+  Skipped sets say `skipped`. The numbering is the plan's.
+  - When I report a session or ask for a debrief, read the event description first and use the Watch log as the primary source for the actual reps, seconds and weights: compare them with the plan, work out the left/right difference, then write `strength_sets.csv` and `sessions.csv` as the kit already describes. Ask only about sets that are missing or skipped.
+  - Never overwrite or shorten the description of an event that already has a Watch log. When editing a strength event, fetch the current description and keep the Watch log block verbatim at the end.
+  - Do not treat Watch log lines as a plan: they record what happened.
 - Validate structured workout text before writing it (if the tools offer validation): the estimated duration must match the intended total, and repeats must show their rep count. Set moving time to the validated duration.
 - Add `claude` to the tags of every event created or changed, and give new events an `external_id` starting `claude-` (e.g. `claude-2026-11-04-threshold`).
 
@@ -140,4 +166,4 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 
 ---
 
-Kit version: 2026-10-31.
+Kit version: 2026-11-01.
