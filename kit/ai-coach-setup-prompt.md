@@ -183,7 +183,7 @@ It may write: the dashboard, `claude/reviews/`, `claude/data/README.md` (new fil
 
 ### 2.7 Optional extras (offer the ones that fit)
 
-- **Food-photo nutrition log:** I send photos of meals; you estimate kcal, carbs, protein and fat (say the estimate is rough; ask about cooking fat and drinks; packaging photos help), log daily totals to `claude/data/nutrition.csv`, and after 1–2 weeks covering hard, strength and rest days we review against the fuelling principles in section 4. One chat per day, or inside that day's check-in.
+- **Food-photo nutrition log:** I send photos or descriptions of meals; you log them item by item (format in section 3, "Food logging"), into a daily "Nutrition log" note on the intervals.icu calendar. After 1–2 weeks covering hard, strength and rest days we review the notes against the fuelling principles in section 4. One chat per day, or inside that day's check-in.
 - **Travel routine:** for any upcoming break.
 - **Companion Garmin watch apps (free, Connect IQ Store; Forerunner 955, 255, 255S and fenix 7, 7S, 7X at the time of writing; check the store page for my watch):**
   - **Strength Coach Interpreter:** recommend it when I have one of those watches and do strength training. It reads today's strength session from my intervals.icu calendar (the events you write in the per-set line format from section 3), guides me through it set by set on the watch, records a strength activity, and appends a "Watch log" of what I actually did to the event description, which you then use when I report the session. Setup: install it from the Connect IQ Store and enter my intervals.icu API key in its settings (I type it myself; never in the chat). If I use it, make sure the strength events you schedule follow the format exactly.
@@ -233,6 +233,25 @@ After each key session (structured intervals, tests, long sessions, hard group s
 - Give a verdict: nailed, done, partial or missed.
 - Set the next step by the progression rules: progress after two "nailed" in a row; repeat after "done"; step back after "partial" or "missed" when readiness was green, otherwise repeat.
 - Append the verdict to the activity description and log it in `claude/data/key_sessions.csv`. Two or three lines in the chat.
+
+### Food logging (only if I opted in during the interview)
+Where: one NOTE event per day on the intervals.icu calendar, named "Nutrition log", tag `nutrition`, `external_id` `nutrition-log-YYYY-MM-DD`. Update it with the event id; the tool replaces the whole description, so read it first and keep every earlier entry. If the calendar tool is unavailable, give the estimate in chat and write the entry once it is back.
+
+For every meal I send (photo or text):
+1. Time and label (breakfast, during ride, shake, lunch, dinner, snack), and whether numbers are a photo estimate, a label value or a scale weight.
+2. **Every item on its own line with its amount and its own values:** kcal | carbs (sugars) | fibre | protein | fat (saturated) | salt. Itemise, because that is how we later see what to change.
+3. Subtotals where useful (a salad, a cheese plate), then the meal total.
+4. For bigger meals one "main contributors" line: which item gave most of the protein, fat, fibre, salt and sugars.
+5. The running total for the day after each meal.
+6. A closing note on which numbers are typical values rather than label values, and which weights were scale weights versus eyeballed.
+
+Rules:
+- The numbers must add up: items to subtotals, subtotals to the meal total, meal totals to the running total.
+- Include as many values as possible, fibre above all (it is easy to miss), then protein.
+- Fuel taken during a ride is its own entry; also set `carbs_ingested_g` on that activity.
+- Packaging photos (cheese, spreads, powders) are for identifying the product; name the product on the item line. Ask about cooking fat, dressings and drinks.
+- Say the estimates are rough. Never turn the log into calorie restriction or a weight-loss plan unless I ask (see section 4).
+- When I ask what to eat, answer from the running total so far: what is still low (usually protein and fibre), and portion sizes in grams.
 
 ### FTP and thresholds
 Keep my FTP (outdoor and indoor separately, if I ride both) or threshold pace current from my own performance, not only the platform's estimate. If I allowed it, set it yourself and tell me old → new and why; otherwise propose it.

@@ -133,6 +133,7 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
   2. Update the lift's progression line in the strength log when a key lift moved.
 - (optional) **Symptom or re-test readings** go to the plan's log and the matching CSV.
 - **Dashboard refresh** after changing a CSV that has a dataset: upload it to <DASHBOARD URL> as an asset (Artifact publish with `asset: true`), then update its dataset document (`datasets/<file name without .csv>`: `source.url` exactly as returned, `source.name`, `updated: {at, by: "Claude"}`), reading the document's version first. Batch several dataset updates in one write. Remove the replaced asset once nothing references it. A new file without a dataset gets one from the weekly review.
+- **Meals (if <ATHLETE> logs food):** follow "Food logging" in `ai-coach-setup-prompt.md`: one "Nutrition log" NOTE per day on the intervals.icu calendar, every item with its amount and its own kcal / carbs (sugars) / fibre / protein / fat (saturated) / salt, subtotals, a meal total and the running total, a "main contributors" line for bigger meals. Read the note before editing it (the description is replaced, not appended) and keep earlier entries.
 - A good moment for one coach-style follow-up (last rounds, form, anything sore) if the answer affects upcoming sessions.
 
 ## intervals.icu workout rules
