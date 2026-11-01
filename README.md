@@ -13,6 +13,8 @@ You don't need to copy files or edit anything. Paste this repository's link into
 - **A daily readiness check-in:** ask "how should I train today?" and Claude rates your readiness green, amber or red (HRV trend, resting heart rate, sleep, training load, how you feel), checks your plan phase and the weather, and recommends (and schedules) the session.
 - **Session debriefs and FTP:** after key sessions Claude checks what you actually did against the plan and decides the next progression step. It keeps your FTP current from your own performance, indoors and outdoors.
 - **A weekly review and block reviews:** a scheduled task checks how your training is going against the plan, suggests changes, writes a review at the end of each training phase, and reshapes your dashboard to fit what matters to you now.
+- **Optional Garmin watch apps:** if you have a Forerunner 955/255/255S or fenix 7/7S/7X, the free Connect IQ apps *Strength Coach Interpreter* (guides your planned strength session set by set from your intervals.icu calendar and logs what you did) and *Scale Linker* (Renpho scale weigh-ins, pre/post-workout sweat loss, to intervals.icu) work with this kit. Claude recommends them during setup where they fit.
+- **Kit news:** the weekly review checks this repository for a newer kit version and tells you what changed. It never applies anything on its own.
 - **Easy re-setup:** before moving to a new kit version, ask "give me my setup interview answers". Paste the result into the new setup and Claude only asks what's missing.
 
 ## How to start
