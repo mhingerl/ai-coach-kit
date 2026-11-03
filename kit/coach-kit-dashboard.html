@@ -1,14 +1,15 @@
 <meta name="dash-one-writer">
 <!--
-  COACH KIT: training dashboard template (kit version 2026-11-01).
+  COACH KIT: training dashboard template (kit version 2026-11-03).
   For Claude during setup (see section 2.4 of ai-coach-setup-prompt.md):
   - Pages (tabs): Today (readiness, today's plan with done badges and workout blocks, two muscle maps: today's
-    workout and what's been missing over 14 or 28 days, coming days), Recovery (HRV, resting HR, sleep, Body Battery,
-    stress, steps, weight), Training load (fitness/fatigue/form, weekly hours by intensity, intensity split, FTP,
+    workout and what's been missing over 14 or 28 days, coming days), Recovery (HRV, resting HR, sleep, heart rate and breathing
+    asleep, Body Battery, stress, steps, weight), Training load (fitness/fatigue/form, weekly hours by intensity, intensity split, FTP,
     debriefs), Strength, Season and logs.
   - Datasets this page reads: strength_sets, exercises, sessions, muscle_targets, area_targets, calendar (strength core);
     wellness, fitness, activities, planned, planned_steps, readiness, key_sessions, ftp_history (filled by the check-in's
     dashboard sync; header-only files at first, and every panel shows a one-line empty note until its data arrives);
+    block_reviews (one summary row per finished phase, from claude/reviews/block_reviews.csv; header only at first);
     lr_markers and left_calf_log for the optional "asymmetry" module.
   - Readiness is worked out on the page with the check-in's rules (HRV 7-day mean vs 60-day mean +/- 0.5 SD, resting HR vs
     30-day mean, sleep, form/ramp, Body Battery/stress); a readiness.csv row for the day (the check-in) takes precedence.
@@ -158,6 +159,11 @@
             <span class="tdb-mv"><b data-draw="mk_num" data-source="readiness_now" data-field="sleep_h" data-row="0">—</b> h</span>
             <span class="tdb-sub">Score <span data-draw="mk_num" data-source="readiness_now" data-field="sleep_score" data-row="0">—</span></span>
           </div>
+          <div class="tdb-mk" data-needs="readiness_now:sleep_hr">
+            <span class="tdb-k"><i class="tdb-dot" data-draw="mk_dot" data-source="readiness_now" data-field="sleep_hr_status" data-row="0">—</i>Heart rate asleep</span>
+            <span class="tdb-mv"><b data-draw="mk_num" data-source="readiness_now" data-field="sleep_hr" data-row="0">—</b> bpm</span>
+            <span class="tdb-sub">30-night median <span data-draw="mk_num" data-source="readiness_now" data-field="sleep_hr_base" data-row="0">—</span></span>
+          </div>
           <div class="tdb-mk" data-needs="readiness_now:form_pct">
             <span class="tdb-k"><i class="tdb-dot" data-draw="mk_dot" data-source="readiness_now" data-field="load_status" data-row="0">—</i>Form</span>
             <span class="tdb-mv"><b data-draw="mk_num" data-source="readiness_now" data-field="form_pct" data-row="0">—</b> %</span>
@@ -166,7 +172,7 @@
           <div class="tdb-mk" data-needs="readiness_now:body_battery">
             <span class="tdb-k"><i class="tdb-dot" data-draw="mk_dot" data-source="readiness_now" data-field="garmin_status" data-row="0">—</i>Body Battery</span>
             <span class="tdb-mv"><b data-draw="mk_num" data-source="readiness_now" data-field="body_battery" data-row="0">—</b></span>
-            <span class="tdb-sub">On waking</span>
+            <span class="tdb-sub">Daily peak</span>
           </div>
           <div class="tdb-mk" data-needs="readiness_now:stress">
             <span class="tdb-k"><i class="tdb-dot" data-draw="mk_dot" data-source="readiness_now" data-field="garmin_status" data-row="0">—</i>Stress</span>
@@ -255,12 +261,24 @@
         <div><h2>Sleep</h2><p class="tdb-note">Hours per night; hover for the sleep score.</p></div>
         <div class="tdb-trend dash-skeleton" data-draw="trend" data-metric="sleep" data-source="readiness_days"></div>
       </div>
+      <div class="tdb-card" id="trend-sleephr" data-needs="readiness_days:sleep_hr">
+        <div><h2>Heart rate asleep</h2><p class="tdb-note">Average beats per minute overnight, from the Garmin connection; the dashed line is the 30-night median. 5 or more above it counts against readiness; 8 or more (or 5 with faster breathing or higher stress asleep) flags possible illness.</p></div>
+        <div class="tdb-trend dash-skeleton" data-draw="trend" data-metric="sleephr" data-source="readiness_days"></div>
+      </div>
+      <div class="tdb-card" id="trend-resp" data-needs="readiness_days:resp_sleep">
+        <div><h2>Breathing rate asleep</h2><p class="tdb-note">Breaths per minute overnight, from the Garmin connection. 1.5 or more above your usual, together with a raised heart rate asleep, flags possible illness.</p></div>
+        <div class="tdb-trend dash-skeleton" data-draw="trend" data-metric="resp" data-source="readiness_days"></div>
+      </div>
+      <div class="tdb-card" id="trend-sst" data-needs="readiness_days:sleep_stress">
+        <div><h2>Stress asleep</h2><p class="tdb-note">Garmin's overnight stress, 0 to 100, as a number against your own median. 10 or more above counts against readiness, only together with another flag.</p></div>
+        <div class="tdb-trend dash-skeleton" data-draw="trend" data-metric="sst" data-source="readiness_days"></div>
+      </div>
       <div class="tdb-card" id="trend-bb" data-needs="readiness_days:body_battery">
-        <div><h2>Body Battery on waking</h2><p class="tdb-note">From the Garmin connection, 0 to 100. Under 50 counts against readiness.</p></div>
+        <div><h2>Body Battery, daily peak</h2><p class="tdb-note">From the Garmin connection, 0 to 100. 25 or more below your usual peak counts against readiness, only together with another flag.</p></div>
         <div class="tdb-trend dash-skeleton" data-draw="trend" data-metric="bb" data-source="readiness_days"></div>
       </div>
       <div class="tdb-card" id="trend-stress" data-needs="readiness_days:stress">
-        <div><h2>Stress</h2><p class="tdb-note">Garmin's daily average stress, 0 to 100. A quarter above your 30-day average counts against readiness.</p></div>
+        <div><h2>Stress</h2><p class="tdb-note">Garmin's daily average stress, 0 to 100, for context.</p></div>
         <div class="tdb-trend dash-skeleton" data-draw="trend" data-metric="stress" data-source="readiness_days"></div>
       </div>
       <div class="tdb-card" id="trend-steps" data-needs="readiness_days:steps">
@@ -552,6 +570,20 @@
     </section>
     <!-- /MODULE asymmetry -->
 
+    <div class="tdb-card" id="block-reviews">
+      <div>
+        <h2>Block reviews</h2>
+        <p class="tdb-note">One row per finished phase: bike hours, strength sessions and fitness over the block, the headline and the first suggested change. The full review is in the project file in the last column.</p>
+      </div>
+      <div class="tdb-tablebox" data-needs="block_reviews">
+        <table class="tdb-table" data-source="block_reviews" data-row-key="phase_id">
+          <thead><tr><th data-field="phase_id">Phase</th><th data-field="phase">Name</th><th data-field="start">Start</th><th data-field="end">End</th><th data-field="endurance_h">Bike h</th><th data-field="strength_sessions">Strength sessions</th><th data-field="fitness_start">Fitness start</th><th data-field="fitness_end">Fitness end</th><th data-field="easy_pct">Easy %</th><th data-field="headline">Headline</th><th data-field="suggestion">First suggested change</th><th data-field="file">Review file</th></tr></thead>
+          <tbody data-draw="blockreviewtable" data-source="block_reviews"></tbody>
+        </table>
+      </div>
+      <p class="tdb-note" data-empty="block_reviews" hidden>No finished phase has a review yet. The first one appears after the first phase ends.</p>
+    </div>
+
     <section class="tdb-section" id="next">
       <div>
         <h2>Coming next</h2>
@@ -561,7 +593,6 @@
       <div class="tdb-soon">
         <div class="tdb-card"><h3>Sweat rate</h3><p class="tdb-note">Sweat loss per hour from weigh-ins before and after sessions.</p><p class="tdb-src">From a smart scale</p></div>
         <div class="tdb-card"><h3>Fuelling</h3><p class="tdb-note">Daily protein per kg and carbs against training load, from your food photos.</p><p class="tdb-src">From the nutrition log</p></div>
-        <div class="tdb-card"><h3>Block reviews</h3><p class="tdb-note">Each finished phase's review: what it built, what worked, what changes next.</p><p class="tdb-src">From the block reviews in your project</p></div>
       </div>
     </section>
   </section>
@@ -727,14 +758,14 @@ dash.calc('status_now', {
 dash.calc('readiness_days', {
   inputs: ['wellness', 'load_series'],
   title: 'Daily readiness from your data',
-  description: 'Per day: HRV 7-day average against your 60-day normal range (mean ± 0.5 SD), resting HR against its 30-day average, sleep, form and ramp rate, Body Battery and stress, each green, amber or red, combined as in the check-in: one amber is still green, two ambers or one lone red are amber, a red with company is red.',
+  description: 'Per day: HRV 7-day average against your 60-day normal range (mean ± 0.5 SD), resting HR against its 30-day average, sleep, form and ramp rate, heart rate asleep (with a possible-illness flag), Body Battery and stress asleep (counted only with another flag), each green, amber or red, combined as in the check-in: one amber is still green, two ambers or one lone red are amber, a red with company is red.',
   fn: (wellness, load_series) => {
     const num = (v) => (v === '' || v == null || isNaN(Number(v)) ? null : Number(v));
     const day = (d) => Date.parse(String(d).slice(0, 10) + 'T00:00:00Z') / 864e5;
     const mean = (a) => (a.length ? a.reduce((s, v) => s + v, 0) / a.length : null);
     const sd = (a) => { const m = mean(a); return a.length > 1 ? Math.sqrt(a.reduce((s, v) => s + (v - m) ** 2, 0) / (a.length - 1)) : null; };
     const r1 = (v) => (v == null ? null : Math.round(v * 10) / 10);
-    const W = wellness.map((r) => ({ t: day(r.date), date: String(r.date).slice(0, 10), hrv: num(r.hrv_ms), rhr: num(r.rhr_bpm), sleep: num(r.sleep_h), score: num(r.sleep_score), bb: num(r.body_battery_wake), stress: num(r.stress_avg), steps: num(r.steps), weight: num(r.weight_kg) }))
+    const W = wellness.map((r) => ({ t: day(r.date), date: String(r.date).slice(0, 10), hrv: num(r.hrv_ms), rhr: num(r.rhr_bpm), sleep: num(r.sleep_h), score: num(r.sleep_score), bb: num(r.body_battery_peak !== undefined && r.body_battery_peak !== '' ? r.body_battery_peak : r.body_battery_wake), shr: num(r.sleep_hr_bpm), resp: num(r.resp_sleep), sst: num(r.sleep_stress), stress: num(r.stress_avg), steps: num(r.steps), weight: num(r.weight_kg) }))
       .filter((r) => !isNaN(r.t)).sort((a, b) => a.t - b.t);
     const byT = new Map(W.map((r) => [r.t, r]));
     const F = new Map(load_series.map((r) => [day(r.date), { ctl: r.ctl, atl: r.atl }]));
@@ -773,22 +804,34 @@ dash.calc('readiness_days', {
         if (form < -30 && ['amber', 'red'].some((v) => v === st.hrv || v === st.rhr)) st.load = 'red';
         if (st.load !== 'green') why.push(form < -30 ? 'form ' + Math.round(form) + '%' : 'ramp +' + r1(ramp) + ' a week');
       }
-      const sb = vals(t - 30, t - 1, 'stress'), sbase = sb.length >= 7 ? mean(sb) : null;
-      if (r.bb != null || r.stress != null) {
-        const lowBb = r.bb != null && r.bb < 50, highStress = r.stress != null && sbase != null && r.stress >= 1.25 * sbase;
-        st.garmin = lowBb || highStress ? 'amber' : 'green';
-        if (lowBb) why.push('Body Battery ' + r.bb);
-        if (highStress) why.push('stress ' + r.stress + ', usual ' + Math.round(sbase));
+      // heart rate asleep against its 30-night median, with the possible-illness flag (makes the day red)
+      const med = (a) => { if (a.length < 7) return null; const q = a.slice().sort((x, y) => x - y), h = q.length >> 1; return q.length % 2 ? q[h] : (q[h - 1] + q[h]) / 2; };
+      const base30 = (k) => med(vals(t - 30, t - 1, k));
+      const hrM = base30('shr'), rsM = base30('resp'), ssM = base30('sst'), bbM = base30('bb');
+      let ill = false;
+      if (r.shr != null && hrM != null) {
+        const d = r.shr - hrM;
+        ill = d >= 8 || (d >= 5 && ((r.resp != null && rsM != null && r.resp - rsM >= 1.5) || (r.sst != null && ssM != null && r.sst - ssM >= 10)));
+        st.sleep_hr = ill ? 'red' : d >= 5 ? 'amber' : 'green';
+        if (st.sleep_hr !== 'green') why.push((ill ? 'possible illness: ' : '') + 'heart rate asleep ' + Math.round(r.shr) + ' bpm, usual ' + Math.round(hrM));
       }
+      // watch numbers that cannot be recomputed count only together with another flag
+      const gFlag = (r.sst != null && ssM != null && r.sst - ssM >= 10) || (r.bb != null && bbM != null && bbM - r.bb >= 25);
+      if (gFlag) {
+        const others = Object.values(st).some((v) => v !== 'green');
+        st.garmin = others ? 'amber' : 'green';
+        why.push((r.sst != null && ssM != null && r.sst - ssM >= 10 ? 'stress asleep ' + Math.round(r.sst) + ', usual ' + Math.round(ssM) : 'Body Battery peak ' + r.bb + ', usual ' + Math.round(bbM)) + (others ? '' : ' (not counted alone)'));
+      } else if (r.bb != null || r.sst != null) st.garmin = 'green';
       const marks = Object.values(st);
       const reds = marks.filter((v) => v === 'red').length, ambers = marks.filter((v) => v === 'amber').length;
-      const status = !marks.length ? null : reds && reds + ambers >= 2 ? 'red' : reds || ambers >= 2 ? 'amber' : 'green';
+      const status = ill ? 'red' : !marks.length ? null : reds && reds + ambers >= 2 ? 'red' : reds || ambers >= 2 ? 'amber' : 'green';
       return {
         date: r.date, status, reasons: why.length ? why.join(' · ') : 'all markers in range',
         hrv_ms: r.hrv, hrv7: r1(h7), band_low: r1(lo), band_high: r1(hi), hrv_status: st.hrv || null,
         rhr_bpm: r.rhr, rhr_base: r1(rbase), rhr_status: st.rhr || null,
         sleep_h: r.sleep, sleep_score: r.score, sleep_status: st.sleep || null,
         ctl: f ? f.ctl : null, atl: f ? f.atl : null, form_pct: form == null ? null : Math.round(form), ramp: r1(ramp), load_status: st.load || null,
+        sleep_hr: r.shr, sleep_hr_base: r1(hrM), sleep_hr_status: st.sleep_hr || null, resp_sleep: r.resp, sleep_stress: r.sst,
         body_battery: r.bb, stress: r.stress, garmin_status: st.garmin || null,
         steps: r.steps, weight_kg: r.weight, weight7: r1(avg7(t, 'weight')),
       };
@@ -1540,7 +1583,10 @@ const TRENDS = {
   hrv: { y: 'hrv_ms', avg: 'hrv7', band: ['band_low', 'band_high'], unit: 'ms', dots: true, label: 'HRV' },
   rhr: { y: 'rhr_bpm', base: 'rhr_base', unit: 'bpm', label: 'Resting HR' },
   sleep: { y: 'sleep_h', unit: 'h', bars: true, zero: true, label: 'Sleep', extra: (r) => (r.sleep_score != null ? 'Score ' + r.sleep_score : null) },
-  bb: { y: 'body_battery', unit: '', zero: true, max: 100, label: 'Body Battery' },
+  sleephr: { y: 'sleep_hr', base: 'sleep_hr_base', unit: 'bpm', label: 'Heart rate asleep' },
+  resp: { y: 'resp_sleep', unit: 'breaths/min', label: 'Breathing rate asleep' },
+  sst: { y: 'sleep_stress', unit: '', zero: true, max: 100, label: 'Stress asleep' },
+  bb: { y: 'body_battery', unit: '', zero: true, max: 100, label: 'Body Battery peak' },
   stress: { y: 'stress', unit: '', zero: true, max: 100, label: 'Stress' },
   steps: { y: 'steps', unit: 'steps', bars: true, zero: true, label: 'Steps' },
   weight: { y: 'weight_kg', avg: 'weight7', unit: 'kg', dots: true, label: 'Weight' },
@@ -1962,6 +2008,7 @@ const fillTable = (el, id, cols, key) => {
 };
 dash.draw('lrtable', (el) => fillTable(el, 'lr_markers', ['date', 'marker', 'condition', 'left', 'right', 'gap', 'unit'],
   (r) => encodeURIComponent(r.date) + ',' + encodeURIComponent(r.condition)));
+dash.draw('blockreviewtable', (el) => fillTable(el, 'block_reviews', ['phase_id', 'phase', 'start', 'end', 'endurance_h', 'strength_sessions', 'fitness_start', 'fitness_end', 'easy_pct', 'headline', 'suggestion', 'file'], (r) => r.phase_id));
 dash.draw('calftable', (el) => fillTable(el, 'left_calf_log', ['date', 'trigger', 'left_calf', 'status'], (r) => r.date));
 dash.draw('sessiontable', (el) => fillTable(el, 'session_summary', ['date', 'weekday', 'where', 'exercises', 'sets', 'intervals', 'context'], (r) => r.date));
 dash.draw('debrieftable', (el) => {

@@ -27,7 +27,7 @@ Describe what <ATHLETE> already did from **completed activity and wellness data*
 - **Deleting:** <ALLOWED | NOT ALLOWED>. If allowed: only future planned events Claude created (tag `claude`, or `external_id` starting `claude-`), dated today or later and not yet done, one at a time with the single-event delete after reading the event. Never completed activities, past events, events the athlete made, library workouts, sport settings or gear, and never bulk or date-range deletes. If not allowed, or the delete tool isn't available, list the events for the athlete to delete.
 - **FTP / thresholds:** <SET BY CLAUDE | PROPOSED BY CLAUDE>. Change only threshold values (FTP, indoor FTP, threshold pace or HR), never zone definitions without the athlete's OK.
 - **Activity descriptions:** append-only.
-- **Pairing planned and actual activities:** allowed without asking (see "Pairing planned and actual activities").
+- **Pairing planned and actual activities:** linking allowed without asking; unlinking is not possible for Claude, so wrong pairs are reported for <ATHLETE> to unlink (see "Pairing planned and actual activities").
 
 ## Steps
 
@@ -79,12 +79,14 @@ The dashboard works out the data-only part of this rating with the same threshol
 
 ## Pairing planned and actual activities
 
-Whenever a completed session is checked, reported or debriefed (key or not, any sport), first make sure intervals.icu has paired the planned event with the actual activity. Auto-pairing sometimes misses, notably strength sessions uploaded from a watch, and the debrief, compliance and dashboard all depend on the pairing.
+Whenever a completed session is checked, reported or debriefed (key or not, any sport, commutes and short rides included), first make sure intervals.icu has paired the planned event with the right activity. Auto-pairing misses and mismatches, notably strength sessions uploaded from a watch, and short commute rides that get attached to the evening's planned ride. The debrief, compliance and dashboard all depend on the pairing.
 
-1. Find the day's planned event and the completed activity. Paired means the event shows `paired_activity_id` (`workout_status` `completed_linked`) and the activity shows `paired_event_id`. A matching activity that reads `completed_unlinked` while its event still reads `planned` is not paired.
-2. If they are not paired and there is one clear match (same day, same sport or type), pair them yourself with the link tool (`link_activity_to_event`, full tool set). It only sets the pairing and deletes nothing, so no go-ahead is needed. Don't just point the gap out.
-3. Say it in one line ("Linked the strength activity to the planned Strength A"). If several planned events or activities could match, pair only the clear ones and ask about the rest. If the link tool is missing, say so and tell <ATHLETE> to pair them in intervals.icu.
-4. Do this before reading a Watch log or computing compliance. Re-read the event afterwards if you need its description.
+1. List the day's planned events and every completed activity of that day, not only the one being discussed. Paired means the event shows `paired_activity_id` (`workout_status` `completed_linked`) and the activity shows `paired_event_id`. A matching activity that reads `completed_unlinked` while its event still reads `planned` is not paired.
+2. Sanity-check the pairs that already exist: same sport or type, similar duration, plausible load and time of day. A 20-minute commute linked to a planned 2-hour ride, or a ride linked to a strength event, is wrong even though intervals.icu shows it as linked. Events with a date but no start time make same-day mismatches more likely, so look hardest on days with several events.
+3. If an activity and an event are not paired and there is one clear match, pair them yourself with the link tool (`link_activity_to_event`, full tool set). It only sets the pairing and deletes nothing, so no go-ahead is needed.
+4. There is no unlink tool. If a wrong pair blocks the right one, say so plainly, name the activity and the event, and ask <ATHLETE> to unlink it in intervals.icu (open the activity, remove its link to the planned workout); then link the right pair. Don't claim a fix you couldn't make.
+5. Say it in one line ("Linked the strength activity to the planned Strength A"). If several events or activities could match, pair only the clear ones and ask about the rest. If the link tool is missing, tell <ATHLETE> to pair them in intervals.icu.
+6. Repeat the check after calendar changes (moved, split or added events) and when a new activity is uploaded later in the day, e.g. the evening ride. Do this before reading a Watch log or computing compliance, and re-read the event afterwards if you need its description.
 
 ## Session debrief
 
@@ -134,6 +136,8 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 - (optional) **Symptom or re-test readings** go to the plan's log and the matching CSV.
 - **Dashboard refresh** after changing a CSV that has a dataset: upload it to <DASHBOARD URL> as an asset (Artifact publish with `asset: true`), then update its dataset document (`datasets/<file name without .csv>`: `source.url` exactly as returned, `source.name`, `updated: {at, by: "Claude"}`), reading the document's version first. Batch several dataset updates in one write. Remove the replaced asset once nothing references it. A new file without a dataset gets one from the weekly review.
 - **Meals (if <ATHLETE> logs food):** follow "Food logging" in `ai-coach-setup-prompt.md`: one "Nutrition log" NOTE per day on the intervals.icu calendar, every item with its amount and its own kcal / carbs (sugars) / fibre / protein / fat (saturated) / salt, subtotals, a meal total and the running total, a "main contributors" line for bigger meals. Read the note before editing it (the description is replaced, not appended) and keep earlier entries.
+- **Regular foods and supplements (if <ATHLETE> logs food):** when <ATHLETE> names something they use regularly (a protein powder and its scoop size, instant oats, a usual bar, gel or drink mix, a usual portion), keep it: product, usual amount in grams and its label values, saved in memory (or, without memory, in a short `claude/regular-foods.md` project document). Check that list before asking, and when <ATHLETE> says "my usual scoop" or "same as last time", use the saved amount and look back at earlier Nutrition log notes instead of asking again. Ask only when a portion differs or the product is new, then save it. Update the entry when the product or portion changes.
+- **Block review summary:** when a block review is written, add its row to `claude/reviews/block_reviews.csv` (phase_id, phase, start, end, endurance_h, strength_sessions, fitness_start, fitness_end, easy_pct, headline, suggestion, file) and refresh the `block_reviews` dataset.
 - A good moment for one coach-style follow-up (last rounds, form, anything sore) if the answer affects upcoming sessions.
 
 ## intervals.icu workout rules
@@ -141,6 +145,7 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 - Leave one blank line before and after every repeat block (a bare `Nx` line or a label ending in `Nx`). Don't indent step lines inside a repeat; they use the same `- ` prefix as other steps.
 - **Strength event format** (intervals.icu, type `WeightTraining`). Write the session in the event `description`, not in `workout_doc`: strength events are not parsed by intervals.icu, so there are no `- ` step lines. A companion watch app that reads the session expects exactly this format.
   - An optional prose header comes first (cues, tempo, why). It must not contain the character `|`.
+  - One strength event per day: put the whole session in a single `WeightTraining` event. A companion watch app reads only the first strength event of the day, so a second one would be ignored.
   - Then one line per set, in the exact order the sets are done: `<n>. <exercise name> | <target> | <load> | <side>`. For example:
     ```
     1. Bulgarian split squat | 10 reps | 14 kg (6+8) | left
@@ -180,4 +185,4 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 
 ---
 
-Kit version: 2026-11-01.
+Kit version: 2026-11-03.
