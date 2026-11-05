@@ -1095,11 +1095,13 @@ window.tdb = {
     tip.style.left = Math.max(0, Math.min(box.width - w, x + 12)) + 'px';
     tip.style.top = Math.max(0, Math.min(box.height - h, y - h - 8)) + 'px';
   },
-  // intervals.icu-style zone colours: Z1 grey, Z2 blue, Z3 green, Z4 yellow, Z5 orange, Z6 red, Z7 purple (% of FTP or threshold)
-  ZONES: ['#9aa0a6', '#2f8fff', '#2fbf6b', '#f2c200', '#ff8a00', '#f03e3e', '#b43cf0'],
+  // intervals.icu zone colours: Z1 teal, Z2 green, Z3 yellow, Z4 orange, Z5 pink, Z6 purple, Z7 grey (% of FTP or threshold)
+  ZONES: ['#8fcfc0', '#79c47a', '#fbe38e', '#f5b48a', '#f06a9a', '#b49ae0', '#9a9aa0'],
+  FORM: ['#f03e3e', '#2fbf6b', '#2f8fff', '#f2c200'],
   zoneColor: (v) => tdb.ZONES[v < 56 ? 0 : v < 76 ? 1 : v < 91 ? 2 : v < 106 ? 3 : v < 121 ? 4 : v < 151 ? 5 : 6],
   CTL: '#2f8fff', ATL: '#e0409b',
-  heat: (t) => d3.interpolateInferno(0.08 + 0.87 * t),
+  heat: (t) => (tdb._h = tdb._h || d3.scaleLinear().domain([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]).range(['#000004', '#160b39', '#420a68', '#6a176e', '#932667', '#bc3754', '#dd513a', '#f37819', '#fca50a', '#f6d746', '#fcffa4']))(0.08 + 0.87 * t),
+  turbo: (t) => (tdb._t = tdb._t || d3.scaleLinear().domain([0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1]).range(['#30123b', '#4662d7', '#36aaf9', '#1ae4b6', '#72fe5e', '#c7ef34', '#faba39', '#f66b19', '#ca2a04']))(t),
   rateColor: (s) => (s === 'ok' ? 'var(--color-ok)' : s === 'warn' ? 'var(--color-warn)' : s === 'bad' ? 'var(--color-bad)' : 'var(--cds-chart-muted)'),
   locColor: (loc) => (loc === 'home' ? dash.colors[0] : loc === 'travel' ? dash.colors[2] : dash.colors[1]),
   // a dataset or calc is "empty" when loaded with no rows, or (with :field) when no row has that field
@@ -1145,7 +1147,7 @@ dash.onData(() => {
   document.querySelectorAll('.tdb-gapwin').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.gapwin) === tdb.gapwin())));
   const sw = { 'tdb-sw-home': 0, 'tdb-sw-gym': 1, 'tdb-sw-travel': 2 };
   Object.entries(sw).forEach(([c, i]) => document.querySelectorAll('.' + c).forEach((s) => { s.style.background = dash.colors[i]; }));
-  Object.entries({ 'tdb-sw-low': 1, 'tdb-sw-mid': 3, 'tdb-sw-high': 5 }).forEach(([c, z]) => document.querySelectorAll('.' + c).forEach((s) => { s.style.background = tdb.ZONES[z]; }));
+  Object.entries({ 'tdb-sw-low': 1, 'tdb-sw-mid': 2, 'tdb-sw-high': 3 }).forEach(([c, z]) => document.querySelectorAll('.' + c).forEach((s) => { s.style.background = tdb.ZONES[z]; }));
   // empty states
   document.querySelectorAll('[data-needs]').forEach((el) => { el.hidden = tdb.isEmpty(el.dataset.needs); });
   document.querySelectorAll('[data-empty]').forEach((el) => { el.hidden = !tdb.isEmpty(el.dataset.empty); });
@@ -1694,7 +1696,7 @@ dash.draw('fitness', (el) => {
   svg.append('g').selectAll('line').data(t1).join('line').attr('x1', ml).attr('x2', width - mr).attr('y1', y1).attr('y2', y1).attr('stroke', 'var(--cds-chart-grid)');
   svg.append('g').selectAll('text').data(t1).join('text').attr('x', ml - 6).attr('y', (v) => y1(v) + 3).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(String);
   // form zones
-  const zones = [[fmin, -30, tdb.ZONES[5], 0.14, 'High risk'], [-30, -10, tdb.ZONES[2], 0.14, 'Optimal'], [-10, 5, 'var(--cds-chart-muted)', 0.08, 'Grey zone'], [5, 20, tdb.ZONES[1], 0.14, 'Fresh'], [20, fmax, tdb.ZONES[3], 0.14, 'Transition']];
+  const zones = [[fmin, -30, tdb.FORM[0], 0.14, 'High risk'], [-30, -10, tdb.FORM[1], 0.14, 'Optimal'], [-10, 5, 'var(--cds-chart-muted)', 0.08, 'Grey zone'], [5, 20, tdb.FORM[2], 0.14, 'Fresh'], [20, fmax, tdb.FORM[3], 0.14, 'Transition']];
   zones.forEach(([a, b, c, o, l]) => {
     const lo = Math.max(a, fmin), hi = Math.min(b, fmax);
     if (hi <= lo) return;
@@ -1704,7 +1706,7 @@ dash.draw('fitness', (el) => {
   svg.append('g').selectAll('text').data(t2).join('text').attr('x', ml - 6).attr('y', (v) => y2(v) + 3).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text((v) => v + '%');
   svg.append('line').attr('x1', ml).attr('x2', width - mr).attr('y1', y2(0)).attr('y2', y2(0)).attr('stroke', 'var(--cds-chart-axis)');
   const bw = Math.max(1, (x(d3.utcDay.offset(start, 1)) - x(start)) - 1);
-  const zc = (v) => (v < -30 ? tdb.ZONES[5] : v < -10 ? tdb.ZONES[2] : v < 5 ? 'var(--cds-chart-muted)' : v < 20 ? tdb.ZONES[1] : tdb.ZONES[3]);
+  const zc = (v) => (v < -30 ? tdb.FORM[0] : v < -10 ? tdb.FORM[1] : v < 5 ? 'var(--cds-chart-muted)' : v < 20 ? tdb.FORM[2] : tdb.FORM[3]);
   svg.append('g').selectAll('rect').data(rows.filter((r) => r.form_pct != null)).join('rect').attr('x', (r) => x(r.d) - bw / 2).attr('width', bw)
     .attr('y', (r) => y2(Math.max(0, r.form_pct))).attr('height', (r) => Math.abs(y2(r.form_pct) - y2(0))).attr('fill', (r) => zc(r.form_pct));
   const line = (k, c, w) => svg.append('path').datum(rows).attr('fill', 'none').attr('stroke', c).attr('stroke-width', w).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').attr('d', d3.line((r) => x(r.d), (r) => y1(r[k])));
@@ -1738,7 +1740,7 @@ dash.draw('weekly', (el) => {
   const x = d3.scaleBand(data.map((r) => r.week), [ml, width - mr]).padding(0.25);
   svg.append('g').selectAll('line').data(yt).join('line').attr('x1', ml).attr('x2', width - mr).attr('y1', y).attr('y2', y).attr('stroke', 'var(--cds-chart-grid)');
   svg.append('g').selectAll('text').data(yt).join('text').attr('x', ml - 6).attr('y', (v) => y(v) + 3).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text((v) => v + ' h');
-  const parts = [['low_h', tdb.ZONES[1]], ['mid_h', tdb.ZONES[3]], ['high_h', tdb.ZONES[5]], ['other_h', 'var(--cds-chart-muted)']];
+  const parts = [['low_h', tdb.ZONES[1]], ['mid_h', tdb.ZONES[2]], ['high_h', tdb.ZONES[3]], ['other_h', 'var(--cds-chart-muted)']];
   const bw = Math.min(32, x.bandwidth());
   const tip = tdb.tip(el);
   data.forEach((r) => {
@@ -1763,7 +1765,7 @@ dash.draw('dist', (el) => {
   const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`).attr('role', 'img').attr('aria-label', 'Share of easy, moderate and hard time over 28 days');
   const x = d3.scaleLinear([0, 100], [0, width]);
   let acc = 0;
-  [['low_pct', tdb.ZONES[1], 'Easy'], ['mid_pct', tdb.ZONES[3], 'Moderate'], ['high_pct', tdb.ZONES[5], 'Hard']].forEach(([k, c, l]) => {
+  [['low_pct', tdb.ZONES[1], 'Easy'], ['mid_pct', tdb.ZONES[2], 'Moderate'], ['high_pct', tdb.ZONES[3], 'Hard']].forEach(([k, c, l]) => {
     const v = r[k] || 0;
     svg.append('rect').attr('x', x(acc)).attr('width', Math.max(0, x(acc + v) - x(acc) - 1)).attr('y', 14).attr('height', 22).attr('fill', c);
     if (x(v) > 44) svg.append('text').attr('x', x(acc) + 6).attr('y', 29).attr('font-size', 11).attr('fill', 'var(--color-bg)').text(v + '%');
@@ -1980,7 +1982,7 @@ dash.draw('timeline', (el) => {
     const x0 = x(tdb.parse(p.start)), x1 = x(d3.utcDay.offset(tdb.parse(p.end), 1));
     const current = today >= tdb.parse(p.start) && today <= tdb.parse(p.end);
     const past = today > tdb.parse(p.end);
-    const pc = d3.interpolateTurbo(0.12 + 0.76 * (phases.length > 1 ? i / (phases.length - 1) : 0.4));
+    const pc = tdb.turbo(0.12 + 0.76 * (phases.length > 1 ? i / (phases.length - 1) : 0.4));
     svg.append('rect').attr('x', x0 + 1).attr('y', 34).attr('width', Math.max(2, x1 - x0 - 2)).attr('height', 26).attr('rx', 4)
       .attr('fill', pc).attr('fill-opacity', current ? 1 : past ? 0.4 : 0.8).attr('stroke', current ? 'var(--color-fg)' : 'none').attr('stroke-width', 1.5)
       .on('pointermove', (event) => tdb.showTip(el, tip, event, [tdb.fmtDay(p.start) + ' – ' + tdb.fmtDay(p.end) + (p.approx === 'Y' ? ' (approx.)' : ''), p.label, p.detail]))

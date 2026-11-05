@@ -7,7 +7,7 @@ The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entrie
 *Touches:* dashboard template only (`kit/coach-kit-dashboard.html`: the colour helpers in the `tdb` object and the drawings for muscle maps, muscle load bars, workout blocks, recovery trends, fitness/form, weekly hours, intensity split and the season timeline; one sentence in the Recovery intro).
 *If you already use the kit:* optional, visual only. Replace your dashboard page with the new template (keep your SETUP lines), or ask Claude to "apply the 2026-11-05.2 colour update to my dashboard". No data files, datasets or other documents change.
 
-- Zone colours as in intervals.icu (grey, blue, green, yellow, orange, red, purple) for workout blocks, weekly hours by intensity and the easy/moderate/hard split.
+- Zone colours as in intervals.icu's zone table (Z1 teal, Z2 green, Z3 yellow, Z4 orange, Z5 pink, Z6 purple, Z7 grey) for workout blocks; weekly hours and the easy/moderate/hard split use Z2, Z3 and Z4.
 - Muscle maps use the inferno heat scale instead of one blue.
 - Muscle load bars and the sessions-per-area dots use traffic-light colours (green at target, amber from 70%, red below).
 - Recovery charts colour each reading green, amber or red against your own band, baseline or typical value (HRV, resting heart rate, sleep, heart rate and breathing asleep, stress, Body Battery, steps). Weight stays neutral.
