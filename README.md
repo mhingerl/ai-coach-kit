@@ -14,7 +14,7 @@ You don't need to copy files or edit anything. Paste this repository's link into
 - **Session debriefs and FTP:** after key sessions Claude checks what you actually did against the plan and decides the next progression step. It keeps your FTP current from your own performance, indoors and outdoors.
 - **A weekly review and block reviews:** a scheduled task checks how your training is going against the plan, suggests changes, writes a review at the end of each training phase, and reshapes your dashboard to fit what matters to you now.
 - **Optional Garmin watch apps:** if you have a Forerunner 955/255/255S or fenix 7/7S/7X, the free Connect IQ apps *Strength Coach Interpreter* (guides your planned strength session set by set from your intervals.icu calendar and logs what you did) and *Scale Linker* (Renpho scale weigh-ins, pre/post-workout sweat loss, to intervals.icu) work with this kit. Claude recommends them during setup where they fit.
-- **Kit news:** the weekly review checks this repository for a newer kit version and tells you what changed. It never applies anything on its own.
+- **Kit news:** the weekly review checks this repository for a newer kit version and tells you what changed. It first reads a one-line `VERSION` file, so a week with no news costs almost nothing, and it never applies anything on its own.
 - **Easy re-setup:** before moving to a new kit version, ask "give me my setup interview answers". Paste the result into the new setup and Claude only asks what's missing.
 
 ## How to start
@@ -41,6 +41,7 @@ You don't need to copy files or edit anything. Paste this repository's link into
 | [`kit/coach-kit-checkin-skill.md`](kit/coach-kit-checkin-skill.md) | Template for your daily readiness check-in skill |
 | [`kit/coach-kit-dashboard.html`](kit/coach-kit-dashboard.html) | Template for your training dashboard |
 | [`kit/coach-kit-exercises.csv`](kit/coach-kit-exercises.csv) | Which muscles each exercise trains (for the muscle map) |
+| [`VERSION`](VERSION) | The current kit version (one line; what the weekly kit-news check reads first) |
 | [`CHANGELOG.md`](CHANGELOG.md) | What changed in each kit version |
 
 **Prefer to do it by hand?** Add the five files in `kit/` to your Project's knowledge and write "Start" in a chat.

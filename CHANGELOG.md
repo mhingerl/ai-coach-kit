@@ -1,5 +1,16 @@
 # Changelog
 
+The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
+
+## 2026-11-05
+
+*Touches:* setup prompt (2.6 step 5, 2.8, section 3 "Dashboard refresh" and the new "Keeping runs cheap"), check-in skill template ("Dashboard sync", "Dashboard refresh", "Logging"), new `VERSION` file.
+*If you already use the kit:* copy the new "Dashboard refresh (cheap flow)" text into your saved check-in skill in place of its old dashboard-refresh bullet, and change your weekly review's kit-news step to read `VERSION` first. No data files or dashboard changes needed.
+
+- Cheaper dashboard sync: the check-in no longer reads whole CSV files through the chat to add a row. It saves the dashboard's current file to disk, merges the new rows with a script, uploads the result by file path, updates all changed dataset documents in one batch and backs the file up to the project from disk. Only files that changed are touched, once per check-in, and old uploaded files are cleaned up about every ten syncs instead of on every sync. Without disk access it falls back to the old way.
+- Cheaper kit-news check: the weekly review reads only the one-line `VERSION` file first and stops when it matches the version you set up from. Only when there is something newer does it read `CHANGELOG.md`, and only as far as your version. Every entry now starts with a *Touches:* line, so an update means fetching just the named files, not redoing the setup.
+- New "Keeping runs cheap" guidance: read only what the task needs, never pass whole data files through the chat, weekly scheduled runs with short prompts that stop early when nothing changed.
+
 ## 2026-11-03
 
 - Pairing planned and actual activities is stricter: the coach checks every completed activity of the day (commutes and short rides too), not only the one being discussed, and sanity-checks pairs that already exist by sport, duration and load, because intervals.icu sometimes attaches a short commute to the evening's planned ride or leaves a strength session unpaired. Clear matches are linked with `link_activity_to_event` without asking. The coach has no unlink tool, so when a wrong pair blocks the right one it says so plainly and asks you to unlink it in intervals.icu. It re-checks after calendar changes and when a later activity is uploaded. Events with a date but no start time make same-day mismatches more likely.

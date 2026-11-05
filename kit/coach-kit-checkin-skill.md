@@ -119,9 +119,23 @@ The dashboard's Today, Recovery and Training load pages read files the check-in 
 2. `fitness.csv`: the day's total training load (`load`) and the part from strength sessions (`strength_load`) for the same days (first time: a year of daily load, so the dashboard's own fitness calculation starts clean), plus intervals.icu's ctl and atl for comparison. The dashboard works out fitness, fatigue and form from the loads.
 3. `activities.csv`: activities since the last row (first time: 90 days), with type, indoor/commute flags, moving minutes, distance, climbing, load, average and normalized power, average HR, paired event id, and minutes in zones 1–2, 3 and 4+ (power zones when there is power, else HR).
 4. `planned.csv` and `planned_steps.csv`: the calendar from 7 days back to 7 days ahead, replacing that window: planned minutes and load, a one-line target, steps with repeats written out (% of FTP, threshold HR or pace; ramps marked), and `strength_plan` (`exercise_id:sets` pairs joined by `|`; a CSV column, not the event text, which uses the per-set lines of the strength event format) for strength sessions.
-5. Write the changed files back to the project, upload them and update their datasets in one batch (see "Logging").
+5. Apply the new rows with the cheap flow in "Dashboard refresh" below: once, at the end of the check-in, only for files that changed (nothing new: no sync).
 
 If the connection isn't reachable, skip it and say the dashboard is as of the last sync.
+
+### Dashboard refresh (cheap flow)
+
+No CSV content passes through the chat: save the file to disk, edit it with a script, upload it by path. Once per check-in, only for files that changed; nothing new means no sync.
+
+1. Read `datasets/<file name without .csv>` on <DASHBOARD URL> (small): note its `version` and the blob id (last path segment of `source.url`).
+2. Save the current file to disk: Artifact `read` with `url` = the dashboard, `path` = the blob id, `out_dir` = a scratch folder. One file per call. Don't open it with Read.
+3. Merge with one short script: replace rows whose key exists (date; activity id; event id plus seq), append the rest, keep header, column order and line endings (for the planned files replace the whole window). Check with `head`, `tail`, `wc -l`.
+4. Upload by path: Artifact publish with `url` = the dashboard, `asset: true`, `file_path`. One CSV per call.
+5. One ArtifactData `batch` updating every changed dataset document: `source.url` exactly as returned, `source.name`, `updated: {at: <real current time>, by: "Claude"}`, `if_version` from step 1.
+6. Back up: Projects `project_write` with `path` = `claude/data/<name>.csv` and `local_path` = the merged file. The dashboard's file is the working copy, the project copy the backup; if they differ, take the newer one and say so.
+7. Don't delete the replaced file on every sync. About every ten syncs, list the dashboard's assets and delete the unreferenced ones one call at a time, checking each result.
+
+For files edited by hand in the project (strength sets, sessions, exercises, calendar, targets), edit the project copy, then do steps 1, 4 and 5 with a disk copy. If saving an asset to disk isn't available, read the project copy, edit and upload it as before, and say it costs more.
 
 ## Logging
 
@@ -134,7 +148,7 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
   1. Append one row per exercise to `claude/data/strength_sets.csv` and the session to `claude/data/sessions.csv` (conventions in `claude/data/README.md`). Add a missing exercise to `exercises.csv` first, with areas and muscle weights.
   2. Update the lift's progression line in the strength log when a key lift moved.
 - (optional) **Symptom or re-test readings** go to the plan's log and the matching CSV.
-- **Dashboard refresh** after changing a CSV that has a dataset: upload it to <DASHBOARD URL> as an asset (Artifact publish with `asset: true`), then update its dataset document (`datasets/<file name without .csv>`: `source.url` exactly as returned, `source.name`, `updated: {at, by: "Claude"}`), reading the document's version first. Batch several dataset updates in one write. Remove the replaced asset once nothing references it. A new file without a dataset gets one from the weekly review.
+- **Dashboard refresh** after changing a CSV that has a dataset: follow "Dashboard refresh (cheap flow)" above (disk copy, script merge, upload by path, one batch for the dataset documents, project backup). A new file without a dataset gets one from the weekly review.
 - **Meals (if <ATHLETE> logs food):** follow "Food logging" in `ai-coach-setup-prompt.md`: one "Nutrition log" NOTE per day on the intervals.icu calendar, every item with its amount and its own kcal / carbs (sugars) / fibre / protein / fat (saturated) / salt, subtotals, a meal total and the running total, a "main contributors" line for bigger meals. Read the note before editing it (the description is replaced, not appended) and keep earlier entries.
 - **Regular foods and supplements (if <ATHLETE> logs food):** when <ATHLETE> names something they use regularly (a protein powder and its scoop size, instant oats, a usual bar, gel or drink mix, a usual portion), keep it: product, usual amount in grams and its label values, saved in memory (or, without memory, in a short `claude/regular-foods.md` project document). Check that list before asking, and when <ATHLETE> says "my usual scoop" or "same as last time", use the saved amount and look back at earlier Nutrition log notes instead of asking again. Ask only when a portion differs or the product is new, then save it. Update the entry when the product or portion changes.
 - **Block review summary:** when a block review is written, add its row to `claude/reviews/block_reviews.csv` (phase_id, phase, start, end, endurance_h, strength_sessions, fitness_start, fitness_end, easy_pct, headline, suggestion, file) and refresh the `block_reviews` dataset.
@@ -185,4 +199,4 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 
 ---
 
-Kit version: 2026-11-03.
+Kit version: 2026-11-05.
