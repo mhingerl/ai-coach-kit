@@ -2,6 +2,18 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-05.2
+
+*Touches:* dashboard template only (`kit/coach-kit-dashboard.html`: the colour helpers in the `tdb` object and the drawings for muscle maps, muscle load bars, workout blocks, recovery trends, fitness/form, weekly hours, intensity split and the season timeline; one sentence in the Recovery intro).
+*If you already use the kit:* optional, visual only. Replace your dashboard page with the new template (keep your SETUP lines), or ask Claude to "apply the 2026-11-05.2 colour update to my dashboard". No data files, datasets or other documents change.
+
+- Zone colours as in intervals.icu (grey, blue, green, yellow, orange, red, purple) for workout blocks, weekly hours by intensity and the easy/moderate/hard split.
+- Muscle maps use the inferno heat scale instead of one blue.
+- Muscle load bars and the sessions-per-area dots use traffic-light colours (green at target, amber from 70%, red below).
+- Recovery charts colour each reading green, amber or red against your own band, baseline or typical value (HRV, resting heart rate, sleep, heart rate and breathing asleep, stress, Body Battery, steps). Weight stays neutral.
+- Fitness, fatigue and form: fitness blue, fatigue pink, form bars and bands in the usual zone colours (high risk, optimal, grey zone, fresh, transition).
+- Season timeline: one colour per phase, the current phase outlined, finished phases faded, milestones in gold.
+
 ## 2026-11-05
 
 *Touches:* setup prompt (2.6 step 5, 2.8, section 3 "Dashboard refresh" and the new "Keeping runs cheap"), check-in skill template ("Dashboard sync", "Dashboard refresh", "Logging"), new `VERSION` file.

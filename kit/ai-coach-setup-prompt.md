@@ -478,4 +478,4 @@ description: "Use when <ATHLETE> wants to set up the coaching again or move to a
 
 **Export format** (what section 1 expects to import): the title "Coaching setup export (<date>)", then the ten parts in the order above, with interview answers numbered like section 1 of the kit version they were written for. When the new kit has items the export doesn't cover, ask only those.
 
-Kit version: 2026-11-05. Start now with the first interview questions.
+Kit version: 2026-11-05.2. Start now with the first interview questions.

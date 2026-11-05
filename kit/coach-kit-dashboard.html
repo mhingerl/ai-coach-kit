@@ -1,6 +1,6 @@
 <meta name="dash-one-writer">
 <!--
-  COACH KIT: training dashboard template (kit version 2026-11-05).
+  COACH KIT: training dashboard template (kit version 2026-11-05.2).
   For Claude during setup (see section 2.4 of ai-coach-setup-prompt.md):
   - Pages (tabs): Today (readiness, today's plan with done badges and workout blocks, two muscle maps: today's
     workout and what's been missing over 14 or 28 days, coming days), Recovery (HRV, resting HR, sleep, heart rate and breathing
@@ -239,7 +239,7 @@
     <div class="tdb-cardhead">
       <div>
         <h2>Recovery</h2>
-        <p class="tdb-note">Your overnight and daily data from your watch, through intervals.icu and the Garmin connection if you have it, against your own baselines.</p>
+        <p class="tdb-note">Your overnight and daily data from your watch, through intervals.icu and the Garmin connection if you have it, against your own baselines. Green is good, amber is worth watching, red is off your normal.</p>
       </div>
       <div class="tdb-seg" role="group" aria-label="Time range">
         <button type="button" class="tdb-range" data-range="30" aria-pressed="false">30 days</button>
@@ -1095,6 +1095,12 @@ window.tdb = {
     tip.style.left = Math.max(0, Math.min(box.width - w, x + 12)) + 'px';
     tip.style.top = Math.max(0, Math.min(box.height - h, y - h - 8)) + 'px';
   },
+  // intervals.icu-style zone colours: Z1 grey, Z2 blue, Z3 green, Z4 yellow, Z5 orange, Z6 red, Z7 purple (% of FTP or threshold)
+  ZONES: ['#9aa0a6', '#2f8fff', '#2fbf6b', '#f2c200', '#ff8a00', '#f03e3e', '#b43cf0'],
+  zoneColor: (v) => tdb.ZONES[v < 56 ? 0 : v < 76 ? 1 : v < 91 ? 2 : v < 106 ? 3 : v < 121 ? 4 : v < 151 ? 5 : 6],
+  CTL: '#2f8fff', ATL: '#e0409b',
+  heat: (t) => d3.interpolateInferno(0.08 + 0.87 * t),
+  rateColor: (s) => (s === 'ok' ? 'var(--color-ok)' : s === 'warn' ? 'var(--color-warn)' : s === 'bad' ? 'var(--color-bad)' : 'var(--cds-chart-muted)'),
   locColor: (loc) => (loc === 'home' ? dash.colors[0] : loc === 'travel' ? dash.colors[2] : dash.colors[1]),
   // a dataset or calc is "empty" when loaded with no rows, or (with :field) when no row has that field
   isEmpty: (spec) => spec.split(' ').some((s) => {
@@ -1137,8 +1143,9 @@ dash.onData(() => {
   document.querySelectorAll('.tdb-mode').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
   document.querySelectorAll('.tdb-range').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.range) === rg)));
   document.querySelectorAll('.tdb-gapwin').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.gapwin) === tdb.gapwin())));
-  const sw = { 'tdb-sw-home': 0, 'tdb-sw-gym': 1, 'tdb-sw-travel': 2, 'tdb-sw-low': 0, 'tdb-sw-mid': 2, 'tdb-sw-high': 3 };
+  const sw = { 'tdb-sw-home': 0, 'tdb-sw-gym': 1, 'tdb-sw-travel': 2 };
   Object.entries(sw).forEach(([c, i]) => document.querySelectorAll('.' + c).forEach((s) => { s.style.background = dash.colors[i]; }));
+  Object.entries({ 'tdb-sw-low': 1, 'tdb-sw-mid': 3, 'tdb-sw-high': 5 }).forEach(([c, z]) => document.querySelectorAll('.' + c).forEach((s) => { s.style.background = tdb.ZONES[z]; }));
   // empty states
   document.querySelectorAll('[data-needs]').forEach((el) => { el.hidden = tdb.isEmpty(el.dataset.needs); });
   document.querySelectorAll('[data-empty]').forEach((el) => { el.hidden = !tdb.isEmpty(el.dataset.empty); });
@@ -1302,7 +1309,8 @@ window.tdbBody = {
           const grp = half.append('g').style('cursor', 'default');
           grp.append('path').attr('d', d).attr('fill', 'var(--cds-chart-grid)').attr('stroke', 'var(--color-panel)').attr('stroke-width', 1.6);
           const muted = opts.muted ? opts.muted(muscle) : false;
-          grp.append('path').attr('d', d).attr('fill', muted ? 'var(--cds-chart-muted)' : accent).attr('fill-opacity', muted ? 0.35 : opts.value(muscle, side));
+          const val = muted ? 0 : opts.value(muscle, side);
+          grp.append('path').attr('d', d).attr('fill', muted ? 'var(--cds-chart-muted)' : tdb.heat(val)).attr('fill-opacity', muted ? 0.35 : val > 0 ? 1 : 0);
           grp.on('pointermove', (event) => { const lines = opts.tip(muscle, side); if (lines) tdb.showTip(el, tip, event, lines); })
             .on('pointerleave', () => { tip.hidden = true; });
         });
@@ -1312,7 +1320,7 @@ window.tdbBody = {
       fig.append('text').attr('x', 160).attr('y', 446).attr('text-anchor', 'middle').attr('fill', 'var(--color-fg-muted)').attr('font-size', 11).text(sides[1]);
     }
     const lg = svg.append('g').attr('transform', 'translate(110,458)');
-    [0.12, 0.3, 0.5, 0.75, 1].forEach((o, i) => lg.append('rect').attr('x', i * 26).attr('y', -6).attr('width', 24).attr('height', 8).attr('rx', 2).attr('fill', accent).attr('fill-opacity', o));
+    [0.12, 0.3, 0.5, 0.75, 1].forEach((o, i) => lg.append('rect').attr('x', i * 26).attr('y', -6).attr('width', 24).attr('height', 8).attr('rx', 2).attr('fill', tdb.heat(o)));
     lg.append('rect').attr('x', -30).attr('y', -6).attr('width', 24).attr('height', 8).attr('rx', 2).attr('fill', 'var(--cds-chart-grid)');
     lg.append('text').attr('x', -34).attr('y', 1).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text('none');
     lg.append('text').attr('x', 134).attr('y', 1).attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(opts.legendEnd);
@@ -1364,7 +1372,7 @@ dash.draw('needs', (el) => {
     gr.append('rect').attr('x', labelW).attr('y', y + 4).attr('width', x(1.5) - labelW).attr('height', 12).attr('rx', 3).attr('fill', 'var(--cds-chart-grid)');
     const share = Math.min(1.5, r.pct / 100);
     gr.append('rect').attr('x', labelW).attr('y', y + 4).attr('width', Math.max(0, x(share) - labelW)).attr('height', 12).attr('rx', 3)
-      .attr('fill', r.pct >= 100 ? dash.colors[0] : r.priority === 'key' ? 'var(--cds-chart-status-critical)' : 'var(--cds-chart-muted)');
+      .attr('fill', r.pct >= 100 ? 'var(--color-ok)' : r.pct >= 70 ? 'var(--color-warn)' : 'var(--color-bad)');
     gr.append('text').attr('x', width).attr('y', y + 13).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').style('font-variant-numeric', 'tabular-nums').text(r.pct + '%');
     gr.append('rect').attr('x', 0).attr('y', y).attr('width', width).attr('height', rowH).attr('fill', 'transparent')
       .on('pointermove', (event) => tdb.showTip(el, tip, event, [r.label + (r.priority === 'key' ? ' · key muscle' : ''), 'Left ' + r.weekly_L.toFixed(1) + ' · Right ' + r.weekly_R.toFixed(1) + ' sets per week', 'Target ' + r.target + ' per week', r.last_date ? 'Last trained ' + tdb.fmtDay(r.last_date) : 'Not trained yet']))
@@ -1462,10 +1470,14 @@ window.tdbBlocks = (box, steps, ftp) => {
     const x0 = x(s.start), x1 = Math.max(x0 + 1, x(s.start + s.dur) - 1), mid = (s.lo + s.hi) / 2;
     const g = svg.append('g');
     if (s.ramp === 'Y') {
-      g.append('path').attr('d', `M${x0},${y(0)} L${x0},${y(s.lo)} L${x1},${y(s.hi)} L${x1},${y(0)} Z`).attr('fill', dash.colors[0]).attr('fill-opacity', zone(mid));
+      const gid = 'tdbg' + s.seq + '-' + Math.random().toString(36).slice(2, 7);
+      const gr = svg.append('defs').append('linearGradient').attr('id', gid).attr('x1', 0).attr('x2', 1).attr('y1', 0).attr('y2', 0);
+      gr.append('stop').attr('offset', '0%').attr('stop-color', tdb.zoneColor(s.lo));
+      gr.append('stop').attr('offset', '100%').attr('stop-color', tdb.zoneColor(s.hi));
+      g.append('path').attr('d', `M${x0},${y(0)} L${x0},${y(s.lo)} L${x1},${y(s.hi)} L${x1},${y(0)} Z`).attr('fill', `url(#${gid})`);
     } else {
-      if (s.hi > s.lo) g.append('rect').attr('x', x0).attr('width', x1 - x0).attr('y', y(s.hi)).attr('height', Math.max(1, y(s.lo) - y(s.hi))).attr('fill', dash.colors[0]).attr('fill-opacity', 0.15);
-      g.append('rect').attr('x', x0).attr('width', x1 - x0).attr('y', y(mid)).attr('height', Math.max(1, y(0) - y(mid))).attr('rx', 1).attr('fill', dash.colors[0]).attr('fill-opacity', zone(mid));
+      if (s.hi > s.lo) g.append('rect').attr('x', x0).attr('width', x1 - x0).attr('y', y(s.hi)).attr('height', Math.max(1, y(s.lo) - y(s.hi))).attr('fill', tdb.zoneColor(mid)).attr('fill-opacity', 0.3);
+      g.append('rect').attr('x', x0).attr('width', x1 - x0).attr('y', y(mid)).attr('height', Math.max(1, y(0) - y(mid))).attr('rx', 1).attr('fill', tdb.zoneColor(mid));
     }
     g.append('rect').attr('x', x0).attr('width', x1 - x0).attr('y', m.t).attr('height', y(0) - m.t).attr('fill', 'transparent')
       .on('pointermove', (event) => {
@@ -1591,6 +1603,18 @@ const TRENDS = {
   steps: { y: 'steps', unit: 'steps', bars: true, zero: true, label: 'Steps' },
   weight: { y: 'weight_kg', avg: 'weight7', unit: 'kg', dots: true, label: 'Weight' },
 };
+// good / watch / off for each reading, against your own band, baseline or the window median
+const RATE = {
+  hrv: (r) => (r.hrv_ms == null || r.band_low == null ? null : r.hrv_ms >= r.band_low ? 'ok' : r.hrv_ms >= r.band_low * 0.9 ? 'warn' : 'bad'),
+  rhr: (r) => (r.rhr_bpm == null || r.rhr_base == null ? null : r.rhr_bpm <= r.rhr_base + 2 ? 'ok' : r.rhr_bpm <= r.rhr_base + 5 ? 'warn' : 'bad'),
+  sleep: (r) => (r.sleep_h == null ? null : r.sleep_h >= 7.5 ? 'ok' : r.sleep_h >= 6.5 ? 'warn' : 'bad'),
+  sleephr: (r) => (r.sleep_hr == null || r.sleep_hr_base == null ? null : r.sleep_hr <= r.sleep_hr_base + 2 ? 'ok' : r.sleep_hr <= r.sleep_hr_base + 5 ? 'warn' : 'bad'),
+  resp: (r, med) => (r.resp_sleep == null ? null : r.resp_sleep <= med * 1.05 ? 'ok' : r.resp_sleep <= med * 1.12 ? 'warn' : 'bad'),
+  sst: (r) => (r.sleep_stress == null ? null : r.sleep_stress <= 25 ? 'ok' : r.sleep_stress <= 40 ? 'warn' : 'bad'),
+  bb: (r) => (r.body_battery == null ? null : r.body_battery >= 75 ? 'ok' : r.body_battery >= 50 ? 'warn' : 'bad'),
+  stress: (r) => (r.stress == null ? null : r.stress <= 35 ? 'ok' : r.stress <= 50 ? 'warn' : 'bad'),
+  steps: (r) => (r.steps == null ? null : r.steps >= 8000 ? 'ok' : r.steps >= 5000 ? 'warn' : 'bad'),
+};
 dash.draw('trend', (el) => {
   const data = tdb.begin(el, 'readiness_days');
   if (!data) return;
@@ -1602,6 +1626,8 @@ dash.draw('trend', (el) => {
   if (!pts.length) return;
   const fmt = (v) => d3.format(',')(Math.round(v * 10) / 10);
   const width = Math.max(240, el.clientWidth || 320), height = 150;
+  const rate = RATE[el.dataset.metric], med = d3.median(pts, (r) => r[cfg.y]);
+  const rc = (r) => (rate ? tdb.rateColor(rate(r, med)) : 'var(--color-fg-muted)');
   const extra = [].concat(cfg.band ? rows.flatMap((r) => [r[cfg.band[0]], r[cfg.band[1]]]) : [], cfg.base ? rows.map((r) => r[cfg.base]) : [], cfg.avg ? rows.map((r) => r[cfg.avg]) : []).filter((v) => v != null);
   const vals = pts.map((r) => r[cfg.y]).concat(extra);
   let lo = cfg.zero ? 0 : d3.min(vals), hi = cfg.max != null ? cfg.max : d3.max(vals);
@@ -1618,22 +1644,23 @@ dash.draw('trend', (el) => {
   svg.append('g').selectAll('text').data(tdbChart.xTicks(x, width)).join('text').attr('x', x).attr('y', height - 5).attr('text-anchor', 'middle').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(d3.utcFormat('%b %-d'));
   if (cfg.band) {
     const b = rows.filter((r) => r[cfg.band[0]] != null);
-    svg.append('path').datum(b).attr('fill', dash.colors[0]).attr('fill-opacity', 0.12).attr('d', d3.area((r) => x(r.d), (r) => y(r[cfg.band[0]]), (r) => y(r[cfg.band[1]])));
+    svg.append('path').datum(b).attr('fill', 'var(--color-ok)').attr('fill-opacity', 0.14).attr('d', d3.area((r) => x(r.d), (r) => y(r[cfg.band[0]]), (r) => y(r[cfg.band[1]])));
   }
   if (cfg.base) svg.append('path').datum(rows.filter((r) => r[cfg.base] != null)).attr('fill', 'none').attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 3').attr('d', d3.line((r) => x(r.d), (r) => y(r[cfg.base])));
   if (cfg.bars) {
     const bw = Math.max(1, (x(d3.utcDay.offset(start, 1)) - x(start)) - 1);
-    svg.append('g').selectAll('rect').data(pts).join('rect').attr('x', (r) => x(r.d) - bw / 2).attr('width', bw).attr('y', (r) => y(r[cfg.y])).attr('height', (r) => Math.max(0, y(lo < 0 ? 0 : y.domain()[0]) - y(r[cfg.y]))).attr('rx', Math.min(2, bw / 2)).attr('fill', dash.colors[0]);
+    svg.append('g').selectAll('rect').data(pts).join('rect').attr('x', (r) => x(r.d) - bw / 2).attr('width', bw).attr('y', (r) => y(r[cfg.y])).attr('height', (r) => Math.max(0, y(lo < 0 ? 0 : y.domain()[0]) - y(r[cfg.y]))).attr('rx', Math.min(2, bw / 2)).attr('fill', (r) => rc(r));
   } else if (cfg.dots) {
-    svg.append('g').selectAll('circle').data(pts).join('circle').attr('cx', (r) => x(r.d)).attr('cy', (r) => y(r[cfg.y])).attr('r', 2.5).attr('fill', 'var(--cds-chart-muted)');
+    svg.append('g').selectAll('circle').data(pts).join('circle').attr('cx', (r) => x(r.d)).attr('cy', (r) => y(r[cfg.y])).attr('r', 3).attr('fill', (r) => rc(r));
   } else {
-    svg.append('path').datum(rows).attr('fill', 'none').attr('stroke', dash.colors[0]).attr('stroke-width', 2).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').attr('d', d3.line((r) => x(r.d), (r) => y(r[cfg.y])).defined((r) => r[cfg.y] != null));
+    svg.append('path').datum(rows).attr('fill', 'none')      .attr('stroke', 'var(--cds-chart-muted)').attr('stroke-width', 1.5).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').attr('d', d3.line((r) => x(r.d), (r) => y(r[cfg.y])).defined((r) => r[cfg.y] != null));
+    svg.append('g').selectAll('circle').data(pts).join('circle').attr('cx', (r) => x(r.d)).attr('cy', (r) => y(r[cfg.y])).attr('r', 2.8).attr('fill', (r) => rc(r));
   }
-  if (cfg.avg) svg.append('path').datum(rows).attr('fill', 'none').attr('stroke', dash.colors[0]).attr('stroke-width', 2).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').attr('d', d3.line((r) => x(r.d), (r) => y(r[cfg.avg])).defined((r) => r[cfg.avg] != null));
+  if (cfg.avg) svg.append('path').datum(rows).attr('fill', 'none').attr('stroke', 'var(--color-fg)').attr('stroke-width', 2).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').attr('d', d3.line((r) => x(r.d), (r) => y(r[cfg.avg])).defined((r) => r[cfg.avg] != null));
   const endV = cfg.avg && last[cfg.avg] != null ? last[cfg.avg] : last[cfg.y];
   svg.append('text').attr('x', width - mr + 4).attr('y', y(endV) + 4).attr('font-size', 11).attr('fill', 'var(--color-fg)').style('font-variant-numeric', 'tabular-nums').text(endLabel);
   const tip = tdb.tip(el);
-  const dot = svg.append('circle').attr('r', 4).attr('fill', dash.colors[0]).attr('visibility', 'hidden');
+  const dot = svg.append('circle').attr('r', 4).attr('fill', 'var(--color-fg)').attr('visibility', 'hidden');
   svg.append('rect').attr('x', ml).attr('y', 0).attr('width', width - ml - mr).attr('height', height - 18).attr('fill', 'transparent')
     .on('pointermove', (event) => {
       const r = tdbChart.nearest(pts, x, event, svg.node(), width);
@@ -1659,7 +1686,7 @@ dash.draw('fitness', (el) => {
   const fmin = Math.min(-40, d3.min(rows, (r) => r.form_pct)), fmax = Math.max(25, d3.max(rows, (r) => r.form_pct));
   const y2 = d3.scaleLinear([fmin, fmax], [h1 + gap + h2, h1 + gap]);
   const last = rows[rows.length - 1];
-  const ends = ['Fitness ' + Math.round(last.ctl), 'Fatigue ' + Math.round(last.atl), 'High risk', 'Optimal', 'Fresh'];
+  const ends = ['Fitness ' + Math.round(last.ctl), 'Fatigue ' + Math.round(last.atl), 'High risk', 'Optimal', 'Grey zone', 'Fresh', 'Transition'];
   const t1 = y1.ticks(4), t2 = [-30, -10, 5, 20].filter((v) => v > fmin && v < fmax);
   const ml = tdbChart.measure(svg, t1.map(String).concat(t2.map((v) => v + '%')), 10) + 8;
   const mr = tdbChart.measure(svg, ends, 11) + 10;
@@ -1667,7 +1694,7 @@ dash.draw('fitness', (el) => {
   svg.append('g').selectAll('line').data(t1).join('line').attr('x1', ml).attr('x2', width - mr).attr('y1', y1).attr('y2', y1).attr('stroke', 'var(--cds-chart-grid)');
   svg.append('g').selectAll('text').data(t1).join('text').attr('x', ml - 6).attr('y', (v) => y1(v) + 3).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text(String);
   // form zones
-  const zones = [[fmin, -30, 'var(--cds-chart-status-critical)', 0.1, 'High risk'], [-30, -10, dash.colors[0], 0.12, 'Optimal'], [5, 20, dash.colors[2], 0.12, 'Fresh']];
+  const zones = [[fmin, -30, tdb.ZONES[5], 0.14, 'High risk'], [-30, -10, tdb.ZONES[2], 0.14, 'Optimal'], [-10, 5, 'var(--cds-chart-muted)', 0.08, 'Grey zone'], [5, 20, tdb.ZONES[1], 0.14, 'Fresh'], [20, fmax, tdb.ZONES[3], 0.14, 'Transition']];
   zones.forEach(([a, b, c, o, l]) => {
     const lo = Math.max(a, fmin), hi = Math.min(b, fmax);
     if (hi <= lo) return;
@@ -1677,12 +1704,12 @@ dash.draw('fitness', (el) => {
   svg.append('g').selectAll('text').data(t2).join('text').attr('x', ml - 6).attr('y', (v) => y2(v) + 3).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text((v) => v + '%');
   svg.append('line').attr('x1', ml).attr('x2', width - mr).attr('y1', y2(0)).attr('y2', y2(0)).attr('stroke', 'var(--cds-chart-axis)');
   const bw = Math.max(1, (x(d3.utcDay.offset(start, 1)) - x(start)) - 1);
-  const zc = (v) => (v < -30 ? 'var(--cds-chart-status-critical)' : v < -10 ? dash.colors[0] : v < 5 ? 'var(--cds-chart-muted)' : dash.colors[2]);
+  const zc = (v) => (v < -30 ? tdb.ZONES[5] : v < -10 ? tdb.ZONES[2] : v < 5 ? 'var(--cds-chart-muted)' : v < 20 ? tdb.ZONES[1] : tdb.ZONES[3]);
   svg.append('g').selectAll('rect').data(rows.filter((r) => r.form_pct != null)).join('rect').attr('x', (r) => x(r.d) - bw / 2).attr('width', bw)
     .attr('y', (r) => y2(Math.max(0, r.form_pct))).attr('height', (r) => Math.abs(y2(r.form_pct) - y2(0))).attr('fill', (r) => zc(r.form_pct));
   const line = (k, c, w) => svg.append('path').datum(rows).attr('fill', 'none').attr('stroke', c).attr('stroke-width', w).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').attr('d', d3.line((r) => x(r.d), (r) => y1(r[k])));
-  line('atl', 'var(--cds-chart-muted)', 1.5);
-  line('ctl', dash.colors[0], 2);
+  line('atl', tdb.ATL, 1.8);
+  line('ctl', tdb.CTL, 2.4);
   let yA = y1(last.ctl) + 4, yB = y1(last.atl) + 4;
   if (Math.abs(yA - yB) < 12) { if (yA <= yB) yB = yA + 12; else yA = yB + 12; }
   svg.append('text').attr('x', width - mr + 4).attr('y', yA).attr('font-size', 11).attr('fill', 'var(--color-fg)').text(ends[0]);
@@ -1711,7 +1738,7 @@ dash.draw('weekly', (el) => {
   const x = d3.scaleBand(data.map((r) => r.week), [ml, width - mr]).padding(0.25);
   svg.append('g').selectAll('line').data(yt).join('line').attr('x1', ml).attr('x2', width - mr).attr('y1', y).attr('y2', y).attr('stroke', 'var(--cds-chart-grid)');
   svg.append('g').selectAll('text').data(yt).join('text').attr('x', ml - 6).attr('y', (v) => y(v) + 3).attr('text-anchor', 'end').attr('font-size', 10).attr('fill', 'var(--color-fg-muted)').text((v) => v + ' h');
-  const parts = [['low_h', dash.colors[0]], ['mid_h', dash.colors[2]], ['high_h', dash.colors[3]], ['other_h', 'var(--cds-chart-muted)']];
+  const parts = [['low_h', tdb.ZONES[1]], ['mid_h', tdb.ZONES[3]], ['high_h', tdb.ZONES[5]], ['other_h', 'var(--cds-chart-muted)']];
   const bw = Math.min(32, x.bandwidth());
   const tip = tdb.tip(el);
   data.forEach((r) => {
@@ -1736,7 +1763,7 @@ dash.draw('dist', (el) => {
   const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${width} ${height}`).attr('role', 'img').attr('aria-label', 'Share of easy, moderate and hard time over 28 days');
   const x = d3.scaleLinear([0, 100], [0, width]);
   let acc = 0;
-  [['low_pct', dash.colors[0], 'Easy'], ['mid_pct', dash.colors[2], 'Moderate'], ['high_pct', dash.colors[3], 'Hard']].forEach(([k, c, l]) => {
+  [['low_pct', tdb.ZONES[1], 'Easy'], ['mid_pct', tdb.ZONES[3], 'Moderate'], ['high_pct', tdb.ZONES[5], 'Hard']].forEach(([k, c, l]) => {
     const v = r[k] || 0;
     svg.append('rect').attr('x', x(acc)).attr('width', Math.max(0, x(acc + v) - x(acc) - 1)).attr('y', 14).attr('height', 22).attr('fill', c);
     if (x(v) > 44) svg.append('text').attr('x', x(acc) + 6).attr('y', 29).attr('font-size', 11).attr('fill', 'var(--color-bg)').text(v + '%');
@@ -1836,7 +1863,7 @@ dash.draw('freq', (el) => {
       for (let k = 0; k < slots; k++) {
         const filled = k < n;
         svg.append('circle').attr('cx', ox + r + k * gap).attr('cy', y + 10).attr('r', r)
-          .attr('fill', filled ? (met ? dash.colors[0] : 'var(--cds-chart-status-critical)') : 'transparent')
+          .attr('fill', filled ? (met ? 'var(--color-ok)' : 'var(--color-bad)') : 'transparent')
           .attr('stroke', filled ? 'none' : k < a.min ? 'var(--cds-chart-status-critical)' : 'var(--cds-chart-axis)')
           .attr('stroke-width', 1.4).attr('stroke-dasharray', !filled && k >= a.min ? '2 2' : null);
       }
@@ -1952,17 +1979,19 @@ dash.draw('timeline', (el) => {
   phases.forEach((p, i) => {
     const x0 = x(tdb.parse(p.start)), x1 = x(d3.utcDay.offset(tdb.parse(p.end), 1));
     const current = today >= tdb.parse(p.start) && today <= tdb.parse(p.end);
+    const past = today > tdb.parse(p.end);
+    const pc = d3.interpolateTurbo(0.12 + 0.76 * (phases.length > 1 ? i / (phases.length - 1) : 0.4));
     svg.append('rect').attr('x', x0 + 1).attr('y', 34).attr('width', Math.max(2, x1 - x0 - 2)).attr('height', 26).attr('rx', 4)
-      .attr('fill', current ? dash.colors[0] : 'var(--cds-chart-muted)').attr('fill-opacity', current ? 1 : 0.35)
+      .attr('fill', pc).attr('fill-opacity', current ? 1 : past ? 0.4 : 0.8).attr('stroke', current ? 'var(--color-fg)' : 'none').attr('stroke-width', 1.5)
       .on('pointermove', (event) => tdb.showTip(el, tip, event, [tdb.fmtDay(p.start) + ' – ' + tdb.fmtDay(p.end) + (p.approx === 'Y' ? ' (approx.)' : ''), p.label, p.detail]))
       .on('pointerleave', () => { tip.hidden = true; });
     if (x1 - x0 > 26) svg.append('text').attr('x', x0 + 6).attr('y', 51).attr('font-size', 11).attr('pointer-events', 'none')
-      .attr('fill', current ? 'var(--color-bg)' : 'var(--color-fg)').text(p.id);
+      .attr('fill', past ? 'var(--color-fg)' : d3.hsl(pc).l > 0.55 ? '#111' : '#fff').text(p.id);
   });
   miles.forEach((mm) => {
     const cx = x(tdb.parse(mm.start));
     svg.append('path').attr('d', d3.symbol(d3.symbolDiamond, 52)()).attr('transform', `translate(${cx},76)`)
-      .attr('fill', 'var(--color-fg-muted)')
+      .attr('fill', '#f2c200').attr('stroke', 'var(--color-fg-muted)').attr('stroke-width', 0.8)
       .on('pointermove', (event) => tdb.showTip(el, tip, event, [tdb.fmtDay(mm.start) + (mm.end ? ' – ' + tdb.fmtDay(mm.end) : '') + (mm.approx === 'Y' ? ' (approx.)' : ''), mm.label, mm.detail]))
       .on('pointerleave', () => { tip.hidden = true; });
   });
