@@ -2,6 +2,15 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-06.2
+
+*Touches:* setup prompt (section 3, strength event format: prose and Watch log bullets, one new App version bullet) and the check-in skill template (same bullets).
+*If you already use the kit:* only if you use the Strength Coach watch app. Add the three sentences below to your saved check-in skill. No data files, datasets or dashboard changes.
+
+- Never start a prose line with the words `Watch log`: the watch stops reading sets there.
+- Find the Watch log by its `Watch log (...)` line, not by the app name (the watch header says `Strength Coach`, the store listing is `Strength Coach Interpreter`).
+- App version note: 1.2.x, current store version 1.2.2, which shows an unequal left/right count as `+1 L` / `+1 R` in the overview.
+
 ## 2026-11-06
 
 *Touches:* setup prompt (section 3, "Writing workouts to intervals.icu": strength event format and the check after writing) and the check-in skill template (the same strength event format bullets).

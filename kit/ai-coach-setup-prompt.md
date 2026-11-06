@@ -336,8 +336,9 @@ Every chat, check-in and scheduled run costs me tokens or credits, so work lean:
   - **Multiple sets:** one separate line per set. There is no "3x10" shorthand. Straight sets are consecutive lines of the same exercise (A, A, A, B, B, B).
   - **Left and right:** two lines per round, left first, then right. An extra left set (left-leg program) is one more `left` line, written exactly where it should be done, directly next to that exercise's other lines (for example left, left, right in round 1). Inside a superset this is fine: the watch detects supersets from the order of the exercises, not from the number of lines per exercise, so the bracket stays.
   - **Supersets:** not marked in the text. The watch recognises them from the line order: a cycle of 2 to 4 different exercises that repeats at least twice (A, B, A, B or A, B, C, A, B, C). The overview draws these exercises together with a bracket. To schedule a superset, write the lines in that repeating order. Straight sets are not a superset.
-  - **Prose:** lines without a `|` are ignored by the watch, so a short description can go above or below the set lines. Put the duration in the **first prose line**, for example `Strength D, ~40 min.`: the watch takes the first `N min` it finds in the prose, so a later `5 min warm-up` or an earlier mention would be shown instead. Prose must never contain the character `|`.
+  - **Prose:** lines without a `|` are ignored by the watch, so a short description can go above or below the set lines. Put the duration in the **first prose line**, for example `Strength D, ~40 min.`: the watch takes the first `N min` it finds in the prose, so a later `5 min warm-up` or an earlier mention would be shown instead. Prose must never contain the character `|`. Never start a prose line with the words `Watch log`: the watch stops reading sets at the first line that starts with them, so every set line after it would be lost.
   - **Overview:** before the first set the watch shows a compact overview: same-exercise sets bundled into one row, supersets with a bracket, left/right as L/R, a header with the workout name, the number of sets and the duration from the prose. Write workouts so this looks clean: identical exercise names, consistent loads, a duration line.
+  - **App version:** 1.2.x (1.2.2 is the current store version; since 1.2.1 an unequal left/right count shows as `3x10 L/R +1 L`).
   - **What changed in 1.2.x:** the line syntax itself is unchanged. Failure sets (`max`) exist since app version 1.1.0. What is new is how the watch reads the lines (bundling, superset detection from the line order, L/R rows, duration from the prose).
   - **Examples (use these as templates):**
 
@@ -405,6 +406,7 @@ Every chat, check-in and scheduled run costs me tokens or credits, so work lean:
   13. Side plank | left | 28 s | bodyweight
   ```
   Skipped sets say `skipped`. The numbering is the plan's.
+  - Find the Watch log by its line `Watch log (...)`, not by the app's name: the watch shows `Strength Coach` in its header and the Connect IQ Store lists it as `Strength Coach Interpreter`, and the name in the log line may change.
   - When I report a session or ask for a debrief, read the event description first and use the Watch log as the primary source for the actual reps, seconds and weights: compare them with the plan, work out the left/right difference, then write `strength_sets.csv` and `sessions.csv` as the kit already describes. Ask only about sets that are missing or skipped.
   - Never overwrite or shorten the description of an event that already has a Watch log. When editing a strength event, fetch the current description and keep the Watch log block verbatim at the end.
   - Do not treat Watch log lines as a plan: they record what happened.
@@ -534,4 +536,4 @@ description: "Use when <ATHLETE> wants to set up the coaching again or move to a
 
 **Export format** (what section 1 expects to import): the title "Coaching setup export (<date>)", then the ten parts in the order above, with interview answers numbered like section 1 of the kit version they were written for. When the new kit has items the export doesn't cover, ask only those.
 
-Kit version: 2026-11-06. Start now with the first interview questions.
+Kit version: 2026-11-06.2. Start now with the first interview questions.
