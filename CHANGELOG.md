@@ -11,7 +11,8 @@ The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entrie
 - Four example sessions added as templates (straight sets, superset with a one-sided exercise, timed and one-sided superset, failure sets with a three-exercise circuit).
 - The prose above or below the set lines should carry a duration such as `~35 min`, and must never contain the character `|`.
 - Failure sets are written exactly `max`. An extra set for one side is simply one more `left` line where it should be done; it does not break the superset detection.
-- Two new checks after writing a strength event: a planned superset repeats in the same order at least twice, and the prose has a duration line.
+- Two new checks after writing a strength event: a planned superset repeats in the same order at least twice, and the first prose line carries the duration.
+- The duration goes in the first prose line (for example `Strength D, ~40 min.`): the watch uses the first `N min` it finds in the prose, so an earlier or later mention such as `5 min warm-up` could be shown instead.
 
 ## 2026-11-05.2
 
