@@ -2,6 +2,17 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-06
+
+*Touches:* setup prompt (section 3, "Writing workouts to intervals.icu": strength event format and the check after writing) and the check-in skill template (the same strength event format bullets).
+*If you already use the kit:* only if you use the Strength Coach watch app (version 1.2.x). Replace the strength event format bullets and the "After writing a strength event" check in your saved check-in skill with the new text from the template. No data files, datasets or dashboard changes.
+
+- Strength event format rewritten for Strength Coach 1.2.x: the line syntax is unchanged (`N. EXERCISE NAME | TARGET | LOAD | SIDE`), but the watch now reads the lines differently. Same-exercise sets are bundled into one overview row, supersets are detected from the line order (a cycle of 2 to 4 different exercises that repeats at least twice) and drawn with a bracket, left and right sets share an L/R row, and the overview header shows the duration from the prose.
+- Four example sessions added as templates (straight sets, superset with a one-sided exercise, timed and one-sided superset, failure sets with a three-exercise circuit).
+- The prose above or below the set lines should carry a duration such as `~35 min`, and must never contain the character `|`.
+- Failure sets are written exactly `max`. An extra set for one side is simply one more `left` line where it should be done; it does not break the superset detection.
+- Two new checks after writing a strength event: a planned superset repeats in the same order at least twice, and the prose has a duration line.
+
 ## 2026-11-05.2
 
 *Touches:* dashboard template only (`kit/coach-kit-dashboard.html`: the colour helpers in the `tdb` object and the drawings for muscle maps, muscle load bars, workout blocks, recovery trends, fitness/form, weekly hours, intensity split and the season timeline; one sentence in the Recovery intro).

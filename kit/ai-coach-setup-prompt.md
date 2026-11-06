@@ -323,25 +323,81 @@ Every chat, check-in and scheduled run costs me tokens or credits, so work lean:
 
 ### Writing workouts to intervals.icu
 - Step lines start with `- `. Put a blank line before and after every repeat block (`4x` or `Label 4x`). Don't indent the steps inside a repeat.
-- **Strength event format** (intervals.icu, type `WeightTraining`). Write the session in the event `description`, not in `workout_doc`: strength events are not parsed by intervals.icu, so there are no `- ` step lines. A companion watch app that reads the session expects exactly this format.
-  - An optional prose header comes first (cues, tempo, why). It must not contain the character `|`.
-  - One strength event per day: put the whole session in a single `WeightTraining` event. A companion watch app reads only the first strength event of the day, so a second one would be ignored.
-  - Then one line per set, in the exact order the sets are done: `<n>. <exercise name> | <target> | <load> | <side>`. For example:
+- **Strength event format** (intervals.icu, type `WeightTraining`). These rules match the Strength Coach watch app, version 1.2.x. Every strength workout you schedule must follow this format.
+  - **Where:** put the session in the intervals.icu event `description` (event type `WeightTraining`), not in a structured workout (`workout_doc`). Strength events are not parsed by intervals.icu, so there are no `- ` step lines.
+  - **One strength event per day:** put the whole session in a single `WeightTraining` event. The watch app reads only the first strength event of the day, so a second one would be ignored.
+  - **Line format:** one line per set, in the exact order the sets are done: `N. EXERCISE NAME | TARGET | LOAD | SIDE`
+    - `N` runs 1, 2, 3 ... across the whole session and does not restart per exercise.
+    - `TARGET`: `10 reps` for reps, `30 s` for a timed hold, or `max` for a set to failure (the watch shows MAX). Nothing else goes in that field. Never write a placeholder number for a failure set. For "hold as long as you can", plan a target time (`60 s`) and say so in the prose.
+    - `LOAD`: `16 kg`, `14 kg (6+8)`, `bodyweight` (shown as BW) or `band: red`. If the band colour is unknown, ask me; never write a placeholder like "one band".
+    - `SIDE`: `left` or `right` for one-sided work. Leave the field out for two-sided exercises.
+    - The exercise name must be identical on every line of that exercise (and contain no `.`).
+    - Rest is not written. The watch counts up by itself.
+  - **Multiple sets:** one separate line per set. There is no "3x10" shorthand. Straight sets are consecutive lines of the same exercise (A, A, A, B, B, B).
+  - **Left and right:** two lines per round, left first, then right. An extra left set (left-leg program) is one more `left` line, written exactly where it should be done, directly next to that exercise's other lines (for example left, left, right in round 1). Inside a superset this is fine: the watch detects supersets from the order of the exercises, not from the number of lines per exercise, so the bracket stays.
+  - **Supersets:** not marked in the text. The watch recognises them from the line order: a cycle of 2 to 4 different exercises that repeats at least twice (A, B, A, B or A, B, C, A, B, C). The overview draws these exercises together with a bracket. To schedule a superset, write the lines in that repeating order. Straight sets are not a superset.
+  - **Prose:** lines without a `|` are ignored by the watch, so a short description can go above or below the set lines. It may contain the duration, for example `~35 min`, which the overview shows in its header. Prose must never contain the character `|`.
+  - **Overview:** before the first set the watch shows a compact overview: same-exercise sets bundled into one row, supersets with a bracket, left/right as L/R, a header with the workout name, the number of sets and the duration from the prose. Write workouts so this looks clean: identical exercise names, consistent loads, a duration line.
+  - **What changed in 1.2.x:** the line syntax itself is unchanged. Failure sets (`max`) exist since app version 1.1.0. What is new is how the watch reads the lines (bundling, superset detection from the line order, L/R rows, duration from the prose).
+  - **Examples (use these as templates):**
+
+    Example 1: straight sets, sequences that change
     ```
+    Full body, ~30 min. Slow lowering.
+    1. Goblet squat | 10 reps | 16 kg
+    2. Goblet squat | 10 reps | 16 kg
+    3. Goblet squat | 10 reps | 16 kg
+    4. Romanian deadlift | 12 reps | 20 kg
+    5. Romanian deadlift | 10 reps | 22 kg
+    6. Romanian deadlift | 8 reps | 24 kg
+    7. Dead bug | 12 reps | bodyweight
+    8. Dead bug | 12 reps | bodyweight
+    ```
+
+    Example 2: superset with a one-sided exercise
+    ```
+    Lower body and pull, ~40 min.
     1. Bulgarian split squat | 10 reps | 14 kg (6+8) | left
     2. Bulgarian split squat | 10 reps | 14 kg (6+8) | right
-    3. Push-ups | 12 reps | bodyweight
-    4. Side plank | 30 s | bodyweight | left
+    3. Pull-ups | 6 reps | bodyweight
+    4. Bulgarian split squat | 10 reps | 14 kg (6+8) | left
+    5. Bulgarian split squat | 10 reps | 14 kg (6+8) | right
+    6. Pull-ups | 6 reps | bodyweight
+    7. Bulgarian split squat | 10 reps | 14 kg (6+8) | left
+    8. Bulgarian split squat | 10 reps | 14 kg (6+8) | right
+    9. Pull-ups | 5 reps | bodyweight
     ```
-  - `n` runs 1..N across the whole session and does not restart per exercise. No set counts like "3x10": a 3-set exercise is 3 lines (6 if it is one-sided).
-  - Target: `N reps`, `N s` (a timed hold) or `max` (a set to failure, see below). Nothing else goes in that field.
-  - **Failure sets (MAX).** When I say to take a set to failure or to maximum reps, write `max` in the target field so the watch shows **MAX** instead of a rep count: `3. Push-ups | max | bodyweight`. The target field (case-insensitive) must contain `max`, `amrap` or `failure` (`max`, `max reps`, `AMRAP` and `to failure` all work), and nothing else goes in that field. A number in the same field (`max 12 reps`) is not shown; it only becomes the starting value on the watch's adjust screen when there is no earlier set of that exercise. Never write a placeholder number (`10 reps`) for a failure set: the watch would show 10. MAX is for reps only: a timed hold is always `N s`, and there is no max-duration syntax, so for "hold as long as you can" plan a target time (`60 s`) and say so in the prose header.
-  - Load: contains `kg` (`14 kg`, `14 kg (6+8)`), or `bodyweight`, or `band` (`band: red`). If the band colour is unknown, ask me; never write a placeholder like "one band".
-  - Side: `left` or `right` for one-sided work only. For bilateral exercises leave the field out (3 fields instead of 4).
-  - The exercise name must be identical on every line of that exercise, and must not contain a `.`.
-  - Supersets, side switches and extra sets are expressed only by line order: A, B, A, B ...; left, right; an extra left set is one more `left` line. Rest is not planned in the text.
-  - Dates: the `external_id` must use the same date as the event's start date (for example `claude-2026-11-03-strength-b` on 3 November).
-- **After writing a strength event,** re-read it with `include_full` and check that (a) every line containing `|` starts with a number and a dot, (b) exercise names are consistent, (c) each line has exactly one target and one load field, (d) the prose header contains no `|`, and (e) the `external_id` date equals the event's start date. Fix and rewrite the event if any check fails.
+
+    Example 3: timed and one-sided superset
+    ```
+    Core and calves, ~25 min
+    1. Side plank | 30 s | bodyweight | left
+    2. Side plank | 30 s | bodyweight | right
+    3. Calf raise | 15 reps | 16 kg | left
+    4. Calf raise | 15 reps | 16 kg | right
+    5. Side plank | 30 s | bodyweight | left
+    6. Side plank | 30 s | bodyweight | right
+    7. Calf raise | 15 reps | 16 kg | left
+    8. Calf raise | 15 reps | 16 kg | right
+    ```
+
+    Example 4: failure sets and a three-exercise circuit
+    ```
+    Upper body, ~35 min
+    1. Push-ups | max | bodyweight
+    2. Band row | 15 reps | band: red
+    3. Plank | 45 s | bodyweight
+    4. Push-ups | max | bodyweight
+    5. Band row | 15 reps | band: red
+    6. Plank | 45 s | bodyweight
+    7. Push-ups | max | bodyweight
+    8. Band row | 15 reps | band: red
+    9. Plank | 45 s | bodyweight
+    10. Pull-ups | max | bodyweight
+    11. Pull-ups | max | bodyweight
+    ```
+  - **Dates:** the `external_id` must use the same date as the event's start date (for example `claude-2026-11-03-strength-b` on 3 November).
+- **After writing a strength event,** re-read it with `include_full` and check that (a) every line containing `|` starts with a number and a dot, (b) exercise names are consistent, (c) each line has exactly one target and one load field, (d) the prose contains no `|`, (e) the `external_id` date equals the event's start date, (f) a planned superset's lines repeat in the same order at least twice (and straight sets are not accidentally interleaved), and (g) the prose has a duration line such as `~35 min`. Fix and rewrite the event if any check fails.
 - **Watch log** (optional; only if I use a companion watch app that guides the session). After a session such an app appends a block to the same event description:
   ```
   Watch log (<app>, 2026-10-31 08:20):
@@ -478,4 +534,4 @@ description: "Use when <ATHLETE> wants to set up the coaching again or move to a
 
 **Export format** (what section 1 expects to import): the title "Coaching setup export (<date>)", then the ten parts in the order above, with interview answers numbered like section 1 of the kit version they were written for. When the new kit has items the export doesn't cover, ask only those.
 
-Kit version: 2026-11-05.2. Start now with the first interview questions.
+Kit version: 2026-11-06. Start now with the first interview questions.
