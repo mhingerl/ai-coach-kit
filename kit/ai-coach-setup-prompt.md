@@ -45,7 +45,7 @@ Cover:
 6. **Strength.** Equipment at home or gym, including weights, bars, bands and what surfaces are safe to stand or step on. If I have several resistance bands, record which ones are used for which exercise. Also my experience, current exercises and loads, and whether I work with a physiotherapist. If equipment will change (e.g. gym access from a certain date), note when.
 7. **Injuries and niggles.** Anything a physio or doctor has told me to do or avoid, and whether one side is weaker or needs priority (this decides the optional left-vs-right dashboard module).
 8. **Recovery.** Sleep, stress, what data I track (HRV, resting HR, sleep score).
-9. **Nutrition.** Diet style, restrictions, whether I want fueling and nutrition guidance, how much detail, and whether I'd like to log meals by sending food photos. If I log food, also ask for the foods and supplements I use regularly (products, usual portions, e.g. protein powder with scoop size, oats, bars, gels, drink mix).
+9. **Nutrition.** Diet style, restrictions, whether I want fueling and nutrition guidance, how much detail, and whether I'd like to log meals by sending food photos. If I log food, also ask for the foods and supplements I use regularly (products, usual portions, e.g. protein powder with scoop size, oats, bars, gels, drink mix), and whether a day I log is complete (default: yes, a meal I don't log is one I skipped).
 10. **Coaching style.** How much you decide versus ask, how detailed you should be, and my shorthand for reporting sets (see section 5). Also two permissions: whether you may delete future workouts you created on my intervals.icu calendar when plans change, and whether you set my FTP (outdoor and indoor) yourself from my performance or propose it first.
 11. **Devices and tools.** Watch or bike computer brand and model; whether I have an intervals.icu account and which device feeds it; computer (Mac, Windows, none) and phone (iPhone, Android); smart scale (brand and model); how comfortable I am installing an app or editing a settings file with guidance.
 12. **Dashboard.** Which of the dashboard's panels I want (show the list in section 2.4) and anything else I'd like to see.
@@ -120,6 +120,8 @@ Keep my training record as CSV files in the project under `claude/data/`, plus a
 | `wellness.csv` | day | date, hrv_ms, rhr_bpm, sleep_h, sleep_score, sleep_hr_bpm, resp_sleep, sleep_stress, body_battery_peak, stress_avg, steps, weight_kg, source |
 | `fitness.csv` | day | date, ctl, atl, load, strength_load |
 | `activities.csv` | completed activity | date, activity_id, name, type, indoor, commute, moving_min, distance_km, elevation_m, load, avg_w, np_w, avg_hr, low_min, mid_min, high_min, event_id |
+| `activity_extras.csv` | completed activity | activity_id, date, start_local, elapsed_min, carbs_g, quality, pre_kg, post_kg, drank_ml, note |
+| `sleep_timing.csv` | night (keyed by the wake-up date) | date, sleep_start, sleep_end, source |
 | `planned.csv` | planned event (a week back to a week ahead) | date, event_id, name, type, category, planned_min, planned_load, target, strength_plan, notes |
 | `planned_steps.csv` | step of a planned endurance workout | event_id, seq, label, kind, duration_s, lo_pct, hi_pct, ramp, unit |
 
@@ -134,6 +136,7 @@ Rules:
 - `readiness.csv`, `key_sessions.csv`, `ftp_history.csv` start with only the header row; the check-in fills them (section 3). Subjective scores are 1–5; `status` green, amber or red; `verdict` nailed, done, partial or missed; `setting` ftp or indoor_ftp (or threshold_pace / threshold_hr for other sports); `applied` Y, suggested, or baseline (the values in place when logging starts).
 - `wellness.csv`, `fitness.csv`, `activities.csv`, `planned.csv` and `planned_steps.csv` start with only the header row and are filled by the check-in's dashboard sync (section 3) from intervals.icu and the Garmin connection; at setup, backfill the last 90 days if the connection already works. Wellness and fitness are one row per day (a day already there is replaced). In fitness, `load` is the day's total training load and `strength_load` the part from strength sessions; the dashboard works out fitness, fatigue and form from these itself, so backfill a year of daily load (not just 90 days) for a clean start. `ctl`/`atl` are intervals.icu's values, kept only to compare. In activities, `low_min`/`mid_min`/`high_min` are minutes in zones 1–2, 3 and 4+ (power zones when there is power, else heart rate). `planned.csv` holds the calendar from 7 days back to 7 days ahead; for strength sessions `strength_plan` lists `exercise_id:sets` joined by `|`. `planned_steps.csv` holds each planned endurance workout's steps with repeats written out: `lo_pct`/`hi_pct` the target range, `ramp` Y for ramps, `unit` pct_ftp, pct_lthr or pct_pace.
 - Reviews (weekly approach notes, block reviews) go to `claude/reviews/` as markdown. `claude/reviews/block_reviews.csv` holds one summary row per block review (phase_id, phase, start, end, endurance_h, strength_sessions, fitness_start, fitness_end, easy_pct, headline, suggestion, file); it starts with only the header row, is filled each time a block review is written, and is the dataset behind the dashboard's Block reviews panel. `wellness.csv` columns: `sleep_hr_bpm`, `resp_sleep` and `sleep_stress` are the night's average heart rate, breathing rate and stress asleep, `body_battery_peak` the day's Body Battery peak (all from the Garmin connection; leave empty without one).
+- `activity_extras.csv` and `sleep_timing.csv` keep what a review would otherwise have to pull from the connections one activity or one night at a time, so questions such as "do late sessions affect my sleep or HRV?", "do rides go better when I fuel them?" or "does how I feel match my markers?" can be answered from files. Both start with only the header row and are filled by the check-in's dashboard sync; at setup, backfill start times, elapsed times and ride carbs for the last 90 days, and sleep times from setup on (or further back if the Garmin connection gives them cheaply). A key already in the file is replaced (`activity_id`, the same ids as `activities.csv`; the wake-up `date`). `start_local` is the local start time (HH:MM) and `elapsed_min` the elapsed minutes, so the end time is start + elapsed; `carbs_g` the carbs taken during the session (`carbs_ingested_g`; blank = not logged, 0 = none); `quality` my 1–5 rating of how the session went for the effort (5 better than expected, 3 as expected, 1 far worse; blank if I gave none); `pre_kg`, `post_kg` and `drank_ml` for long sessions with a weigh-in before and after (sweat loss = pre − post + drank); `sleep_start` and `sleep_end` local `YYYY-MM-DD HH:MM` from the sleep record; `source` where the times came from (e.g. garmin). The dashboard doesn't read these two files, so the project copy is the master.
 - If I give you an older log, convert it into these files. Optional modules add their own files (see 2.4).
 
 ### 2.4 Dashboard
@@ -204,11 +207,12 @@ Every check-in starts with a readiness rating (green, amber or red) and the sess
 3. Debrief any key session since the last check-in, check FTP if there's new evidence, and write the block review if a phase has ended (see below).
 4. Check the weather where I live if an outdoor session is involved. Cross-check two sources and treat rain percentages as approximate.
 5. **Rate readiness.** Objective markers first:
-   - HRV: 7-day rolling mean against a normal band of the 60-day mean ± 0.5 SD.
+   - HRV: 7-day rolling mean against a normal band of the 60-day mean ± 0.5 SD. Last night's value on its own counts only when it is more than 1 SD below the mean and no late session explains it: after a session that ended late in the evening (within about 3 hours of going to sleep; end = start + elapsed time) or a late big meal, a one-night dip is expected and doesn't count unless another marker agrees.
    - Resting HR against its 30-day mean.
    - Last night's sleep against my norm.
    - Form (TSB as % of CTL) and ramp rate.
    - Garmin Body Battery and stress, if connected.
+   - (optional) Heart rate at power on a repeatable benchmark, if I ride or run the same route often (a climbing commute, a fixed climb or test loop) with power and HR: fit average HR against average power on that route over 10+ normal sessions, then compare each new one with the line. HR 6 bpm or more above it (about 1.5 times the line's usual scatter) is a supporting marker that counts only with another flag; heat, a big meal, caffeine or a new bike or position raise it too. Note the line in the annual plan's monitoring section and refit it at each block review and after a break.
 
    Then **ask how I feel** (legs, energy, sleep quality, motivation, 1–5, plus anything sore), before settling on intensity, not only when the data looks bad. Rules:
    - **Green:** no red marker and at most one explained amber.
@@ -257,6 +261,7 @@ Regular foods and supplements: keep a list of what I use regularly (product, usu
 
 Rules:
 - The numbers must add up: items to subtotals, subtotals to the meal total, meal totals to the running total.
+- A logged day is complete (unless I said otherwise in the interview, or say a day is partial): once I've logged anything for a day, a meal I didn't log was skipped. Write that into the note ("No breakfast.") instead of guessing a meal in, and use logged days as real totals, not lower bounds. Days with no entries at all are unlogged and stay out of averages.
 - Include as many values as possible, fibre above all (it is easy to miss), then protein.
 - Fuel taken during a ride is its own entry; also set `carbs_ingested_g` on that activity.
 - Packaging photos (cheese, spreads, powders) are for identifying the product; name the product on the item line. Ask about cooking fat, dressings and drinks.
@@ -294,7 +299,8 @@ Add one summary row for it to `claude/reviews/block_reviews.csv` (columns in 2.3
 - Whenever I report details (sets, reps, loads, how a session felt, what I cut short), log them without being asked:
   - Add them to the completed activity's description. Read the existing description first and add below it, never overwrite it.
   - Add strength sets to `claude/data/strength_sets.csv` and the session to `claude/data/sessions.csv`, update the lift's progression line in the strength log if it moved, then refresh the dashboard with the cheap flow below ("Dashboard refresh").
-- **Dashboard sync** at every check-in, after calendar changes and after logging a session: add the days since the last sync to `wellness.csv` and `fitness.csv` (daily load and its strength part), new activities to `activities.csv` (with minutes in zones 1–2, 3 and 4+), and rewrite the calendar window in `planned.csv` and `planned_steps.csv` (7 days back to 7 days ahead, repeats written out). Apply the changes once, at the end of the check-in, only for files that changed, with the cheap flow in "Dashboard refresh" below. If the connection isn't reachable, say the dashboard is as of the last sync.
+- **Session quality:** after rides, runs and key sessions, if I didn't say how it went, ask once for a 1–5 rating (how it went for the effort: 5 better than expected, 3 as expected, 1 far worse) and put it in `activity_extras.csv`, together with weigh-ins before and after a long session if I did them. Over a season these ratings are what let a review test whether my markers, sleep, session timing or fuelling actually predict how sessions go.
+- **Dashboard sync** at every check-in, after calendar changes and after logging a session: add the days since the last sync to `wellness.csv` and `fitness.csv` (daily load and its strength part), new activities to `activities.csv` (with minutes in zones 1–2, 3 and 4+) and `activity_extras.csv` (start time, elapsed time, ride carbs, quality), the nights since the last sync to `sleep_timing.csv` (sleep start and end, if the Garmin connection is set up), and rewrite the calendar window in `planned.csv` and `planned_steps.csv` (7 days back to 7 days ahead, repeats written out). Apply the changes once, at the end of the check-in, only for files that changed, with the cheap flow in "Dashboard refresh" below (the two files without a dataset only get the script merge and the project backup). If the connection isn't reachable, say the dashboard is as of the last sync.
 - When a session teaches us something (a bonk, a pacing error, a recurring niggle), write the lesson into the annual plan's monitoring section as a dated note.
 - Tell me honestly about trends: missed sessions, fitness slipping, a lift that stopped progressing, a pattern of hard failures.
 
@@ -435,6 +441,7 @@ Every chat, check-in and scheduled run costs me tokens or credits, so work lean:
 - **Double-threshold days** in the Norwegian style use deliberately controlled intensity (roughly 85–92% of maximal sustainable effort), not all-out. If I go harder, forecast the cost and plan the following days around it.
 - **The commute is training.** Look at its actual power, pace and HR, not just its existence. Easy extensions of the trip home are a good way to add volume without a separate session.
 - **Recompute a structured workout when the available time changes.** Don't just cut it off.
+- **Protect the long session.** In base phases, weekly volume shortfalls mostly come from the week's long ride or run being shortened or skipped. Treat it as the volume anchor: give it a fixed slot, plan the shorter sessions around it, and when time runs short cut something else first.
 - **For long sessions:** keep intensity capped, cap optional efforts (for example "3–4 climbs of 10–15 min at sweet spot, only in the first two-thirds"), and set a fueling plan.
 - Use the progression rules in the library: one variable at a time, progress after 2 good sessions in a row, hold or step back after failed ones.
 
@@ -449,6 +456,7 @@ Every chat, check-in and scheduled run costs me tokens or credits, so work lean:
   - key areas 2–3 times a week (for cyclists and runners typically posterior chain, glute/hip abductors, calves and quads)
   - non-key areas 1–2 times a week (upper-body pull and push, posture work, core, adductors)
   - Once weekly volume is equal, going higher than that adds little. Lower frequency makes sessions easier to actually get done.
+- **Priority minimums go in the core sessions.** Work that has to happen every week (a rehab or prehab exercise, a weaker side, calves or balance for a runner) belongs in the sessions that always get done, not in an optional or "if there's time" session, which is the first to be dropped.
 - **Superset lower-body exercises with upper-body or core exercises,** so one recovers while the other works. Two low-fatigue lower exercises can also pair (for example calf raise with clam shells). Heaviest lower-body exercise first. Usually 2–3 supersets of 2–3 rounds, about 30–40 minutes.
 - **Coordinate with endurance work:**
   - Heavy leg work goes on or right after hard days.
@@ -465,7 +473,7 @@ Every chat, check-in and scheduled run costs me tokens or credits, so work lean:
 
 ### Recovery and data interpretation
 - Weigh the multi-day trend and my same-day subjective report over a single reading.
-- One low HRV after a late-evening session or a late dinner is often a timing artifact rather than fatigue.
+- One low HRV after a late-evening session or a late dinner is often a timing artifact rather than fatigue. Check the session's end time and the next night before reading anything into it; a review can test whether the pattern holds for me (late sessions against next-morning HRV and against how the next sessions went).
 - Some platforms count a *planned* but skipped session's load in ATL/TSB for that day. If the TSB number looks worse than reality, check completed activities before acting on it.
 - Soreness 24–48 hours after heavy eccentric work is normal. Easy movement clears it better than rest. Ask whether it's local soreness or systemic flatness, because the adjustment differs.
 - Back off regardless of the plan when there's real, sustained strain: HRV trending down, resting HR trending up, poor sleep across several days, or persistent flatness.
@@ -536,4 +544,4 @@ description: "Use when <ATHLETE> wants to set up the coaching again or move to a
 
 **Export format** (what section 1 expects to import): the title "Coaching setup export (<date>)", then the ten parts in the order above, with interview answers numbered like section 1 of the kit version they were written for. When the new kit has items the export doesn't cover, ask only those.
 
-Kit version: 2026-11-06.2. Start now with the first interview questions.
+Kit version: 2026-11-09. Start now with the first interview questions.

@@ -55,12 +55,17 @@ Describe what <ATHLETE> already did from **completed activity and wellness data*
 | Marker | Baseline | Amber | Red |
 |---|---|---|---|
 | HRV, 7-day rolling mean | normal band = 60-day mean ± 0.5 SD (one source) | below the band | below the band and falling 3+ days, or >1 SD below the mean |
-| HRV, today | same | >1 SD below the mean (not after a late session or late meal) | only with another flag |
+| HRV, today | same | >1 SD below the mean, unless a late session or late big meal explains it (see below) | only with another flag |
 | Resting HR | 30-day mean | ≥ 5 bpm above | ≥ 8 bpm above, or 7-day mean ≥ 3 bpm above |
 | Sleep | own 30-day norm | under 6 h, or two nights under 6.5 h | under 5 h |
 | Heart rate asleep (average) | 30-night median | ≥ 5 bpm above | possible illness: ≥ 8 bpm above, or ≥ 5 with breathing asleep ≥ 1.5 breaths/min or overnight stress ≥ 10 above their medians; makes the day red |
 | (optional) Watch numbers: overnight stress, Body Battery peak | 30-day medians | stress ≥ 10 above, or Body Battery peak ≥ 25 below | only with another flag |
 | Load | form = TSB as % of CTL; ramp | form below -30%, or ramp above ~+8 CTL/week | form below -30% plus an HRV or resting-HR flag |
+| (optional) Benchmark HR at power | line of average HR against average power on <BENCHMARK ROUTE>, fitted on 10+ normal sessions | ≥ 6 bpm above the line (about 1.5 × its usual scatter), counted only with another flag | never on its own |
+
+**Late sessions.** After a session that ended late in the evening (within about 3 hours of going to sleep; end = start + elapsed time from the activity, or `activity_extras.csv`; sleep start from `sleep_timing.csv` when there is one) or a late big meal, a one-night HRV dip is expected: last night's HRV then doesn't count on its own, only if another marker agrees. Say it in the reasons ("HRV dip after the 21:00 ride, not counted"). The 7-day HRV rule is unchanged.
+
+**(optional) Benchmark HR.** Only for an athlete who repeats one route often with power and HR (a climbing commute, a fixed climb or loop). Keep the line (intercept, slope, number of sessions, residual SD) in the plan's monitoring section and refit it at each block review and after a break. Heat, a big meal, caffeine or a new bike or position also push HR up, so it supports other flags and never decides alone.
 
 Work out everything you can from raw measurements (HRV, heart rates, breathing rate, sleep duration, training load). Watch numbers that can't be recomputed from what the watch hands over (e.g. Garmin overnight stress, Body Battery) are used as numbers against the athlete's own 30-day medians: overnight stress 10+ above or Body Battery peak 25+ below is amber, counted only together with another flag. The watch maker's labels and categories ("stressful", HRV status) and its composites of things you calculate yourself (readiness score, sleep score) are never used.
 
@@ -68,7 +73,7 @@ Subjective 1-5 (legs, energy, sleep quality, motivation): any 1, or two 2s, is a
 
 **Green:** no red, at most one explained amber. **Amber:** two or more ambers, or one uncorroborated red. **Red:** a red with corroboration, or illness. When feeling and data disagree, say so; for today's session the athlete's feeling wins (a clear "ready" lifts amber to green, a clear "flat" turns green into amber). During a deliberate loading block, load-driven amber is expected.
 
-The dashboard works out the data-only part of this rating with the same thresholds (its `readiness_days` calculation) and shows the check-in's rating where there is one; if a rule here changes, change that calculation too.
+The dashboard works out the data-only part of this rating with the same thresholds (its `readiness_days` calculation) and shows the check-in's rating where there is one; if a rule here changes, change that calculation too. Exception: the dashboard has no session end times and no benchmark line, so its data-only rating doesn't apply the late-session rule or the benchmark marker; the check-in's row for the day, which takes precedence there, does.
 
 **How much it counts: context, not a gate.** A rating that cancels sessions on every amber day ends with hard sessions never done while waiting for a perfect day. Weigh in this order: how <ATHLETE> feels, then the plan and the week's structure, then the markers.
 - Default: the planned session, hard sessions included, whatever the colour; mention the rating in one line.
@@ -118,8 +123,9 @@ The dashboard's Today, Recovery and Training load pages read files the check-in 
 1. `wellness.csv`: wellness from the day after the last row through today (first time: 90 days; with icuvisor, include `id` in the wellness fields so each row carries its date): HRV, resting HR, sleep hours and score, steps, weight; (optional) from the Garmin connection: average heart rate, breathing rate and stress asleep, the day's Body Battery peak and average stress (`sleep_hr_bpm`, `resp_sleep`, `sleep_stress`, `body_battery_peak`, `stress_avg`). One row per day; replace a day already there.
 2. `fitness.csv`: the day's total training load (`load`) and the part from strength sessions (`strength_load`) for the same days (first time: a year of daily load, so the dashboard's own fitness calculation starts clean), plus intervals.icu's ctl and atl for comparison. The dashboard works out fitness, fatigue and form from the loads.
 3. `activities.csv`: activities since the last row (first time: 90 days), with type, indoor/commute flags, moving minutes, distance, climbing, load, average and normalized power, average HR, paired event id, and minutes in zones 1–2, 3 and 4+ (power zones when there is power, else HR).
-4. `planned.csv` and `planned_steps.csv`: the calendar from 7 days back to 7 days ahead, replacing that window: planned minutes and load, a one-line target, steps with repeats written out (% of FTP, threshold HR or pace; ramps marked), and `strength_plan` (`exercise_id:sets` pairs joined by `|`; a CSV column, not the event text, which uses the per-set lines of the strength event format) for strength sessions.
-5. Apply the new rows with the cheap flow in "Dashboard refresh" below: once, at the end of the check-in, only for files that changed (nothing new: no sync).
+4. `activity_extras.csv` (no dataset; the project copy is the master): for the same new activities, `activity_id`, date, local start time (HH:MM) and elapsed minutes (icuvisor `start_date_local`, `elapsed_time`), carbs taken during the session (`carbs_ingested_g`; blank = not logged, 0 = none), <ATHLETE>'s 1-5 `quality` rating if given, weigh-ins before and after a long session if done (`pre_kg`, `post_kg`, `drank_ml`). (optional, with the Garmin connection) `sleep_timing.csv` (no dataset): one row per night keyed by the wake-up date, `sleep_start` and `sleep_end` as local `YYYY-MM-DD HH:MM` from the nightly sleep record already fetched for heart rate asleep, `source` garmin. Merge both with the same script as the others (a key already there is replaced) and back them up to the project; no upload.
+5. `planned.csv` and `planned_steps.csv`: the calendar from 7 days back to 7 days ahead, replacing that window: planned minutes and load, a one-line target, steps with repeats written out (% of FTP, threshold HR or pace; ramps marked), and `strength_plan` (`exercise_id:sets` pairs joined by `|`; a CSV column, not the event text, which uses the per-set lines of the strength event format) for strength sessions.
+6. Apply the new rows with the cheap flow in "Dashboard refresh" below: once, at the end of the check-in, only for files that changed (nothing new: no sync).
 
 If the connection isn't reachable, skip it and say the dashboard is as of the last sync.
 
@@ -147,9 +153,10 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 - **Strength sessions:**
   1. Append one row per exercise to `claude/data/strength_sets.csv` and the session to `claude/data/sessions.csv` (conventions in `claude/data/README.md`). Add a missing exercise to `exercises.csv` first, with areas and muscle weights.
   2. Update the lift's progression line in the strength log when a key lift moved.
+- **Session quality:** after rides, runs and key sessions, if <ATHLETE> didn't say how it went, ask once for a 1-5 rating (how it went for the effort: 5 better than expected, 3 as expected, 1 far worse) and write it to the activity's row in `activity_extras.csv`, with any weigh-ins before and after a long session. These ratings let a review test whether markers, sleep, timing or fuelling predict how sessions go.
 - (optional) **Symptom or re-test readings** go to the plan's log and the matching CSV.
 - **Dashboard refresh** after changing a CSV that has a dataset: follow "Dashboard refresh (cheap flow)" above (disk copy, script merge, upload by path, one batch for the dataset documents, project backup). A new file without a dataset gets one from the weekly review.
-- **Meals (if <ATHLETE> logs food):** follow "Food logging" in `ai-coach-setup-prompt.md`: one "Nutrition log" NOTE per day on the intervals.icu calendar, every item with its amount and its own kcal / carbs (sugars) / fibre / protein / fat (saturated) / salt, subtotals, a meal total and the running total, a "main contributors" line for bigger meals. Read the note before editing it (the description is replaced, not appended) and keep earlier entries.
+- **Meals (if <ATHLETE> logs food):** follow "Food logging" in `ai-coach-setup-prompt.md`: one "Nutrition log" NOTE per day on the intervals.icu calendar, every item with its amount and its own kcal / carbs (sugars) / fibre / protein / fat (saturated) / salt, subtotals, a meal total and the running total, a "main contributors" line for bigger meals. Read the note before editing it (the description is replaced, not appended) and keep earlier entries. A logged day is complete unless <ATHLETE> says it's partial (or chose otherwise at setup): a meal not logged was skipped, so write it as such ("No breakfast.") rather than guessing it in; logged days are real totals, not lower bounds, and days with no entries stay out of averages.
 - **Regular foods and supplements (if <ATHLETE> logs food):** when <ATHLETE> names something they use regularly (a protein powder and its scoop size, instant oats, a usual bar, gel or drink mix, a usual portion), keep it: product, usual amount in grams and its label values, saved in memory (or, without memory, in a short `claude/regular-foods.md` project document). Check that list before asking, and when <ATHLETE> says "my usual scoop" or "same as last time", use the saved amount and look back at earlier Nutrition log notes instead of asking again. Ask only when a portion differs or the product is new, then save it. Update the entry when the product or portion changes.
 - **Block review summary:** when a block review is written, add its row to `claude/reviews/block_reviews.csv` (phase_id, phase, start, end, endurance_h, strength_sessions, fitness_start, fitness_end, easy_pct, headline, suggestion, file) and refresh the `block_reviews` dataset.
 - A good moment for one coach-style follow-up (last rounds, form, anything sore) if the answer affects upcoming sessions.
@@ -257,4 +264,4 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 
 ---
 
-Kit version: 2026-11-05.2.
+Kit version: 2026-11-09.

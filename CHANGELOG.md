@@ -2,6 +2,20 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-09
+
+*Touches:* setup prompt (interview item 9; 2.3 data files table and rules; section 3 readiness step 5, food logging rules, "Logging what actually happened"; section 4 endurance, strength and recovery principles) and the check-in skill template ("Readiness", "Dashboard sync", "Logging").
+*If you already use the kit:* optional. Create the two new files with their header rows in `claude/data/` and add the README lines for them, then copy the late-session paragraph, the "Dashboard sync" step 4, the session-quality bullet and the logged-day sentence into your saved check-in skill (the benchmark row only if you repeat one route often). No dashboard or dataset changes.
+
+These come from a season audit: questions that took many connector calls to answer, and rules that turned out to matter.
+
+- Late sessions: last night's HRV no longer counts on its own after a session that ended late in the evening (within about 3 hours of going to sleep; end = start + elapsed time) or a late big meal. A one-night dip there is expected; it counts only when another marker agrees. The 7-day HRV rule is unchanged. The dashboard can't see end times, so its data-only rating doesn't apply this; the check-in's rating, which takes precedence there, does.
+- Optional benchmark marker: for athletes who repeat one route often with power and HR (a climbing commute, a fixed climb or loop), heart rate 6 bpm or more above their own HR-against-power line on that route is a supporting readiness marker, counted only with another flag. The line is kept in the plan's monitoring section and refitted at each block review and after a break.
+- Two new data files, filled by the check-in's sync and kept only in the project (no dashboard dataset): `activity_extras.csv` (activity_id, date, start_local, elapsed_min, carbs_g, quality, pre_kg, post_kg, drank_ml, note) and `sleep_timing.csv` (date, sleep_start, sleep_end, source). With start times, ride carbs, session ratings and sleep times on file, a review can test timing, fuelling and feel-against-markers questions without pulling every activity and night again.
+- Session quality: after rides, runs and key sessions the coach asks once for a 1-5 rating of how it went for the effort (5 better than expected, 3 as expected, 1 far worse) if you didn't say, and logs it with any weigh-ins before and after a long session.
+- Food logging: a logged day is complete by default (the interview asks). A meal not logged was skipped and is written as such ("No breakfast."); logged days are real totals, not lower bounds; days with no entries stay out of averages.
+- Two principles: protect the week's long ride or run as the volume anchor (weekly shortfalls mostly come from shortening it), and put priority minimums (rehab or prehab work, a weaker side, calves or balance) in the core strength sessions, not in optional ones that get dropped first.
+
 ## 2026-11-06.2
 
 *Touches:* setup prompt (section 3, strength event format: prose and Watch log bullets, one new App version bullet) and the check-in skill template (same bullets).
