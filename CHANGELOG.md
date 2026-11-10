@@ -2,6 +2,15 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-10
+
+*Touches:* setup prompt (2.1 living documents, section 3 "Keeping runs cheap" and the strength event format bullets, section 4 strength principles, export list) and the check-in skill template (step 2 and the same two strength event format bullets).
+*If you already use the kit:* optional, but it lowers the reading cost of every check-in. Split any document above about 30 KB (move a special program into its own document, move old session tables into `claude/archive/`), then copy the three sentences below into your saved check-in skill. No data files, datasets or dashboard changes.
+
+- Leaner documents: each document has one job (plan = strategy, strength log = rules, pools and one progression line per lift, a special program = its own document with a short pointer in the plan, library = catalogue). History lives in the data files or in `claude/archive/`, never in a document read at every check-in; a table of past sessions that grows past about a page is moved out. A special-program document is read only when composing sessions, after a trigger event or at a re-test. Sizes are checked at each block review (split above roughly 30 KB).
+- Extra sets go to the side that failed: equal sets on both sides, and one extra set only for a side that stopped short while the other finished (or that you call clearly weaker), judged from the last two exposures and dropped once both sides are level for two exposures. This replaces a blanket "one extra set for the weaker side" in the strength event format.
+- Tempo goes into the exercise name on every line when using the Strength Coach watch app (for example `Bulgarian split squat 3s down + 1s pause`), because the watch shows only name, target and load, never the prose. A tempo written only in the description was missed again and again in practice. Names also must not contain `.`, `|` or a comma.
+
 ## 2026-11-09
 
 *Touches:* setup prompt (interview item 9; 2.3 data files table and rules; section 3 readiness step 5, food logging rules, "Logging what actually happened"; section 4 endurance, strength and recovery principles) and the check-in skill template ("Readiness", "Dashboard sync", "Logging").

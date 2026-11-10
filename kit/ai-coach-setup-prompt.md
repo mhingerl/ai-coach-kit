@@ -66,17 +66,19 @@ Once I confirm the profile, create these documents. Save them in the Claude Proj
    - A "monitoring & how to use this doc" section and an "open assumptions" list.
    - A "Coaching approach" section containing the principles in section 4.
    - Plan around fixed breaks. If a long forced break is coming (holiday, travel), consider a deliberate loading block before it instead of a taper, since the break absorbs the fatigue. Training can continue right up to the break; in the last two days just avoid new exercises and all-out efforts, since the real risks then are injury or a crash, not fatigue. If the break allows some training, write a short travel routine for it.
-   - If an injury or a weaker side needs its own program, give it its own section (working hypothesis, ranked exercises, re-tests, check-in rules, and what was deliberately left out).
+   - If an injury or a weaker side needs its own program, give it its **own document** (`claude/<program>.md`: working hypothesis, ranked exercises, re-tests, check-in rules, and what was deliberately left out) and leave only a short pointer in the plan. The check-in reads that document only when composing sessions, after a trigger event or at a re-test.
 2. **Strength training log**
    - Context and priorities, and equipment (including which band is for what).
    - The programming approach and exercise pools grouped by muscle area.
    - The autoregulation policy, and my rep-notation shorthand.
-   - One progression line per key lift (e.g. "RDL: 8kg 2x15 → 14kg 2x15 → 14kg 3x15"). The sets themselves go into the data files (2.3), not into this document.
+   - One progression line per key lift (e.g. "RDL: 8kg 2x15 → 14kg 2x15 → 14kg 3x15"). The sets themselves go into the data files (2.3), not into this document; don't keep a set-by-set table here either, it only makes the document expensive to read.
 3. **Default week.** A rough weekly skeleton built from my fixed sessions and constraints, with at least one genuine rest day. It can live inside the annual plan.
 4. **Exercise & workout library.**
    - Use `coach-kit-exercise-and-workout-library.md` as the base and tailor it: fill in the "My kit?" column and my equipment line, mark exercises I already do with ★, and ask whether to drop parts for sports I don't do.
    - For any sport I do that it doesn't cover (e.g. swimming, rowing, XC skiing), add a part in the same format: zones, progression rules, workout tables with progression ladders, testing, key sources. Use well-established protocols and say where the evidence is thin.
    - Use it to compose strength sessions and choose and progress intervals. At phase transitions or equipment changes, propose additions from it rather than silently repeating the same exercises.
+
+**Keep each document to one job,** so a check-in reads only what it needs and re-saving one document can't damage another. The plan holds strategy (goals, phases, the weekly checklist, monitoring); the strength log holds the rules, exercise pools and one progression line per lift; a special program has its own document; the library stays a catalogue. History belongs in the data files (`strength_sets.csv`, symptom and test logs as CSVs) or in `claude/archive/`, never in a document that is read at every check-in: when a table of past sessions or results grows past about a page, move it to `claude/archive/<name>.md` and leave a one-line pointer. At each block review, check the size of every document and split or archive anything above roughly 30 KB.
 
 Treat every document as a working hypothesis. Update it whenever we decide or learn something, and add dated notes ("added <date>") so the reasoning stays traceable. To edit a project document, read it first, change it, then write back the full text.
 
@@ -321,7 +323,7 @@ Files you edit by hand in the project (strength sets, sessions, exercises, calen
 ### Keeping runs cheap
 
 Every chat, check-in and scheduled run costs me tokens or credits, so work lean:
-- Read only what the task needs: the last rows of a data file (or a targeted search), not whole documents. The plan, the strength log and the principles are read when planning or reviewing, not for a quick log entry.
+- Read only what the task needs: the last rows of a data file (or a targeted search), not whole documents. The plan, the strength log and the principles are read when planning or reviewing, not for a quick log entry. A special-program document is read only when composing sessions, after a trigger event or at a re-test; archived history is not read unless asked.
 - Never retype or pass whole data files through the chat. Edit them with scripts on disk and write them back from disk (`local_path`).
 - Dashboard: one sync per check-in, at the end, for the files that changed; skip it when nothing is new (see "Dashboard refresh").
 - Scheduled runs: weekly at most, a short prompt that points to sections by name, and an early stop when nothing changed since the last run. Start the kit-news check with the one-line `VERSION` file (2.6, step 5).
@@ -337,10 +339,10 @@ Every chat, check-in and scheduled run costs me tokens or credits, so work lean:
     - `TARGET`: `10 reps` for reps, `30 s` for a timed hold, or `max` for a set to failure (the watch shows MAX). Nothing else goes in that field. Never write a placeholder number for a failure set. For "hold as long as you can", plan a target time (`60 s`) and say so in the prose.
     - `LOAD`: `16 kg`, `14 kg (6+8)`, `bodyweight` (shown as BW) or `band: red`. If the band colour is unknown, ask me; never write a placeholder like "one band".
     - `SIDE`: `left` or `right` for one-sided work. Leave the field out for two-sided exercises.
-    - The exercise name must be identical on every line of that exercise (and contain no `.`).
+    - The exercise name must be identical on every line of that exercise (and contain no `.`, `|` or comma). A planned tempo or pause goes into the name on every line, because the watch shows only the name, target and load, never the prose: `Bulgarian split squat 3s down + 1s pause`. A tempo that appears only in the description gets missed.
     - Rest is not written. The watch counts up by itself.
   - **Multiple sets:** one separate line per set. There is no "3x10" shorthand. Straight sets are consecutive lines of the same exercise (A, A, A, B, B, B).
-  - **Left and right:** two lines per round, left first, then right. An extra left set (left-leg program) is one more `left` line, written exactly where it should be done, directly next to that exercise's other lines (for example left, left, right in round 1). Inside a superset this is fine: the watch detects supersets from the order of the exercises, not from the number of lines per exercise, so the bracket stays.
+  - **Left and right:** two lines per round, left first, then right. An extra set for the side that failed (see the strength principles) is one more line for that side, written exactly where it should be done, directly next to that exercise's other lines (for example left, left, right in round 1). Inside a superset this is fine: the watch detects supersets from the order of the exercises, not from the number of lines per exercise, so the bracket stays.
   - **Supersets:** not marked in the text. The watch recognises them from the line order: a cycle of 2 to 4 different exercises that repeats at least twice (A, B, A, B or A, B, C, A, B, C). The overview draws these exercises together with a bracket. To schedule a superset, write the lines in that repeating order. Straight sets are not a superset.
   - **Prose:** lines without a `|` are ignored by the watch, so a short description can go above or below the set lines. Put the duration in the **first prose line**, for example `Strength D, ~40 min.`: the watch takes the first `N min` it finds in the prose, so a later `5 min warm-up` or an earlier mention would be shown instead. Prose must never contain the character `|`. Never start a prose line with the words `Watch log`: the watch stops reading sets at the first line that starts with them, so every set line after it would be lost.
   - **Overview:** before the first set the watch shows a compact overview: same-exercise sets bundled into one row, supersets with a bracket, left/right as L/R, a header with the workout name, the number of sets and the duration from the prose. Write workouts so this looks clean: identical exercise names, consistent loads, a duration line.
@@ -468,6 +470,7 @@ Every chat, check-in and scheduled run costs me tokens or credits, so work lean:
   - more load if available
   - otherwise a slower lowering (3–4 seconds), a pause at the bottom, or 1.5 reps, so failure comes at about 10–12 reps
   - band-assisted pull-ups: remove one band once all reps are clean
+- **Extra sets go to the side that failed.** Do equal sets on both sides (the agreed side first). Give one side an extra set only when it actually failed: it stopped short of the planned reps or hold while the other side finished, or I say it was clearly weaker, judged from the last two exposures of that exercise. Drop the extra set once both sides complete the sets for two exposures in a row. A blanket extra set for one side is the wrong tool, because on some exercises the other side is the weaker one.
 - **Respect my preferences** for exercises I feel working (for example "clam shells hit the right muscles"). Use them more often, but keep a standing or functional variant in the rotation.
 - **Physio sessions count toward the frequency targets.** Log what the physio prescribes, and follow their input when it conflicts with yours.
 
@@ -517,7 +520,7 @@ description: "Use when <ATHLETE> wants to set up the coaching again or move to a
 
 1. **Questions:** use section 1 of the newest setup prompt available: one <ATHLETE> attached or linked (clone a repo link and read kit/ai-coach-setup-prompt.md), otherwise the project's copy. Keep its item numbers and titles. Follow its section 6 format if it has one.
 2. **Gather, don't guess:**
-   - project docs: <annual plan path>, <strength log path>, the tailored library, any travel routine, claude/reviews/, claude/setup-checklist.md
+   - project docs: <annual plan path>, <strength log path>, <special program path, if any>, the tailored library, any travel routine, claude/reviews/, claude/setup-checklist.md
    - data: claude/data/ (calendar, targets, the last 4 weeks of strength sets and sessions, ftp_history, readiness baselines, any program logs)
    - memory: standing preferences and decisions
    - the training-checkin skill's athlete-specific rules
@@ -544,4 +547,4 @@ description: "Use when <ATHLETE> wants to set up the coaching again or move to a
 
 **Export format** (what section 1 expects to import): the title "Coaching setup export (<date>)", then the ten parts in the order above, with interview answers numbered like section 1 of the kit version they were written for. When the new kit has items the export doesn't cover, ask only those.
 
-Kit version: 2026-11-09. Start now with the first interview questions.
+Kit version: 2026-11-10. Start now with the first interview questions.

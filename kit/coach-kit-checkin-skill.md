@@ -38,7 +38,7 @@ Describe what <ATHLETE> already did from **completed activity and wellness data*
    - Planned events from today to about 6 days out.
    - (optional) From the Garmin connection: last night's average heart rate and breathing rate asleep, overnight HRV and sleep duration.
    - `claude/data/key_sessions.csv`, `ftp_history.csv`, `readiness.csv`, `calendar.csv` and the list of `claude/reviews/`: open debriefs, last FTP check, phases ended without a review.
-2. **Read the plan docs and strength data.** Phase today and its focus, goals, the weekly volume ceiling, any special program (optional: <e.g. "the knee program in the annual plan">), and from `claude/data/strength_sets.csv` (joined to the `areas` in `exercises.csv`) what's been trained this week against the frequency targets. Flag honestly when the week conflicts with the plan, and suggest revising the plan rather than silently overriding either.
+2. **Read the plan docs and strength data.** Phase today and its focus, goals, the weekly volume ceiling, any special program (optional: <e.g. "`claude/knee-program.md`, read only when composing sessions, after a trigger event or at a re-test">), and from `claude/data/strength_sets.csv` (joined to the `areas` in `exercises.csv`) what's been trained this week against the frequency targets. Flag honestly when the week conflicts with the plan, and suggest revising the plan rather than silently overriding either.
 3. **Debrief** any key session since the last row in `key_sessions.csv` (see "Session debrief").
 4. **FTP check** when there's new evidence (see "FTP").
 5. **Block review** when a phase has ended without one (see "Block review").
@@ -172,10 +172,10 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
     - `TARGET`: `10 reps` for reps, `30 s` for a timed hold, or `max` for a set to failure (the watch shows MAX). Nothing else goes in that field. Never write a placeholder number for a failure set. For "hold as long as you can", plan a target time (`60 s`) and say so in the prose.
     - `LOAD`: `16 kg`, `14 kg (6+8)`, `bodyweight` (shown as BW) or `band: red`. If the band colour is unknown, ask me; never write a placeholder like "one band".
     - `SIDE`: `left` or `right` for one-sided work. Leave the field out for two-sided exercises.
-    - The exercise name must be identical on every line of that exercise (and contain no `.`).
+    - The exercise name must be identical on every line of that exercise (and contain no `.`, `|` or comma). A planned tempo or pause goes into the name on every line, because the watch shows only the name, target and load, never the prose: `Bulgarian split squat 3s down + 1s pause`. A tempo that appears only in the description gets missed.
     - Rest is not written. The watch counts up by itself.
   - **Multiple sets:** one separate line per set. There is no "3x10" shorthand. Straight sets are consecutive lines of the same exercise (A, A, A, B, B, B).
-  - **Left and right:** two lines per round, left first, then right. An extra left set (left-leg program) is one more `left` line, written exactly where it should be done, directly next to that exercise's other lines (for example left, left, right in round 1). Inside a superset this is fine: the watch detects supersets from the order of the exercises, not from the number of lines per exercise, so the bracket stays.
+  - **Left and right:** two lines per round, left first, then right. An extra set for the side that failed (see the strength principles) is one more line for that side, written exactly where it should be done, directly next to that exercise's other lines (for example left, left, right in round 1). Inside a superset this is fine: the watch detects supersets from the order of the exercises, not from the number of lines per exercise, so the bracket stays.
   - **Supersets:** not marked in the text. The watch recognises them from the line order: a cycle of 2 to 4 different exercises that repeats at least twice (A, B, A, B or A, B, C, A, B, C). The overview draws these exercises together with a bracket. To schedule a superset, write the lines in that repeating order. Straight sets are not a superset.
   - **Prose:** lines without a `|` are ignored by the watch, so a short description can go above or below the set lines. Put the duration in the **first prose line**, for example `Strength D, ~40 min.`: the watch takes the first `N min` it finds in the prose, so a later `5 min warm-up` or an earlier mention would be shown instead. Prose must never contain the character `|`. Never start a prose line with the words `Watch log`: the watch stops reading sets at the first line that starts with them, so every set line after it would be lost.
   - **Overview:** before the first set the watch shows a compact overview: same-exercise sets bundled into one row, supersets with a bracket, left/right as L/R, a header with the workout name, the number of sets and the duration from the prose. Write workouts so this looks clean: identical exercise names, consistent loads, a duration line.
@@ -264,4 +264,4 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 
 ---
 
-Kit version: 2026-11-09.
+Kit version: 2026-11-10.
