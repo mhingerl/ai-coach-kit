@@ -172,7 +172,7 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
     - `TARGET`: `10 reps` for reps, `30 s` for a timed hold, or `max` for a set to failure (the watch shows MAX). Nothing else goes in that field. Never write a placeholder number for a failure set. For "hold as long as you can", plan a target time (`60 s`) and say so in the prose.
     - `LOAD`: `16 kg`, `14 kg (6+8)`, `bodyweight` (shown as BW) or `band: red`. If the band colour is unknown, ask me; never write a placeholder like "one band".
     - `SIDE`: `left` or `right` for one-sided work. Leave the field out for two-sided exercises.
-    - The exercise name must be identical on every line of that exercise (and contain no `.`, `|` or comma). A planned tempo or pause goes into the name on every line, because the watch shows only the name, target and load, never the prose: `Bulgarian split squat 3s down + 1s pause`. A tempo that appears only in the description gets missed.
+    - The exercise name must be identical on every line of that exercise (and contain no `.`, `|` or comma). A planned tempo or pause goes into the name on every line, because the watch shows only the name, target and load, never the prose: `Bulgarian split squat 3 count down + 1 count pause`. A tempo that appears only in the description gets missed. Never write a digit directly followed by `s`, `m` or `h` in a name (`3s`, `2m`): intervals.icu reads it as a duration and turns every such line into a 3-second step, which replaces the planned duration with a few seconds. Write `3 count down`, with a space and a word.
     - Rest is not written. The watch counts up by itself.
   - **Multiple sets:** one separate line per set. There is no "3x10" shorthand. Straight sets are consecutive lines of the same exercise (A, A, A, B, B, B).
   - **Left and right:** two lines per round, left first, then right. An extra set for the side that failed (see the strength principles) is one more line for that side, written exactly where it should be done, directly next to that exercise's other lines (for example left, left, right in round 1). Inside a superset this is fine: the watch detects supersets from the order of the exercises, not from the number of lines per exercise, so the bracket stays.
@@ -264,4 +264,4 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 
 ---
 
-Kit version: 2026-11-10.
+Kit version: 2026-11-10.2.

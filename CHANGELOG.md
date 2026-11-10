@@ -2,6 +2,13 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-10.2
+
+*Touches:* the strength event format bullet in the setup prompt (section 3) and in the check-in skill template.
+*If you already use the kit:* if you use the Strength Coach watch app and wrote tempo into exercise names, change names like `3s down` to `3 count down` in your saved check-in skill and in your planned strength events.
+
+- Exercise names must not contain a digit directly followed by `s`, `m` or `h` (`3s down`): intervals.icu reads it as a duration and creates a step of that many seconds, so the event's moving time dropped to a few seconds (28 s and 18 s on two 40 min sessions). Write the tempo as `3 count down` instead. The 2026-11-10 example is corrected.
+
 ## 2026-11-10
 
 *Touches:* setup prompt (2.1 living documents, section 3 "Keeping runs cheap" and the strength event format bullets, section 4 strength principles, export list) and the check-in skill template (step 2 and the same two strength event format bullets).
