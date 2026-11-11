@@ -2,6 +2,15 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-11.5
+
+*Touches:* setup prompt (interview item 11, 2.1 plan contents, section 4 new "Choosing the signal" subsection, the FTP and thresholds rules, the benchmark marker), the check-in skill template (recommend line, FTP section, Signals line) and the workout library (zones note).
+*If you already use the kit:* optional but useful if you have no power meter or want the coach to switch signals: add a Signals line to your saved check-in skill (which signal leads for which session, power doesn't automatically win), and tell the coach what you can measure. Regenerate `coaching-principles.md` from the new section 4.
+
+- New: the coach asks what you can measure per sport (power meter, trainer power, HR strap or wrist HR, GPS, pace) and records an intensity method per sport in the plan. No power meter is a normal case.
+- New: a "Choosing the signal" principle. The coach decides per session whether power, heart rate, pace or feel leads (power for intervals and short efforts, HR for long steady sessions and when power is distorted, pace for flat running, RPE as the tiebreaker), and names the weak points of each signal (HR lag, wrist HR errors, cardiac drift, heat).
+- Thresholds without power: threshold HR and pace are kept and logged the same way as FTP. The library has HR and RPE stand-ins for the power zones, and the benchmark marker works with pace.
+
 ## 2026-11-11.4
 
 *Touches:* setup prompt 2.3 (the "Dashboard off" rule) and the Logging dashboard-sync bullet, and the check-in skill template's "Dashboard sync" intro.

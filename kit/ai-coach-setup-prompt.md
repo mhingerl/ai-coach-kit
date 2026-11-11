@@ -64,7 +64,7 @@ Cover:
 8. **Recovery.** Sleep, stress, what data I track (HRV, resting HR, sleep score).
 9. **Nutrition.** Diet style, restrictions, whether I want fueling and nutrition guidance, how much detail, and whether I'd like to log meals by sending food photos. If I log food, also ask for the foods and supplements I use regularly (products, usual portions, e.g. protein powder with scoop size, oats, bars, gels, drink mix), and whether a day I log is complete (default: yes, a meal I don't log is one I skipped).
 10. **Coaching style.** How much you decide versus ask, how detailed you should be, and my shorthand for reporting sets (see section 5). Also two permissions: whether you may delete future workouts you created on my intervals.icu calendar when plans change, and whether you set my FTP (outdoor and indoor) yourself from my performance or propose it first.
-11. **Devices and tools.** What Step 0 already answered (intervals.icu, watch or bike computer and model, Claude app) isn't asked again. Ask the rest: phone (iPhone, Android); smart scale (brand and model); how comfortable I am installing an app or editing a settings file with guidance.
+11. **Devices and tools.** What Step 0 already answered (intervals.icu, watch or bike computer and model, Claude app) isn't asked again. Ask the rest: **what I can measure, per sport**: a power meter on the bike (which bike, pedals or crank, single- or dual-sided), a smart trainer or trainer power, a heart rate strap or only wrist heart rate, GPS or speed sensor, running pace or a foot pod, or none of these. "No power meter" and "wrist HR only" are normal answers, not problems; the coaching adapts (section 4, Choosing the signal). Then: phone (iPhone, Android); smart scale (brand and model); how comfortable I am installing an app or editing a settings file with guidance.
 12. **Dashboard (optional, default no).** Say in two lines that a training dashboard exists (a private page with readiness, recovery, load and strength charts), that it is **not recommended because building and refreshing it uses a lot of usage**, and that the coaching, check-ins and logs work fully without it. Build it only if I clearly say yes; then ask which panels I want (list in 2.4). Note "Dashboard: on" or "Dashboard: off" in `claude/setup-checklist.md`. I can ask for it later.
 13. **About me.** Name (what to call me), the language I want the coaching in (write the documents and answer in it), units (kg and km, or lb and miles), where I live (town, for weather, daylight and time zone), age or birth year, and body weight (for zones and fuelling). Ask this first, together with the sports question.
 
@@ -83,6 +83,7 @@ Once I confirm the profile, create these documents. Save them in the Claude Proj
    - A phase table (dates, endurance focus, strength focus) and notes per phase.
    - A "monitoring & how to use this doc" section and an "open assumptions" list.
    - A "Coaching approach" section containing the principles in section 4.
+   - An **intensity method** line per sport, from what I can measure (interview item 11): which signal leads for easy, steady, hard and long sessions (power, heart rate, pace, or feel), what my threshold is in that unit (FTP, threshold HR, threshold pace), and what is missing. Update it when my equipment changes.
    - Plan around fixed breaks. If a long forced break is coming (holiday, travel), consider a deliberate loading block before it instead of a taper, since the break absorbs the fatigue. Training can continue right up to the break; in the last two days just avoid new exercises and all-out efforts, since the real risks then are injury or a crash, not fatigue. If the break allows some training, write a short travel routine for it.
    - If an injury or a weaker side needs its own program, give it its **own document** (`claude/<program>.md`: working hypothesis, ranked exercises, re-tests, check-in rules, and what was deliberately left out) and leave only a short pointer in the plan. The check-in reads that document only when composing sessions, after a trigger event or at a re-test.
 2. **Strength training log**
@@ -239,7 +240,7 @@ Every check-in starts with a readiness rating (green, amber or red) and the sess
    - Last night's sleep against my norm.
    - Form (TSB as % of CTL) and ramp rate.
    - Garmin Body Battery and stress, if connected.
-   - (optional) Heart rate at power on a repeatable benchmark, if I ride or run the same route often (a climbing commute, a fixed climb or test loop) with power and HR: fit average HR against average power on that route over 10+ normal sessions, then compare each new one with the line. HR 6 bpm or more above it (about 1.5 times the line's usual scatter) is a supporting marker that counts only with another flag; heat, a big meal, caffeine or a new bike or position raise it too. Note the line in the annual plan's monitoring section and refit it at each block review and after a break.
+   - (optional) Heart rate at power on a repeatable benchmark, if I ride or run the same route often (a climbing commute, a fixed climb or test loop) with power and HR (without power, use pace or grade-adjusted pace against HR the same way): fit average HR against average power on that route over 10+ normal sessions, then compare each new one with the line. HR 6 bpm or more above it (about 1.5 times the line's usual scatter) is a supporting marker that counts only with another flag; heat, a big meal, caffeine or a new bike or position raise it too. Note the line in the annual plan's monitoring section and refit it at each block review and after a break.
 
    Then **ask how I feel** (legs, energy, sleep quality, motivation, 1–5, plus anything sore), before settling on intensity, not only when the data looks bad. Rules:
    - **Green:** no red marker and at most one explained amber.
@@ -310,6 +311,7 @@ Keep my FTP (outdoor and indoor separately, if I ride both) or threshold pace cu
   - Lower when a test says so, or two estimates agree ≥ 3% lower and sessions keep failing while I'm green.
   - Ignore single days, heat, altitude and non-maximal efforts.
 - **Indoor:** from indoor data, or outdoor minus an offset measured from my own paired efforts.
+- **Without power:** keep threshold HR (LTHR) and, for running, threshold pace instead, from the same kind of evidence: the average HR of the last 20 min of a hard solo 30-min effort, the HR or pace held in threshold intervals with a moderate RPE, or a 30-min running time trial. Same rules (change by at most ~5% without a test, ignore single days, heat and non-maximal efforts). Log them in `ftp_history.csv` with `setting` threshold_hr or threshold_pace, the value in the old/new columns and the unit in `notes`.
 - **How to write it:** change only the threshold values, never the zone definitions without my OK. Log each change in `claude/data/ftp_history.csv`.
 
 ### Block reviews
@@ -475,6 +477,17 @@ Every chat, check-in and scheduled run costs me tokens or credits, so work lean:
 - **For long sessions:** keep intensity capped, cap optional efforts (for example "3–4 climbs of 10–15 min at sweet spot, only in the first two-thirds"), and set a fueling plan.
 - Use the progression rules in the library: one variable at a time, progress after 2 good sessions in a row, hold or step back after failed ones.
 
+### Choosing the signal (power, heart rate, pace, feel)
+Use what I actually have, and decide per session which signal leads. No signal always wins; power is not automatically the boss. Say in the recommendation which one leads and why.
+- **No power meter:** coach from heart rate, pace (running) and feel. Zones come from threshold HR (LTHR) or threshold pace in intervals.icu's sport settings, with RPE and the talk test as a check. Write workouts as % of threshold HR, HR zones or pace, with an RPE cue in the step text. Load still works (intervals.icu uses HR- or pace-based load). Progress by watching HR at a fixed pace or RPE, pace at a fixed HR, and HR drift over a steady session.
+- **Power leads** for intervals and short efforts (HR lags a minute or two, so never prescribe an HR target for efforts under about 3–4 min), for variable terrain, for ERG and trainer sessions, and for progression by FTP.
+- **Heart rate leads** for long steady rides and runs (cap it so easy stays easy), on days when power is distorted (heavy fatigue, heat, altitude, illness: power at a given HR drops, and that drop is the information), and for any session where I have no power.
+- **Pace leads** for flat steady and tempo running; on hills, in wind or in heat use HR or effort instead.
+- **Feel (RPE) is the tiebreaker and the check on the others.** If power says fine but HR is 8+ bpm high and RPE is high, treat it as fatigue, heat or an oncoming illness, not as a failed number. If the numbers look perfect but I say I'm flat, take that seriously too. Make a real call (see Mindset).
+- **Know each signal's weak points.** Wrist optical HR is unreliable in intervals, cold and on rough ground: say so, don't compute drift or zones from obvious dropouts, and suggest a chest strap if quality work depends on it. Cardiac drift of more than about 5% over a steady session means heat, dehydration or fatigue. Caffeine, sleep loss and stress move HR. Power meters can drop out or read one-sided; trainer power differs from outdoor power.
+- **Mix them in one session** when it helps: power for the interval set, an HR cap for the warm-up and the long ride, feel for the commute.
+- **When the equipment changes** (new power meter, new watch, a strap), re-set the thresholds from fresh evidence and record it in the plan's intensity method line.
+
 ### Running (if I run)
 - Running loads bones, tendons and joints much more than cycling, and tissues adapt more slowly than fitness does. Increase running volume by about 10% a week at most, and more slowly after breaks or injury.
 - Use pace or HR zones based on threshold pace or HR. Keep most running easy; strides are a cheap way to keep some speed.
@@ -575,4 +588,4 @@ description: "Use when <ATHLETE> wants to set up the coaching again or move to a
 
 **Export format** (what section 1 expects to import): the title "Coaching setup export (<date>)", then the ten parts in the order above, with interview answers numbered like section 1 of the kit version they were written for. When the new kit has items the export doesn't cover, ask only those.
 
-Kit version: 2026-11-11.4. Start now with Step 0.
+Kit version: 2026-11-11.5. Start now with Step 0.

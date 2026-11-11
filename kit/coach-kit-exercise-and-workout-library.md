@@ -267,6 +267,8 @@ Proposals, not decisions. The coach raises them at the right moment (a phase cha
 | Z6 | 121–150% | Anaerobic capacity | 30 s – 2 min efforts |
 | Z7 | > 150% / max | Neuromuscular | Sprints under 15 s |
 
+**No power meter?** Use the same zones with these stand-ins, and take the athlete's own threshold HR (LTHR) from intervals.icu: Z1 below ~80% of LTHR, Z2 ~80–89%, Z3 ~90–94%, Z4/sweet spot ~95–100%, Z5 above ~100% (HR lags: for efforts under ~4 min go by RPE and the first minutes' effort, not HR). RPE: Z2 3–4 out of 10, tempo 5, sweet spot/threshold 6–7, VO2max 8–9. Write steps as % of threshold HR or an HR range plus an RPE cue, and judge progress by HR at the same effort, drift and completed reps instead of watts. Percent bands are rough; the athlete's own tests and platform zones win.
+
 All targets here are **% of FTP on purpose**, never fixed watts, because FTP changes. When scheduling or recommending a session, convert to watts using the *current* FTP from intervals.icu (sport settings, or eFTP if it's clearly more recent). Recheck it at each phase transition and after every FTP test.
 
 ## General progression rules for intervals
