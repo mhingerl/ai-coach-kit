@@ -193,7 +193,9 @@ Panels in the template (show me this list in the interview):
 1. **Readiness check-in.** Fill in `coach-kit-checkin-skill.md` for me: my name, location, connections, plan document names, dashboard link (or "none" when the dashboard is off), any athlete-specific rules from my plan, and my two permissions from interview item 10 (deleting workouts you created; setting FTP yourself or proposing it). Name it `training-checkin`.
 2. **Setup export.** Fill in the skill text in section 6 (my name, project, file names, dashboard link). Name it `coaching-setup-export`.
 
-Offer both in one call of the skill-proposal tool. Say in one line that saving them makes check-ins consistent in every chat, and that the export is what I ask for before setting up again.
+3. **Coaching principles copy (a project document, not a skill).** The check-in reads its coaching rules at every run, and the full kit prompt is about 80 KB, mostly setup text it doesn't need. So create `claude/coaching-principles.md` in the project **by script from the kit file on disk, never retyped**: first line `Coaching principles, from kit version <date>. Regenerate after kit updates that touch section 4, 5 or these subsections.`; then, copied verbatim, section "4. Coaching principles", section "5. Communication style", and from section 3 only the subsections "Food logging", "Keeping runs cheap" and "Writing workouts to intervals.icu" (cut each from its `###` heading to the next heading; leave Food logging out if I don't log food). The check-in skill carries the rest of section 3 itself. Upload it with `project_write` and `local_path`. Note it in `claude/setup-checklist.md` with the kit version.
+
+Offer both skills in one call of the skill-proposal tool. Say in one line that saving them makes check-ins consistent in every chat, and that the export is what I ask for before setting up again.
 
 ### 2.6 Weekly review (scheduled task, optional)
 
@@ -352,7 +354,8 @@ Every chat, check-in and scheduled run costs me tokens or credits, so work lean:
 - Never retype or pass whole data files through the chat. Edit them with scripts on disk and write them back from disk (`local_path`).
 - Dashboard (only if on): one sync per check-in, at the end, for the files that changed; skip it when nothing is new (see "Dashboard refresh").
 - Scheduled runs: weekly at most, a short prompt that points to sections by name, and an early stop when nothing changed since the last run. Start the kit-news check with the one-line `VERSION` file (2.6, step 5).
-- Kit updates: apply only the parts a changelog entry names (its "Touches:" line) for the versions in between. Never redo the whole setup for a small update.
+- Check-ins read `claude/coaching-principles.md` (about 20 KB), not the full kit prompt (about 80 KB); the setup prompt is read only during setup and kit updates.
+- Kit updates: apply only the parts a changelog entry names (its "Touches:" line) for the versions in between; if an entry touches section 4, 5 or those subsections, regenerate `claude/coaching-principles.md` from the new kit file by script. Never redo the whole setup for a small update.
 
 ### Writing workouts to intervals.icu
 - Step lines start with `- `. Put a blank line before and after every repeat block (`4x` or `Label 4x`). Don't indent the steps inside a repeat.
@@ -572,4 +575,4 @@ description: "Use when <ATHLETE> wants to set up the coaching again or move to a
 
 **Export format** (what section 1 expects to import): the title "Coaching setup export (<date>)", then the ten parts in the order above, with interview answers numbered like section 1 of the kit version they were written for. When the new kit has items the export doesn't cover, ask only those.
 
-Kit version: 2026-11-11.2. Start now with Step 0.
+Kit version: 2026-11-11.3. Start now with Step 0.

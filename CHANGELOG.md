@@ -2,6 +2,13 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-11.3
+
+*Touches:* setup prompt 2.5 (new item 3) and "Keeping runs cheap", and the check-in skill template (the "Coaching principles" line and the Food logging reference).
+*If you already use the kit:* optional, saves roughly 15-20k tokens per check-in. Create `claude/coaching-principles.md` as 2.5 item 3 describes (a script copy of section 4, section 5 and three subsections of section 3, about 20 KB), then change the "Coaching principles" line in your saved check-in skill to read that file instead of sections 3-5 of the setup prompt.
+
+- Check-ins no longer read the full kit prompt. Setup creates a small `claude/coaching-principles.md` from it (principles, communication style, food logging, workout writing rules) and the check-in skill reads only that. The skill already carries the rest of the ongoing-coaching rules, so section 3 was being read twice.
+
 ## 2026-11-11.2
 
 *Touches:* setup prompt (athlete intro, Step 0 capability line, interview item 12, 2.3 data files, 2.4, 2.5, 2.6, 2.8, and the dashboard sync and refresh parts of section 3) and the check-in skill template (dashboard sync steps).
