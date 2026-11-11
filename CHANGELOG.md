@@ -2,6 +2,14 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-11.6
+
+*Touches:* setup prompt 2.2 (icuvisor connection options), interview item 11, and the "Choosing the signal" subsection; the check-in skill template's Signals line.
+*If you already use the kit:* nothing is required. If you want to change the signal your workouts are written in, tell the coach; to switch to the extension, install it as 2.2 describes. Regenerate `coaching-principles.md` (section 4 changed).
+
+- New: icuvisor as a Claude Desktop extension (`.mcpb`: Settings → Extensions → Advanced settings → Install Extension…, paste API key, athlete ID, time zone, toolset full) is the recommended local route, so no config-file editing. It is macOS only at the moment; Windows keeps the local app with the env block, and the hosted connector remains the phone route.
+- New: with both power and HR, the athlete chooses which signal is written into workouts (power first, HR first, or coach decides). With power first the coach schedules in watts and says when HR or feel should lead.
+
 ## 2026-11-11.5
 
 *Touches:* setup prompt (interview item 11, 2.1 plan contents, section 4 new "Choosing the signal" subsection, the FTP and thresholds rules, the benchmark marker), the check-in skill template (recommend line, FTP section, Signals line) and the workout library (zones note).
