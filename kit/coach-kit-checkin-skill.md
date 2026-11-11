@@ -118,7 +118,7 @@ At the first check-in after a phase in `calendar.csv` ends without a review (or 
 
 ## Dashboard sync
 
-Only if the dashboard is on (<DASHBOARD URL> is not "none"). Otherwise skip this section and "Dashboard refresh".
+Only if the dashboard is on (<DASHBOARD URL> is not "none"). Otherwise skip this section and "Dashboard refresh", except that a 1-5 quality rating, ride carbs or weigh-ins <ATHLETE> gives still go into `activity_extras.csv` (step 4; one row per such activity, nothing else).
 
 The dashboard's Today, Recovery and Training load pages read files the check-in keeps current (with a local connection the page can't query intervals.icu itself). At every check-in, after calendar changes, after logging a session, and on request:
 
@@ -266,4 +266,4 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 
 ---
 
-Kit version: 2026-11-11.3.
+Kit version: 2026-11-11.4.

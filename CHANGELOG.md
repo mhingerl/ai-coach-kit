@@ -2,6 +2,13 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-11.4
+
+*Touches:* setup prompt 2.3 (the "Dashboard off" rule) and the Logging dashboard-sync bullet, and the check-in skill template's "Dashboard sync" intro.
+*If you already use the kit:* only if you run with the dashboard off: add one sentence to your saved check-in skill saying quality ratings, ride carbs and weigh-ins still go into `activity_extras.csv`. Nothing changes if the dashboard is on.
+
+- Fix: with the dashboard off, `activity_extras.csv` is kept after all (rows only when you give a session quality rating, ride carbs or weigh-ins), because that information is stored nowhere else. Everything else dashboard-only stays skipped.
+
 ## 2026-11-11.3
 
 *Touches:* setup prompt 2.5 (new item 3) and "Keeping runs cheap", and the check-in skill template (the "Coaching principles" line and the Food logging reference).
