@@ -2,7 +2,7 @@
 
 > **For Claude:** if a user pasted this repository's link, they want to be set up as an athlete with this kit. Read [`SETUP-FOR-CLAUDE.md`](SETUP-FOR-CLAUDE.md) and follow it; the first thing you ask is whether they have intervals.icu.
 
-A ready-made setup that turns Claude into your personal endurance and strength coach. It reads your training data, plans your sessions, logs what you did and keeps a training dashboard for you.
+A ready-made setup that turns Claude into your personal endurance and strength coach. It reads your training data, plans your sessions, and logs what you did. A training dashboard is available as an optional extra.
 
 You don't need to copy files or edit anything. Paste this repository's link into Claude and Claude sets everything up with you.
 
@@ -12,12 +12,12 @@ You don't need to copy files or edit anything. Paste this repository's link into
 - **An interview.** Claude asks about your sports, goals, schedule, equipment, injuries, devices and how you like to be coached, then writes up a short profile for you to correct.
 - **A training plan and logs** in your Claude Project: an annual plan with phases, a strength log, and an exercise and workout library tailored to your equipment.
 - **Connections to your data,** guided step by step: intervals.icu (via icuvisor), and optionally Garmin's Personal API and a smart scale.
-- **A training dashboard:** a Today page with your readiness, today's session (with a done badge and its interval structure) and the muscles to target; recovery trends (HRV, resting heart rate, sleep, Body Battery, stress); training load (fitness, fatigue, form, weekly hours by intensity, FTP); a muscle load body map, weekly strength targets and progression; your season plan.
+- **An optional training dashboard (off by default, not recommended: it uses a lot of usage):** a Today page with your readiness, today's session (with a done badge and its interval structure) and the muscles to target; recovery trends (HRV, resting heart rate, sleep, Body Battery, stress); training load (fitness, fatigue, form, weekly hours by intensity, FTP); a muscle load body map, weekly strength targets and progression; your season plan.
 - **A daily readiness check-in:** ask "how should I train today?" and Claude rates your readiness green, amber or red (HRV trend, resting heart rate, sleep, training load, how you feel), checks your plan phase and the weather, and recommends (and schedules) the session.
 - **Session debriefs and FTP:** after key sessions Claude checks what you actually did against the plan and decides the next progression step. It keeps your FTP current from your own performance, indoors and outdoors.
-- **A weekly review and block reviews:** a scheduled task checks how your training is going against the plan, suggests changes, writes a review at the end of each training phase, and reshapes your dashboard to fit what matters to you now.
+- **An optional weekly review and block reviews (setup asks if you want it):** a scheduled task checks how your training is going against the plan, suggests changes, writes a review at the end of each training phase, and reshapes your dashboard to fit what matters to you now.
 - **Optional Garmin watch apps:** if you have a Forerunner 955/255/255S or fenix 7/7S/7X, the free Connect IQ apps *Strength Coach Interpreter* (guides your planned strength session set by set from your intervals.icu calendar and logs what you did) and *Scale Linker* (Renpho scale weigh-ins, pre/post-workout sweat loss, to intervals.icu) work with this kit. Claude recommends them during setup where they fit.
-- **Kit news:** the weekly review checks this repository for a newer kit version and tells you what changed. It first reads a one-line `VERSION` file, so a week with no news costs almost nothing, and it never applies anything on its own.
+- **Kit news:** the weekly review (or a kit-news check on its own, if you pick that) checks this repository for a newer kit version and tells you what changed. It first reads a one-line `VERSION` file, so a week with no news costs almost nothing, and it never applies anything on its own.
 - **Easy re-setup:** before moving to a new kit version, ask "give me my setup interview answers". Paste the result into the new setup and Claude only asks what's missing.
 
 ## How to start
@@ -45,7 +45,7 @@ You don't need to copy files or edit anything. Paste this repository's link into
 | [`kit/ai-coach-setup-prompt.md`](kit/ai-coach-setup-prompt.md) | The coaching and setup instructions |
 | [`kit/coach-kit-exercise-and-workout-library.md`](kit/coach-kit-exercise-and-workout-library.md) | Exercise and workout catalogue (strength, cycling, running) |
 | [`kit/coach-kit-checkin-skill.md`](kit/coach-kit-checkin-skill.md) | Template for your daily readiness check-in skill |
-| [`kit/coach-kit-dashboard.html`](kit/coach-kit-dashboard.html) | Template for your training dashboard |
+| [`kit/coach-kit-dashboard.html`](kit/coach-kit-dashboard.html) | Template for the optional training dashboard |
 | [`kit/coach-kit-exercises.csv`](kit/coach-kit-exercises.csv) | Which muscles each exercise trains (for the muscle map) |
 | [`VERSION`](VERSION) | The current kit version (one line; what the weekly kit-news check reads first) |
 | [`CHANGELOG.md`](CHANGELOG.md) | What changed in each kit version |
@@ -56,7 +56,7 @@ You don't need to copy files or edit anything. Paste this repository's link into
 
 - Claude is not a doctor, physiotherapist or dietitian. For pain, injury or health questions it will say so and refer you on.
 - With your OK, Claude creates and edits planned workouts on your intervals.icu calendar. It shows you a preview and waits for your go-ahead before changing the calendar, and only deletes workouts if you allowed that.
-- Your plan, logs and dashboard stay in your own Claude account. The dashboard is private unless you share it.
+- Your plan and logs stay in your own Claude account, and so does the dashboard if you choose one (it is private unless you share it).
 - Third-party connectors (icuvisor, the Garmin extension) are community projects, not made by Anthropic, Garmin or intervals.icu. The setup instructions name the version of the Garmin extension that was reviewed.
 
 ## License

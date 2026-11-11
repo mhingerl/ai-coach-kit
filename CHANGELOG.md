@@ -2,6 +2,14 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-11.2
+
+*Touches:* setup prompt (athlete intro, Step 0 capability line, interview item 12, 2.3 data files, 2.4, 2.5, 2.6, 2.8, and the dashboard sync and refresh parts of section 3) and the check-in skill template (dashboard sync steps).
+*If you already use the kit:* nothing to do; your dashboard and weekly review keep working. If you want to cut your usage, tell Claude to stop the dashboard sync (set your saved check-in skill's dashboard link to "none") and to pause the weekly review.
+
+- The training dashboard is now optional and off by default. Setup says it is not recommended because building and refreshing it uses a lot of usage, and builds it only if you clearly say yes. With it off, the dashboard-only data files (wellness, fitness, activities, planned, planned_steps, activity_extras, sleep_timing) are not created and check-ins skip the sync, which makes every check-in cheaper.
+- The weekly review is optional too: setup asks once and offers the full weekly review (recommended), a kit-news check only (reads one small file), or none. Without it you can ask for "the weekly review" or "kit news" in a chat.
+
 ## 2026-11-11
 
 *Touches:* setup prompt (new Step 0 before the interview; interview items 7, 11 and the new item 13; 2.2 intervals.icu items; 2.4 and 2.6 fallbacks), `SETUP-FOR-CLAUDE.md` and the README. The check-in skill template only has its version line bumped.

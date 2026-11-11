@@ -15,7 +15,7 @@ Run this only when <ATHLETE> asks for it in chat ("check-in", "readiness", "how 
 
 **Background:** <ATHLETE> lives in <TOWN, COUNTRY>. <One or two lines on commute and fixed sessions, e.g. "Commutes by bike 4 days a week, ~6 km with 150 m climbing each way; count it as training and use the climb as a repeatable power-to-HR benchmark." Delete if not relevant.> Training data lives on intervals.icu, reached through the icuvisor tools (<hosted connector | local app>, full tool set). (optional) Garmin data (sleep, HRV, stress, Body Battery, intraday heart rate) comes from the Garmin Personal API connection. Long-term strategy lives in the project docs `<annual plan path>` and `<strength log path>`; read them with the Projects tool.
 
-**Structured data:** strength sets, sessions, targets, readiness ratings, session debriefs and FTP changes are CSVs in the project under `claude/data/` (schema and rules in `claude/data/README.md`). They feed the training dashboard (<DASHBOARD URL>), so every change to a file with a dashboard dataset is followed by a dashboard refresh (see "Logging"). Reviews go to `claude/reviews/`.
+**Structured data:** strength sets, sessions, targets, readiness ratings, session debriefs and FTP changes are CSVs in the project under `claude/data/` (schema and rules in `claude/data/README.md`). If the dashboard is on (<DASHBOARD URL>; "none" means off, then ignore every dashboard step in this skill), they feed it, so every change to a file with a dashboard dataset is followed by a dashboard refresh (see "Logging"). Reviews go to `claude/reviews/`.
 
 **Coaching principles:** follow sections 3-5 of `ai-coach-setup-prompt.md`. Where it and the athlete's own plan docs disagree, the plan docs win, since they hold the athlete's decisions.
 
@@ -48,7 +48,7 @@ Describe what <ATHLETE> already did from **completed activity and wellness data*
 9. **Ask about available time** if not said, with a few time-range options.
 10. **Adjust the calendar** on intervals.icu (create, update, and delete within the permissions above). Show a readable preview (duration, key steps, targets, load change, anything removed) and get the go-ahead first.
 11. **Log** today's rating in `claude/data/readiness.csv` (one row per date) with the agreed session.
-12. **Sync the dashboard** (see "Dashboard sync"), in one batch at the end.
+12. **Sync the dashboard** only if it is on (see "Dashboard sync"), in one batch at the end.
 
 ## Readiness
 
@@ -118,6 +118,8 @@ At the first check-in after a phase in `calendar.csv` ends without a review (or 
 
 ## Dashboard sync
 
+Only if the dashboard is on (<DASHBOARD URL> is not "none"). Otherwise skip this section and "Dashboard refresh".
+
 The dashboard's Today, Recovery and Training load pages read files the check-in keeps current (with a local connection the page can't query intervals.icu itself). At every check-in, after calendar changes, after logging a session, and on request:
 
 1. `wellness.csv`: wellness from the day after the last row through today (first time: 90 days; with icuvisor, include `id` in the wellness fields so each row carries its date): HRV, resting HR, sleep hours and score, steps, weight; (optional) from the Garmin connection: average heart rate, breathing rate and stress asleep, the day's Body Battery peak and average stress (`sleep_hr_bpm`, `resp_sleep`, `sleep_stress`, `body_battery_peak`, `stress_avg`). One row per day; replace a day already there.
@@ -155,7 +157,7 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
   2. Update the lift's progression line in the strength log when a key lift moved.
 - **Session quality:** after rides, runs and key sessions, if <ATHLETE> didn't say how it went, ask once for a 1-5 rating (how it went for the effort: 5 better than expected, 3 as expected, 1 far worse) and write it to the activity's row in `activity_extras.csv`, with any weigh-ins before and after a long session. These ratings let a review test whether markers, sleep, timing or fuelling predict how sessions go.
 - (optional) **Symptom or re-test readings** go to the plan's log and the matching CSV.
-- **Dashboard refresh** after changing a CSV that has a dataset: follow "Dashboard refresh (cheap flow)" above (disk copy, script merge, upload by path, one batch for the dataset documents, project backup). A new file without a dataset gets one from the weekly review.
+- **Dashboard refresh** (only if the dashboard is on) after changing a CSV that has a dataset: follow "Dashboard refresh (cheap flow)" above (disk copy, script merge, upload by path, one batch for the dataset documents, project backup). A new file without a dataset gets one from the weekly review.
 - **Meals (if <ATHLETE> logs food):** follow "Food logging" in `ai-coach-setup-prompt.md`: one "Nutrition log" NOTE per day on the intervals.icu calendar, every item with its amount and its own kcal / carbs (sugars) / fibre / protein / fat (saturated) / salt, subtotals, a meal total and the running total, a "main contributors" line for bigger meals. Read the note before editing it (the description is replaced, not appended) and keep earlier entries. A logged day is complete unless <ATHLETE> says it's partial (or chose otherwise at setup): a meal not logged was skipped, so write it as such ("No breakfast.") rather than guessing it in; logged days are real totals, not lower bounds, and days with no entries stay out of averages.
 - **Regular foods and supplements (if <ATHLETE> logs food):** when <ATHLETE> names something they use regularly (a protein powder and its scoop size, instant oats, a usual bar, gel or drink mix, a usual portion), keep it: product, usual amount in grams and its label values, saved in memory (or, without memory, in a short `claude/regular-foods.md` project document). Check that list before asking, and when <ATHLETE> says "my usual scoop" or "same as last time", use the saved amount and look back at earlier Nutrition log notes instead of asking again. Ask only when a portion differs or the product is new, then save it. Update the entry when the product or portion changes.
 - **Block review summary:** when a block review is written, add its row to `claude/reviews/block_reviews.csv` (phase_id, phase, start, end, endurance_h, strength_sessions, fitness_start, fitness_end, easy_pct, headline, suggestion, file) and refresh the `block_reviews` dataset.
@@ -264,4 +266,4 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 
 ---
 
-Kit version: 2026-11-11.
+Kit version: 2026-11-11.2.
