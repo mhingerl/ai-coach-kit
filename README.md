@@ -1,12 +1,15 @@
 # AI coach kit
 
+> **For Claude:** if a user pasted this repository's link, they want to be set up as an athlete with this kit. Read [`SETUP-FOR-CLAUDE.md`](SETUP-FOR-CLAUDE.md) and follow it; the first thing you ask is whether they have intervals.icu.
+
 A ready-made setup that turns Claude into your personal endurance and strength coach. It reads your training data, plans your sessions, logs what you did and keeps a training dashboard for you.
 
 You don't need to copy files or edit anything. Paste this repository's link into Claude and Claude sets everything up with you.
 
 ## What you get
 
-- **An interview first.** Claude asks about your sports, goals, schedule, equipment, injuries, devices and how you like to be coached, then writes up a short profile for you to correct.
+- **A quick check first.** Claude asks whether you have an intervals.icu account (the one essential piece) and a Garmin device. If you don't have intervals.icu yet, it walks you through creating it before anything else.
+- **An interview.** Claude asks about your sports, goals, schedule, equipment, injuries, devices and how you like to be coached, then writes up a short profile for you to correct.
 - **A training plan and logs** in your Claude Project: an annual plan with phases, a strength log, and an exercise and workout library tailored to your equipment.
 - **Connections to your data,** guided step by step: intervals.icu (via icuvisor), and optionally Garmin's Personal API and a smart scale.
 - **A training dashboard:** a Today page with your readiness, today's session (with a done badge and its interval structure) and the muscles to target; recovery trends (HRV, resting heart rate, sleep, Body Battery, stress); training load (fitness, fatigue, form, weekly hours by intensity, FTP); a muscle load body map, weekly strength targets and progression; your season plan.
@@ -21,13 +24,16 @@ You don't need to copy files or edit anything. Paste this repository's link into
 
 1. Open the Claude app. The desktop app on a Mac or Windows computer works best, because some connections run on your computer.
 2. Create a new **Project** (for example "Coach") and start a chat in it.
-3. Paste this message, with this repository's address at the end:
+3. Paste this message, with this repository's address at the end (the address alone also works):
 
    > Set me up as my coach with this kit: https://github.com/mhingerl/ai-coach-kit
 
 4. Answer Claude's questions. Setup takes about 30–45 minutes, and you can stop and continue later.
 
-**You'll need:** a free account at [intervals.icu](https://intervals.icu) linked to your watch or bike computer (Garmin, Wahoo, COROS, Polar, Suunto and others). Claude helps you create one if you don't have it yet.
+**You'll need:**
+- A free account at [intervals.icu](https://intervals.icu) linked to your watch or bike computer (Garmin, Wahoo, COROS, Polar, Suunto and others). This is essential; Claude helps you create it if you don't have it yet.
+- A Garmin device is optional (it adds recovery data and some watch apps).
+- A Claude account with Projects and connectors. Setup and the weekly review use a fair amount of usage, so a paid plan is the comfortable choice. On a Team or Enterprise plan your organisation's owner must allow the intervals.icu connector.
 
 **Never paste passwords or API keys into the chat.** Claude tells you where each one goes.
 
@@ -49,6 +55,7 @@ You don't need to copy files or edit anything. Paste this repository's link into
 ## Good to know
 
 - Claude is not a doctor, physiotherapist or dietitian. For pain, injury or health questions it will say so and refer you on.
+- With your OK, Claude creates and edits planned workouts on your intervals.icu calendar. It shows you a preview and waits for your go-ahead before changing the calendar, and only deletes workouts if you allowed that.
 - Your plan, logs and dashboard stay in your own Claude account. The dashboard is private unless you share it.
 - Third-party connectors (icuvisor, the Garmin extension) are community projects, not made by Anthropic, Garmin or intervals.icu. The setup instructions name the version of the Garmin extension that was reviewed.
 

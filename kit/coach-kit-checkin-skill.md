@@ -264,4 +264,4 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 
 ---
 
-Kit version: 2026-11-10.2.
+Kit version: 2026-11-11.
