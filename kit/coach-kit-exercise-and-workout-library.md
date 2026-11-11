@@ -1,6 +1,6 @@
 # Exercise & workout library
 
-**Purpose:** a reference catalogue of strength exercises and endurance workouts (cycling and running). The coach uses it to:
+**Purpose:** a reference catalogue of strength exercises and endurance workouts (cycling, running, swimming and rowing). Every part is optional: keep the parts for the athlete's sports and delete the rest. The coach uses it to:
 - compose strength sessions on the day, including superset pairings
 - plan interval progressions
 - suggest new exercises or formats at the right moment, for example when equipment changes or a new training phase starts
@@ -453,6 +453,71 @@ As with cycling, store targets as % of threshold and convert to actual pace from
 
 ---
 
+# Part 4 — Swimming workouts
+
+Evidence base: swim training is less standardised than cycling or running, and these are well-established practical formats rather than exact study protocols. Technique and frequency matter more than raw volume.
+
+## Zones (from critical swim speed, CSS)
+
+CSS pace per 100 m comes from a 400 m and a 200 m time trial (rested, same pool): speed = 200 m ÷ (T400 − T200) in m/s; pace per 100 m = 100 ÷ speed. Retest every 6–8 weeks.
+
+| Zone | Pace vs CSS (per 100 m) | Name | Feel |
+|---|---|---|---|
+| Z1 | CSS + 12 s or slower | Recovery / drills | Very easy, focus on form |
+| Z2 | CSS + 6–12 s | Aerobic | Steady, can hold a conversation at the wall |
+| Z3 | CSS + 2–5 s | Tempo | Comfortably hard |
+| Z4 | CSS ± 2 s | Threshold | Hard but controlled, short rest |
+| Z5 | CSS − 3 s or faster | VO2max / speed | Very hard, long rest |
+
+HR is slow and unreliable in water, so go by pace per 100 m, stroke count and RPE. Equipment (pull buoy, paddles, fins) changes the pace: note it and don't compare across equipment.
+
+## Workouts
+
+| Workout | Structure | Purpose | Progression |
+|---|---|---|---|
+| Technique | 400–800 m of drills (catch-up, fingertip drag, single-arm) with easy swims between | Stroke efficiency | Add one drill; keep Z1 |
+| Aerobic base | 6–10 × 200 m Z2, 20 s rest | Aerobic endurance | More repeats, then 300 m |
+| Long continuous | 1,500–3,000 m Z2 | Endurance, race-specific for open water | +200–300 m per step |
+| CSS repeats | 8–12 × 100 m at CSS, 10–15 s rest | Threshold | More repeats → 5 × 200 m → 3 × 400 m at CSS |
+| Threshold | 4 × 400 m at CSS + 3 s, 20 s rest | Sustained speed | Shorter rest, then pace |
+| Speed | 8–16 × 25–50 m fast, 30–45 s rest | Neuromuscular speed, turns | More repeats, full rest |
+| Race-pace | Race-distance share at goal pace in sets (e.g. 3 × 500 m) | Pacing | Longer sets, shorter rest |
+
+Rules: swim two to four times a week if possible (frequency beats duration); keep most volume easy; change one variable at a time (repeats, then distance, then rest, then pace); progress after two good sessions in a row.
+
+---
+
+# Part 5 — Rowing workouts
+
+Evidence base: indoor rowing and sculling have a well-developed training tradition (mostly low-intensity volume plus a little high intensity), but protocols vary by coach. Treat the numbers as starting points.
+
+## Zones (from a 2 km test or a 30-min maximal piece)
+
+| Zone | Effort | Stroke rate | Name |
+|---|---|---|---|
+| UT2 | about 55–70% of 2 km power, conversational | 18–20 spm | Aerobic base |
+| UT1 | about 70–80% | 20–24 spm | Hard aerobic |
+| AT | about 80–90% (30-min race pace) | 24–28 spm | Threshold |
+| TR | about 90–100% (2 km pace) | 28–32 spm | Transport / VO2max |
+| AN | above 2 km pace | 32+ spm | Anaerobic / sprints |
+
+Use the split per 500 m (or power on an ergometer), stroke rate and RPE; HR is a cross-check. Use the platform's rowing threshold if it has one.
+
+## Workouts
+
+| Workout | Structure | Purpose | Progression |
+|---|---|---|---|
+| Steady state | 30–90 min UT2 | Aerobic base | +5–10 min per week; one long piece a week |
+| Pyramid | 250 / 500 / 750 / 1,000 / 750 / 500 / 250 m at UT1 | Hard aerobic, pacing | Shorten the rest, then raise the pace |
+| 4 × 4 min | 4 min at TR, 3 min easy | VO2max | 3 → 4 → 5 reps, then pace |
+| 8 × 500 m | At 2 km pace, 90 s rest | Race-specific speed | Shorter rest, then pace |
+| Threshold | 3 × 10 min at AT, 3 min easy | Sustained power | 2 × 20 min → 30 min continuous |
+| Test | 2 km all-out, or 30 min maximal | Sets zones | Every 6–8 weeks, rested, same setup |
+
+Rules: mostly UT2 (about 80% of time); keep form under fatigue and stop the piece when technique goes; low-back and rib care matter, so build volume gradually, and pair rowing with core and hip-hinge work from Part 1.
+
+---
+
 # Periodization quick reference (ties to the annual plan)
 
 | Phase | Endurance | Intensity focus | Strength focus |
@@ -476,5 +541,7 @@ As with cycling, store targets as % of threshold and convert to actual pace from
 - Harøy 2019 (Copenhagen adduction program)
 - Daniels, *Daniels' Running Formula* (running zones and threshold/interval formats)
 - Friel (LTHR 30-min test)
+- Wakayoshi et al. 1992 (critical swim speed from 200 m and 400 m trials)
+- Concept2 and British Rowing training guides (rowing zones and steady-state/interval structure)
 
 Protocol details vary between studies. The targets above are practical starting points, not exact replications.

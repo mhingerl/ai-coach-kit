@@ -2,7 +2,7 @@
 
 > **For Claude:** if a user pasted this repository's link, they want to be set up as an athlete with this kit. Read [`SETUP-FOR-CLAUDE.md`](SETUP-FOR-CLAUDE.md) and follow it; the first thing you ask is whether they have intervals.icu.
 
-A ready-made setup that turns Claude into your personal endurance and strength coach. It reads your training data, plans your sessions, and logs what you did. A training dashboard is available as an optional extra.
+A ready-made setup that turns Claude into your personal training coach for strength, endurance sports (cycling, running, swimming, rowing, triathlon) or any mix. It reads your training data, plans your sessions, and logs what you did. A training dashboard is available as an optional extra.
 
 You don't need to copy files or edit anything. Paste this repository's link into Claude and Claude sets everything up with you.
 

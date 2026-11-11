@@ -2,6 +2,22 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-11.7
+
+*Touches:* the whole kit: setup prompt (interview item 1, 10, 11, plan contents, data files table, section 3 "Thresholds", debriefs, section 4 new subsections), check-in skill template (sports line, thresholds section, file name), library (new swimming and rowing parts), README, and one data file rename.
+*If you already use the kit (do this once; ask your coach "update me to kit 2026-11-11.7" and it should follow these steps, asking you before it changes anything):*
+1. **Rename the threshold file.** `claude/data/ftp_history.csv` becomes `claude/data/threshold_history.csv` with the header `date,sport,setting,unit,old_value,new_value,change_pct,method,estimates,evidence_activities,applied,notes`. Convert each old row: `sport` Ride for `ftp` and `indoor_ftp` (for `threshold_pace` or `threshold_hr` the sport it applied to), `unit` W for FTP (otherwise from the notes), `old_w` and `new_w` become `old_value` and `new_value`. Check the new file, then delete the old one. Update the file table in `claude/data/README.md`. If your dashboard is on, its dataset id stays `ftp_history`: build it from the Ride rows of the new file, with `old_value` and `new_value` renamed `old_w` and `new_w` (the FTP panel is cycling only).
+2. **Update your saved check-in skill.** Replace every `ftp_history.csv` with `threshold_history.csv` and tell it to log `sport`, `setting` and `unit`. Add a "Sports" line (your sports and how they combine). If you want the new names, rename the "FTP" section to "Thresholds" and the "FTP check" step to "Threshold check". Easiest: let the coach redo the template (`coach-kit-checkin-skill.md`) with your existing athlete-specific rules and offer it as one skill card.
+3. **Regenerate `claude/coaching-principles.md`** from the new setup prompt (setup prompt 2.5, item 3): section 4 gained "Strength only", "Several sports", "Swimming" and "Rowing".
+4. **Add a sport profile per sport** to your plan (setup prompt 2.1, replaces the earlier "intensity method" line): what you measure, which signal leads, threshold and how it is tested, key sessions, how progress is judged.
+5. **Library:** if you swim or row, copy Parts 4 and 5 of the new library into yours. Delete the parts for sports you don't do, if you like.
+6. Look through your own documents (registry, notes, scheduled task prompts) for the old file name and the word "FTP" where thresholds in general are meant, and update them.
+
+- New: the kit no longer assumes a sport. The interview starts from which sports you do (strength only, one endurance sport, several, triathlon) and builds only what applies: a strength-only athlete gets no endurance zones, threshold tests or interval debriefs.
+- New: a short sport profile per sport (what you measure, which signal leads, threshold, key sessions, how progress is judged). Cycling is one profile among others.
+- New: swimming (CSS-based zones and workouts) and rowing (2 km-based zones and workouts) in the library, with swim and rowing thresholds in the threshold rules, and principles for strength-only training, multi-sport mixes and triathlon.
+- Changed: `ftp_history.csv` is now `threshold_history.csv` with `sport` and `unit` columns, so thresholds of any sport fit. The dashboard stays built around cycling and strength.
+
 ## 2026-11-11.6
 
 *Touches:* setup prompt 2.2 (icuvisor connection options), interview item 11, and the "Choosing the signal" subsection; the check-in skill template's Signals line.

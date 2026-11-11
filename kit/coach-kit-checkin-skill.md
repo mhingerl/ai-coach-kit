@@ -6,7 +6,7 @@
 
 ---
 name: "training-checkin"
-description: "Use when <ATHLETE> asks for a check-in, readiness or how to train today, reports a completed session (rides, runs, strength, physio), or asks for training advice. Rates readiness, recommends and schedules the session, debriefs key sessions, keeps FTP current and writes block reviews. On-demand only."
+description: "Use when <ATHLETE> asks for a check-in, readiness or how to train today, reports a completed session (any sport, strength, physio), or asks for training advice. Rates readiness, recommends and schedules the session, debriefs key sessions, keeps thresholds current and writes block reviews. On-demand only."
 ---
 
 # <ATHLETE>'s readiness check-in
@@ -15,7 +15,9 @@ Run this only when <ATHLETE> asks for it in chat ("check-in", "readiness", "how 
 
 **Background:** <ATHLETE> lives in <TOWN, COUNTRY>. <One or two lines on commute and fixed sessions, e.g. "Commutes by bike 4 days a week, ~6 km with 150 m climbing each way; count it as training and use the climb as a repeatable power-to-HR benchmark." Delete if not relevant.> Training data lives on intervals.icu, reached through the icuvisor tools (<hosted connector | local app>, full tool set). (optional) Garmin data (sleep, HRV, stress, Body Battery, intraday heart rate) comes from the Garmin Personal API connection. Long-term strategy lives in the project docs `<annual plan path>` and `<strength log path>`; read them with the Projects tool.
 
-**Structured data:** strength sets, sessions, targets, readiness ratings, session debriefs and FTP changes are CSVs in the project under `claude/data/` (schema and rules in `claude/data/README.md`). If the dashboard is on (<DASHBOARD URL>; "none" means off, then ignore every dashboard step in this skill), they feed it, so every change to a file with a dashboard dataset is followed by a dashboard refresh (see "Logging"). Reviews go to `claude/reviews/`.
+**Structured data:** strength sets, sessions, targets, readiness ratings, session debriefs and threshold changes are CSVs in the project under `claude/data/` (schema and rules in `claude/data/README.md`). If the dashboard is on (<DASHBOARD URL>; "none" means off, then ignore every dashboard step in this skill), they feed it, so every change to a file with a dashboard dataset is followed by a dashboard refresh (see "Logging"). Reviews go to `claude/reviews/`.
+
+**Sports:** <LIST THE ATHLETE'S SPORTS AND HOW THEY COMBINE, e.g. "strength only" | "cycling plus strength" | "triathlon: swim, bike, run, plus strength">. Delete every step, section and column below that belongs to a sport the athlete doesn't do (a strength-only athlete has no threshold section, no interval debriefs and no endurance load talk).
 
 **Coaching principles:** follow `claude/coaching-principles.md` in the project (endurance, strength, recovery and nutrition principles, communication style, food logging, keeping runs cheap and the strength event format with examples; this skill carries the rest of the ongoing-coaching rules, so don't read the full setup prompt). Where it and the athlete's own plan docs disagree, the plan docs win, since they hold the athlete's decisions.
 
@@ -35,13 +37,13 @@ Describe what <ATHLETE> already did from **completed activity and wellness data*
 1. **Pull training data:**
    - Today's date and digest.
    - Wellness (HRV, resting HR, sleep, steps) for the last ~60 days (the readiness baselines) and fitness (CTL/ATL/TSB, ramp rate) for the last 14 days, with explicit YYYY-MM-DD dates where the tools need them.
-   - Activities for the last 10-14 days (load, types, the commute's actual power/HR). Check that each one is paired with its planned event and pair any that aren't (see "Pairing planned and actual activities"). Note any activity that triggers an athlete-specific check (optional, e.g. runs or long walks for an injury program).
+   - Activities for the last 10-14 days (load, types and the key numbers of each sport, such as power, pace, splits and HR; the commute if it counts as training). Check that each one is paired with its planned event and pair any that aren't (see "Pairing planned and actual activities"). Note any activity that triggers an athlete-specific check (optional, e.g. runs or long walks for an injury program).
    - Planned events from today to about 6 days out.
    - (optional) From the Garmin connection: last night's average heart rate and breathing rate asleep, overnight HRV and sleep duration.
-   - `claude/data/key_sessions.csv`, `ftp_history.csv`, `readiness.csv`, `calendar.csv` and the list of `claude/reviews/`: open debriefs, last FTP check, phases ended without a review.
+   - `claude/data/key_sessions.csv`, `threshold_history.csv`, `readiness.csv`, `calendar.csv` and the list of `claude/reviews/`: open debriefs, last threshold check, phases ended without a review.
 2. **Read the plan docs and strength data.** Phase today and its focus, goals, the weekly volume ceiling, any special program (optional: <e.g. "`claude/knee-program.md`, read only when composing sessions, after a trigger event or at a re-test">), and from `claude/data/strength_sets.csv` (joined to the `areas` in `exercises.csv`) what's been trained this week against the frequency targets. Flag honestly when the week conflicts with the plan, and suggest revising the plan rather than silently overriding either.
 3. **Debrief** any key session since the last row in `key_sessions.csv` (see "Session debrief").
-4. **FTP check** when there's new evidence (see "FTP").
+4. **Threshold check** when there's new evidence (see "Thresholds").
 5. **Block review** when a phase has ended without one (see "Block review").
 6. **Weather** for <TOWN> today (and tomorrow if a key session is planned), from two sources; treat rain percentages as approximate.
 7. **Rate readiness** (see "Readiness"): objective markers first, then ask how <ATHLETE> feels in one multiple-choice question (legs, energy, sleep quality, motivation 1-5, anything sore), with the preliminary read. When a symptom comes up, ask the one targeted follow-up that would change the call (where exactly, since when, better or worse under load, muscular or sharp/joint). (optional) <Athlete-specific check-in rule from the plan, e.g. day-1/2/3 questions after a trigger, with the green/amber/red rules.>
@@ -101,22 +103,23 @@ Key sessions: structured intervals, tests, long sessions (3 h+), hard group sess
 1. Find the activity and its planned event, make sure they are paired (see "Pairing planned and actual activities"), then read its details and intervals (if the intervals are auto-laps, say so).
 2. Compliance per work rep against target; reps in range; fade first → last rep; HR drift; decoupling on long steady sessions (under ~5% good); new bests at 1/5/20/60 min vs the last 90 days; fuelling if reported; for strength, sets done vs planned and estimated 1RM vs last time.
 3. Verdict: nailed (all in range, fade ≤ 3%), done (~80% in range), partial, missed. Next step: progress after two "nailed" in a row, repeat after "done", step back after "partial"/"missed" if readiness was green (otherwise repeat).
-4. Append "Debrief (Claude, <date>): …" to the activity description (read first, add below), add a row to `claude/data/key_sessions.csv`, and tell <ATHLETE> in 2-3 lines. Note any FTP evidence.
+4. Append "Debrief (Claude, <date>): …" to the activity description (read first, add below), add a row to `claude/data/key_sessions.csv`, and tell <ATHLETE> in 2-3 lines. Note any threshold evidence.
 
-## FTP
+## Thresholds
 
-<Outdoor and indoor | outdoor only | threshold HR and pace (no power meter) | threshold pace for running>, from <ATHLETE>'s own performance, not only the platform estimate.
+<LIST THE THRESHOLDS THAT APPLY: FTP outdoor and indoor | FTP outdoor only | threshold HR | threshold pace (running) | CSS (swimming) | rowing split>, from <ATHLETE>'s own performance, not only the platform estimate. Keep only the bullets that apply to the athlete's sports.
 
 - **When:** after tests, new 5-60 min bests, debriefs that point to it, the first sessions after a break of 2+ weeks, and at least every 4 weeks. Use the last 90 days, or only the time since the last break if shorter.
 - **Estimates:** 95% of a 20-min test; 75% of the best ramp-test minute; 90% of an 8-min test; best maximal 60-min power; ~0.96 × CP from maximal 3- and 12-min efforts (CP = (P12 × 720 − P3 × 180) / 540); threshold interval evidence; the platform's eFTP as one input. Weight: test > long maximal effort > CP > intervals > eFTP.
 - **Change:** raise when a test says so or two estimates are ≥ 2% higher (max ~5% per step without a test); lower when a test says so or two estimates agree ≥ 3% lower and sessions keep failing while green. Ignore single days, heat, altitude, other power sources and non-maximal efforts.
 - **Indoor:** from indoor rides, or outdoor minus an offset measured from paired efforts; keep the existing value until evidence says otherwise.
+- **Swimming:** CSS from a 400 m and a 200 m time trial (speed = 200 m ÷ (T400 − T200); retest every 6–8 weeks). **Rowing:** 2 km erg split or the average split of a 30-min maximal piece.
 - **Without power:** keep threshold HR (average HR of the last 20 min of a hard solo 30-min effort, or HR held in threshold intervals with a moderate RPE) and threshold pace for running (30-min time trial). Same rules; log with `setting` threshold_hr or threshold_pace, unit in `notes`.
-- **Apply:** update only the threshold fields of the sport settings (needs the full tool set; never send zones), read back, log in `claude/data/ftp_history.csv`, tell <ATHLETE> old → new, method and evidence. If proposing instead, or the tool is missing, give the value and where to set it, and log it as suggested.
+- **Apply:** update only the threshold fields of the sport settings (needs the full tool set; never send zones), read back, log in `claude/data/threshold_history.csv` (columns date, sport, setting, unit, old_value, new_value, change_pct, method, estimates, evidence_activities, applied, notes), tell <ATHLETE> old → new, method and evidence. If proposing instead, or the tool is missing, give the value and where to set it, and log it as suggested.
 
 ## Block review
 
-At the first check-in after a phase in `calendar.csv` ends without a review (or to complete one the weekly review left "pending"): write `claude/reviews/<end date>-<phase id>-block-review.md` with the phase intent; weekly volume and load, CTL start → end, intensity distribution, key session verdicts, FTP change; readiness counts and HRV/resting HR trend; strength adherence, sets vs targets and key lifts start → end; (optional) special-program markers; what worked and what didn't; 3-5 suggestions for the next phase. Summarize in 3-4 lines and ask which to adopt; edit the plan only for those.
+At the first check-in after a phase in `calendar.csv` ends without a review (or to complete one the weekly review left "pending"): write `claude/reviews/<end date>-<phase id>-block-review.md` with the phase intent; weekly volume and load, CTL start → end, intensity distribution, key session verdicts, threshold changes; readiness counts and HRV/resting HR trend; strength adherence, sets vs targets and key lifts start → end; (optional) special-program markers; what worked and what didn't; 3-5 suggestions for the next phase. Summarize in 3-4 lines and ask which to adopt; edit the plan only for those.
 
 ## Dashboard sync
 
@@ -128,7 +131,7 @@ The dashboard's Today, Recovery and Training load pages read files the check-in 
 2. `fitness.csv`: the day's total training load (`load`) and the part from strength sessions (`strength_load`) for the same days (first time: a year of daily load, so the dashboard's own fitness calculation starts clean), plus intervals.icu's ctl and atl for comparison. The dashboard works out fitness, fatigue and form from the loads.
 3. `activities.csv`: activities since the last row (first time: 90 days), with type, indoor/commute flags, moving minutes, distance, climbing, load, average and normalized power, average HR, paired event id, and minutes in zones 1–2, 3 and 4+ (power zones when there is power, else HR).
 4. `activity_extras.csv` (no dataset; the project copy is the master): for the same new activities, `activity_id`, date, local start time (HH:MM) and elapsed minutes (icuvisor `start_date_local`, `elapsed_time`), carbs taken during the session (`carbs_ingested_g`; blank = not logged, 0 = none), <ATHLETE>'s 1-5 `quality` rating if given, weigh-ins before and after a long session if done (`pre_kg`, `post_kg`, `drank_ml`). (optional, with the Garmin connection) `sleep_timing.csv` (no dataset): one row per night keyed by the wake-up date, `sleep_start` and `sleep_end` as local `YYYY-MM-DD HH:MM` from the nightly sleep record already fetched for heart rate asleep, `source` garmin. Merge both with the same script as the others (a key already there is replaced) and back them up to the project; no upload.
-5. `planned.csv` and `planned_steps.csv`: the calendar from 7 days back to 7 days ahead, replacing that window: planned minutes and load, a one-line target, steps with repeats written out (% of FTP, threshold HR or pace; ramps marked), and `strength_plan` (`exercise_id:sets` pairs joined by `|`; a CSV column, not the event text, which uses the per-set lines of the strength event format) for strength sessions.
+5. `planned.csv` and `planned_steps.csv`: the calendar from 7 days back to 7 days ahead, replacing that window: planned minutes and load, a one-line target, steps with repeats written out (% of the sport's threshold in its own unit: % FTP, % threshold HR or pace; ramps marked), and `strength_plan` (`exercise_id:sets` pairs joined by `|`; a CSV column, not the event text, which uses the per-set lines of the strength event format) for strength sessions.
 6. Apply the new rows with the cheap flow in "Dashboard refresh" below: once, at the end of the check-in, only for files that changed (nothing new: no sync).
 
 If the connection isn't reachable, skip it and say the dashboard is as of the last sync.
@@ -268,4 +271,4 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 
 ---
 
-Kit version: 2026-11-11.6.
+Kit version: 2026-11-11.7.
