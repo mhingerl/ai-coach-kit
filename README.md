@@ -62,6 +62,10 @@ You don't need to copy files or edit anything. Paste this repository's link into
 - Your plan and logs stay in your own Claude account, and so does the dashboard if you choose one (it is private unless you share it).
 - The coach data extension is a community project in this repository, not made by Anthropic, Garmin or intervals.icu. It reads and writes only at intervals.icu and (with your key) Garmin, with its Write mode setting limiting what it can change.
 
+## Tell us what's missing
+
+Using a watch, bike computer, scale or app the kit doesn't work with yet, or have an idea or a problem? [Open an issue](https://github.com/mhingerl/ai-coach-kit/issues/new/choose) (device request or feedback). Please don't put keys, passwords or personal health data in it. Your coach can also draft the issue text for you to post.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).

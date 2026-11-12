@@ -1,0 +1,25 @@
+name: Device or service request
+description: Your watch, bike computer, scale or app isn't supported yet
+labels: ["device-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! Please don't paste API keys, passwords or personal health data here. Issues are public.
+  - type: input
+    id: device
+    attributes:
+      label: Device, app or service
+      description: Brand and model (for example "Polar Vantage V3", "Withings scale", "Whoop")
+    validations:
+      required: true
+  - type: textarea
+    id: today
+    attributes:
+      label: How does its data reach you today?
+      description: For example "syncs to intervals.icu", "only in its own app", "exports FIT files"
+  - type: textarea
+    id: want
+    attributes:
+      label: What would you like the coach to do with it?
+      description: Read recovery data, send workouts to it, log weigh-ins, and so on
