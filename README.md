@@ -8,7 +8,7 @@ You don't need to copy files or edit anything. Paste this repository's link into
 
 ## What you get
 
-- **A quick check first.** Claude asks whether you have an intervals.icu account (the one essential piece) and a Garmin device. If you don't have intervals.icu yet, it walks you through creating it before anything else.
+- **A quick check first.** Claude asks what it can read your training from: an intervals.icu account (recommended), a Garmin device, or your own FIT files. One is enough, more is better. If you have none yet, it walks you through creating an intervals.icu account first.
 - **An interview.** Claude asks about your sports, goals, schedule, equipment, injuries, devices and how you like to be coached, then writes up a short profile for you to correct.
 - **A training plan and logs** in your Claude Project: an annual plan with phases, a strength log, and an exercise and workout library tailored to your equipment.
 - **Connections to your data,** guided step by step: intervals.icu and optionally Garmin, both through one coach data extension that comes with this kit, and optionally a smart scale.
@@ -33,8 +33,8 @@ You don't need to copy files or edit anything. Paste this repository's link into
 
 **You'll need:**
 - The Claude desktop app on a Mac or Windows computer (the kit's extension runs there; web and phone chats can only read a snapshot).
-- A free account at [intervals.icu](https://intervals.icu) linked to your watch or bike computer (Garmin, Wahoo, COROS, Polar, Suunto and others). This is essential; Claude helps you create it if you don't have it yet. Strava alone does not work: Strava's rules stop intervals.icu from passing Strava data on to Claude, so link your device's own service instead.
-- A Garmin device is optional (it adds recovery data and some watch apps). If you have one, add a Garmin key to the extension: it is the only lasting route, because Garmin's terms may stop intervals.icu from passing Garmin data on to Claude.
+- A free account at [intervals.icu](https://intervals.icu) linked to your watch or bike computer (Garmin, Wahoo, COROS, Polar, Suunto and others). Recommended: it is where the coach writes your planned sessions, so without it you get sessions in the chat instead of on a calendar. One source is enough to start (see below); Claude helps you create the account if you want it. Strava alone does not work: Strava's rules stop intervals.icu from passing Strava data on to Claude, so link your device's own service instead.
+- A Garmin device is optional (it adds recovery data and some watch apps), and a Garmin key alone is enough to start with (the coach then reads your data but cannot write to a calendar). Your own `.fit` files in a folder work too. More sources are better. If you have a Garmin, add a Garmin key to the extension: it is the only lasting route, because Garmin's terms may stop intervals.icu from passing Garmin data on to Claude.
 - A Claude account with Projects. Setup and the weekly review use a fair amount of usage, so a paid plan is the comfortable choice. On a Team or Enterprise plan your organisation must allow desktop extensions.
 
 **Never paste passwords or API keys into the chat.** Claude tells you where each one goes.

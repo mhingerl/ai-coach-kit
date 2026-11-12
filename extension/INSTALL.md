@@ -2,7 +2,7 @@
 
 A Claude Desktop extension that is the kit's connection to your training data: one compact digest instead of many separate calls, intervals.icu and Garmin merged, calendar changes with safety limits, and your kit data files kept up to date on your own computer. From kit 2026-11-12.3 it is required: it replaces the separate intervals.icu connector (icuvisor) and the Garmin extension. The old kit version keeps working with those, but receives no updates.
 
-**File:** [`coach-data.mcpb`](coach-data.mcpb) · **Version:** 0.10.0 · **SHA-256:** `2c3cd1a09b7e1da514192fc1364c0f45458eadc5a23ad2c2493ec43e725536ed`
+**File:** [`coach-data.mcpb`](coach-data.mcpb) · **Version:** 0.10.1 · **SHA-256:** `ee85157c57f87d479b58ec7d3615e0a88f54cd51db1e055e969033fdadeeb90f`
 
 It runs only in the Claude desktop app (Mac or Windows), not on the phone or the web. For phone and web chats the extension writes a small snapshot your coach saves into your Project (see below).
 
@@ -11,7 +11,7 @@ It runs only in the Claude desktop app (Mac or Windows), not on the phone or the
 1. Download [`coach-data.mcpb`](coach-data.mcpb) (on its GitHub page use the download button).
 2. In the Claude desktop app open **Settings → Extensions → Advanced settings → Install Extension…** and choose the file. (Dragging it onto the Claude window also works.)
 3. Fill in the settings screen:
-   - **intervals.icu API key** and **athlete ID** (intervals.icu → Settings → Developer Settings; the ID looks like `i12345`). Claude Desktop keeps the key in the system keychain. Never paste it into a chat.
+   - **intervals.icu API key** and **athlete ID** (recommended; leave both empty if you use only Garmin or FIT files; one source of the three is enough) (intervals.icu → Settings → Developer Settings; the ID looks like `i12345`). Claude Desktop keeps the key in the system keychain. Never paste it into a chat.
    - **Garmin API key** (optional): from Garmin Connect on the web, Settings → Personal API.
    - **Write mode** (leave it as it is unless you want less): `full` (default) lets the coach create and update planned workouts and notes, pair activities, set carbs, update thresholds and delete single future events it created; `safe` is the same without deleting; `off` makes it read-only. You can change it any time in Settings → Extensions → this extension; restart the app afterwards.
    - **Time zone**, for example `Europe/Vienna`.
