@@ -11,7 +11,7 @@ The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entrie
 *If you already use the kit (ask your coach "update me to kit 2026-11-12.3"; it should follow these steps and ask before changing anything):*
 1. **Install the coach data extension** (see above): intervals.icu API key, athlete ID, time zone; optional Garmin key (the one you already created, or a new one; no separate Garmin extension any more), data folder and Write mode. Ask the coach to run `coach_status` and `coach_digest` and show you the result.
 2. **Update your saved check-in skill card** from the new template (`kit/coach-kit-checkin-skill.md`): keep your athlete-specific rules; take the new "Background" tool line, the Deleting, pairing and threshold lines and the data-pull note. Easiest: let the coach redo the template with your existing rules and offer it as one skill card.
-3. **Deleting future events the coach created:** if you allowed it before, set the extension's Write mode to `full`; otherwise leave it on `safe`.
+3. **Write mode:** the extension ships with Write mode `full` (create and update workouts and notes, pair activities, carbs, thresholds, delete single future events the coach created). If you don't want the coach to delete, set it to `safe`, or to `off` for read-only, in Settings → Extensions → the extension → Write mode.
 4. **After one full check-in worked with the extension,** remove icuvisor and the Garmin extension in Settings → Extensions.
 5. **Phone and web chats:** they cannot use the extension and cannot change your calendar any more. Ask the coach on the computer to "update my snapshot"; it saves `claude/data/snapshot.md` in your Project, which chats on your phone read for recent data.
 

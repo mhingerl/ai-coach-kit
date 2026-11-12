@@ -2,7 +2,7 @@
 
 A Claude Desktop extension that is the kit's connection to your training data: one compact digest instead of many separate calls, intervals.icu and Garmin merged, calendar changes with safety limits, and your kit data files kept up to date on your own computer. From kit 2026-11-12.3 it is required: it replaces the separate intervals.icu connector (icuvisor) and the Garmin extension. The old kit version keeps working with those, but receives no updates.
 
-**File:** [`coach-data.mcpb`](coach-data.mcpb) · **Version:** 0.8.0 · **SHA-256:** `66bf8c2e209a6a03098d4210b3c674f4ad1d012f34bb76d19d7b9a0921863e6a`
+**File:** [`coach-data.mcpb`](coach-data.mcpb) · **Version:** 0.8.1 · **SHA-256:** `1b46f95e95f4bb5466789356bbad6d3e8ceff3dd416367baf0f7542dcbbda32a`
 
 It runs only in the Claude desktop app (Mac or Windows), not on the phone or the web. For phone and web chats the extension writes a small snapshot your coach saves into your Project (see below).
 
@@ -13,7 +13,7 @@ It runs only in the Claude desktop app (Mac or Windows), not on the phone or the
 3. Fill in the settings screen:
    - **intervals.icu API key** and **athlete ID** (intervals.icu → Settings → Developer Settings; the ID looks like `i12345`). Claude Desktop keeps the key in the system keychain. Never paste it into a chat.
    - **Garmin API key** (optional): from Garmin Connect on the web, Settings → Personal API.
-   - **Write mode**: `safe` (default) lets the coach create and update planned workouts and notes, pair activities, set carbs and update thresholds; `full` also lets it delete single future events it created; `off` makes it read-only.
+   - **Write mode** (leave it as it is unless you want less): `full` (default) lets the coach create and update planned workouts and notes, pair activities, set carbs, update thresholds and delete single future events it created; `safe` is the same without deleting; `off` makes it read-only. You can change it any time in Settings → Extensions → this extension; restart the app afterwards.
    - **Time zone**, for example `Europe/Vienna`.
    - **Data folder** (optional): pick an empty folder on your computer. The extension keeps your kit's data CSV files there and writes only inside it.
 4. Quit the Claude app completely and reopen it. Then ask your coach: "check the coach data extension" (it runs `coach_status`).
@@ -27,7 +27,7 @@ Check the file first if you like: on a Mac, `shasum -a 256 ~/Downloads/coach-dat
 | `coach_digest` | Last days of activities, recovery, baselines, fitness and planned sessions in one small answer |
 | `coach_thresholds`, `coach_activity` | FTP and other thresholds; one activity in detail |
 | `coach_events` | Calendar events and notes with their full text |
-| `coach_event_save`, `coach_event_delete` | Create or update one planned workout or note (dry run first); delete one future event the coach created (Write mode `full`) |
+| `coach_event_save`, `coach_event_delete` | Create or update one planned workout or note (dry run first); delete one future event the coach created (Write mode `full`, the default) |
 | `coach_link`, `coach_activity_update`, `coach_thresholds_update` | Pair an activity with its planned event; carbs taken; update FTP or threshold values (never zones) |
 | `coach_sync` | Brings `wellness`, `fitness`, `activities` and `sleep_timing` CSV files in your data folder up to date (dry run first; never deletes) |
 | `coach_snapshot` | A 3 KB summary of those files for phone and web chats |
