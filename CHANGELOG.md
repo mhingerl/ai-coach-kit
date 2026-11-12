@@ -2,6 +2,16 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-12.2
+
+*Touches:* setup prompt (section 4/5, "Writing workouts to intervals.icu": new rule on event names) and the check-in skill template ("intervals.icu workout rules"). Section 4/5 changed, so regenerate `coaching-principles.md`.
+*If you already use the kit (ask your coach "update me to kit 2026-11-12.2"; it should follow these steps and ask before changing anything):*
+1. **Garmin bike computer or watch users: shorten the names of your planned workouts.** Look at the events on your intervals.icu calendar from today on that the coach created. Rename any whose name is longer than about 25 characters or has colons, brackets or suffixes like `(outdoor)` (for example `Endurance 80 min + primers (outdoor)` becomes `Endurance 80 + primers`), keeping the description and steps unchanged. Show the new names and ask before changing them.
+2. **Update your saved check-in skill card:** in the intervals.icu workout rules add: keep event names short and plain (about 25 characters, no colons, brackets or `(outdoor)` suffixes).
+3. **Regenerate `claude/coaching-principles.md`** from the new setup prompt (2.5, item 3).
+
+- New: a rule for event names. Long names with symbols synced from intervals.icu to a Garmin Edge 530 with the name shown as a line or underscores and no steps, although intervals.icu showed the event and its steps correctly. Renaming to a short plain name and saving again fixed it. Whether length, the colon or the brackets is the cause is not confirmed, so the rule limits all three; a 22-character name with a plus sign worked. If a device shows a blank name or missing steps, the coach checks the event in intervals.icu first, then shortens the name and re-saves it.
+
 ## 2026-11-12.1
 
 *Touches:* setup prompt (what you need, Step 0 interview item 1 and its actions, 2.2 items 1 and 3, the check-in's data pull in section 3) and README. No change to section 4 or 5, so `coaching-principles.md` stays as it is.

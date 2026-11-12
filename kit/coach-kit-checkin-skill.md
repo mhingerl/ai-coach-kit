@@ -171,6 +171,7 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 ## intervals.icu workout rules
 
 - Leave one blank line before and after every repeat block (a bare `Nx` line or a label ending in `Nx`). Don't indent step lines inside a repeat; they use the same `- ` prefix as other steps.
+- **Event names:** keep them short and plain for Garmin devices: about 25 characters at most, no colons or brackets and no `(outdoor)` style suffixes (put those in the description). Long names with colons and brackets have synced as a line or underscores with no steps on a Garmin Edge. If an athlete reports that, confirm the event in intervals.icu has its steps and no push errors, then shorten the name and re-save it with the same description.
 - **Strength event format** (intervals.icu, type `WeightTraining`). These rules match the Strength Coach watch app, version 1.2.x. Every strength workout you schedule must follow this format.
   - **Where:** put the session in the intervals.icu event `description` (event type `WeightTraining`), not in a structured workout (`workout_doc`). Strength events are not parsed by intervals.icu, so there are no `- ` step lines.
   - **One strength event per day:** put the whole session in a single `WeightTraining` event. The watch app reads only the first strength event of the day, so a second one would be ignored.

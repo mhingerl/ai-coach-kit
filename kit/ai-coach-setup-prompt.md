@@ -365,6 +365,7 @@ Every chat, check-in and scheduled run costs me tokens or credits, so work lean:
 
 ### Writing workouts to intervals.icu
 - Step lines start with `- `. Put a blank line before and after every repeat block (`4x` or `Label 4x`). Don't indent the steps inside a repeat.
+- **Event names (Garmin bike computers and watches): keep them short and plain.** Use about 25 characters at most, and avoid colons, brackets and sport or place suffixes like `(outdoor)` (put those in the description). Good examples: `Endurance 80 + primers`, `Sweet spot 2x15`, `FTP test 20 min`. Seen on a Garmin Edge 530: events named `Endurance 80 min + primers (outdoor)` (36 characters) synced to the device with a name shown as a line or underscores and no steps, although intervals.icu showed the event and its steps correctly. Renaming the event to a short plain name and saving it again fixed it. The cause (length, colon or brackets) is not confirmed, so follow all of these limits; a name of 22 characters with a plus sign synced fine. When an athlete reports a blank name or missing steps on a device: check that the event in intervals.icu has its steps and no push errors, then shorten the name and re-save the event with the same description. Check the names of already scheduled events when you apply this.
 - **Strength event format** (intervals.icu, type `WeightTraining`). These rules match the Strength Coach watch app, version 1.2.x. Every strength workout you schedule must follow this format.
   - **Where:** put the session in the intervals.icu event `description` (event type `WeightTraining`), not in a structured workout (`workout_doc`). Strength events are not parsed by intervals.icu, so there are no `- ` step lines.
   - **One strength event per day:** put the whole session in a single `WeightTraining` event. The watch app reads only the first strength event of the day, so a second one would be ignored.
@@ -614,4 +615,4 @@ description: "Use when <ATHLETE> wants to set up the coaching again or move to a
 
 **Export format** (what section 1 expects to import): the title "Coaching setup export (<date>)", then the ten parts in the order above, with interview answers numbered like section 1 of the kit version they were written for. When the new kit has items the export doesn't cover, ask only those.
 
-Kit version: 2026-11-11.7. Start now with Step 0.
+Kit version: 2026-11-12.2. Start now with Step 0.
