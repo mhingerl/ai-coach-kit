@@ -2,7 +2,7 @@
 
 A Claude Desktop extension that gives your coach one compact digest of your training data instead of many separate calls, merges intervals.icu and Garmin, and can keep your kit data files up to date on your own computer. It is optional: the kit works without it, and your existing setup keeps working.
 
-**File:** [`coach-data.mcpb`](coach-data.mcpb) · **Version:** 0.6.0 · **SHA-256:** `331e987c1ef82c80fba69813c8f6a985b7e46f0bce932ab0a156cd978a30a17a`
+**File:** [`coach-data.mcpb`](coach-data.mcpb) · **Version:** 0.6.1 · **SHA-256:** `a64a4e8f26e868afd91a2f758aa8c61dd64c2f4a111b2a78da01a16dbd9d5ae5`
 
 It runs only in the Claude desktop app (Mac or Windows), not on the phone or the web. For phone and web chats the extension writes a small snapshot your coach saves into your Project (see below).
 
