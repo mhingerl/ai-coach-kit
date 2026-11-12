@@ -4,14 +4,21 @@ The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entrie
 
 ## 2026-11-12.3
 
-*Touches:* README, setup prompt (2.2, new item 5), check-in skill template (data pull, dashboard sync) and a new `extension/` folder. Nothing in section 4 or 5 changed, so `coaching-principles.md` stays as it is.
-*If you already use the kit (ask your coach "update me to kit 2026-11-12.3"; it should follow these steps and ask before changing anything):*
-1. **Nothing is required.** The kit works as before without the extension.
-2. **Optional: install the coach data extension** (Claude desktop app on a Mac or Windows): download `extension/coach-data.mcpb` from this repository and follow `extension/INSTALL.md`.
-3. **If you installed it, update your saved check-in skill card:** in the data-pull step add: if the coach data extension is connected, use `coach_digest` for the pull; in "Dashboard sync" add the `coach_sync` and `coach_snapshot` paragraph from the template.
+*Touches:* the whole connection layer: README, setup prompt (what you need, interview items 3 and Garmin, 2.2 items 2 and 3, weekly connection check, pairing), the check-in skill template (data pull, permissions, thresholds, dashboard sync) and a new `extension/` folder. Nothing in section 4 or 5 changed, so `coaching-principles.md` stays as it is.
 
-- New: an optional extension (one `.mcpb` file in this repository) that gives the check-in one compact digest, merges intervals.icu and Garmin, keeps the data files up to date in a folder on your computer, and writes a small snapshot your coach saves into the Project so chats on your phone can read your recent data.
-- Changed: setup offers the extension after the connections; the check-in prefers `coach_digest` when it is there.
+**Important: from this version the kit works only through its own coach data extension.** It replaces icuvisor (the intervals.icu connector) and the separate Garmin extension, and needs the Claude desktop app on a Mac or Windows computer. **You can stay on your current kit version: it keeps working with icuvisor and the Garmin extension, but it will not receive any more updates.** To keep getting updates, update to this version and install the extension: [download `coach-data.mcpb`](https://github.com/mhingerl/ai-coach-kit/releases/latest/download/coach-data.mcpb) (or take the file in `extension/`), then in the Claude desktop app open Settings → Extensions → Advanced settings → Install Extension…, choose the file and fill in its settings (steps in `extension/INSTALL.md`).
+
+*If you already use the kit (ask your coach "update me to kit 2026-11-12.3"; it should follow these steps and ask before changing anything):*
+1. **Install the coach data extension** (see above): intervals.icu API key, athlete ID, time zone; optional Garmin key (the one you already created, or a new one; no separate Garmin extension any more), data folder and Write mode. Ask the coach to run `coach_status` and `coach_digest` and show you the result.
+2. **Update your saved check-in skill card** from the new template (`kit/coach-kit-checkin-skill.md`): keep your athlete-specific rules; take the new "Background" tool line, the Deleting, pairing and threshold lines and the data-pull note. Easiest: let the coach redo the template with your existing rules and offer it as one skill card.
+3. **Deleting future events the coach created:** if you allowed it before, set the extension's Write mode to `full`; otherwise leave it on `safe`.
+4. **After one full check-in worked with the extension,** remove icuvisor and the Garmin extension in Settings → Extensions.
+5. **Phone and web chats:** they cannot use the extension and cannot change your calendar any more. Ask the coach on the computer to "update my snapshot"; it saves `claude/data/snapshot.md` in your Project, which chats on your phone read for recent data.
+
+- Changed: the kit's connection to intervals.icu and Garmin is one extension that ships in this repository. It reads a compact digest, reads and writes calendar events and notes (only events the coach created can be changed or deleted), pairs activities, sets carbs and thresholds, and keeps the kit's data files (wellness, fitness, activities, sleep timing, planned sessions and their steps) up to date in a folder on your computer.
+- Changed: setup installs the extension instead of icuvisor and the Garmin extension. The weekly connection check runs `coach_status` and reports newer extension versions from this changelog.
+- Removed: the hosted intervals.icu connector option (it worked on the phone). Chats on the phone now read a snapshot and cannot change the calendar.
+- New: a 3 KB snapshot (`claude/data/snapshot.md`) for chats on the web or phone.
 
 ## 2026-11-12.2
 
