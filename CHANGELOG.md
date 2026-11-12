@@ -2,6 +2,17 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-12.3
+
+*Touches:* README, setup prompt (2.2, new item 5), check-in skill template (data pull, dashboard sync) and a new `extension/` folder. Nothing in section 4 or 5 changed, so `coaching-principles.md` stays as it is.
+*If you already use the kit (ask your coach "update me to kit 2026-11-12.3"; it should follow these steps and ask before changing anything):*
+1. **Nothing is required.** The kit works as before without the extension.
+2. **Optional: install the coach data extension** (Claude desktop app on a Mac or Windows): download `extension/coach-data.mcpb` from this repository and follow `extension/INSTALL.md`.
+3. **If you installed it, update your saved check-in skill card:** in the data-pull step add: if the coach data extension is connected, use `coach_digest` for the pull; in "Dashboard sync" add the `coach_sync` and `coach_snapshot` paragraph from the template.
+
+- New: an optional extension (one `.mcpb` file in this repository) that gives the check-in one compact digest, merges intervals.icu and Garmin, keeps the data files up to date in a folder on your computer, and writes a small snapshot your coach saves into the Project so chats on your phone can read your recent data.
+- Changed: setup offers the extension after the connections; the check-in prefers `coach_digest` when it is there.
+
 ## 2026-11-12.2
 
 *Touches:* setup prompt (section 4/5, "Writing workouts to intervals.icu": new rule on event names) and the check-in skill template ("intervals.icu workout rules"). Section 4/5 changed, so regenerate `coaching-principles.md`.

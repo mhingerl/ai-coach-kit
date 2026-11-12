@@ -34,7 +34,7 @@ Describe what <ATHLETE> already did from **completed activity and wellness data*
 
 ## Steps
 
-1. **Pull training data:**
+1. **Pull training data:** (If the coach data extension is connected, `coach_digest` returns all of this in one call: activities, wellness with baselines, fitness, planned events and flags; use it instead of the separate calls below, and use `coach_status` if it errors. Without it, use the calls below.)
    - Today's date and digest.
    - Wellness (HRV, resting HR, sleep, steps) for the last ~60 days (the readiness baselines) and fitness (CTL/ATL/TSB, ramp rate) for the last 14 days, with explicit YYYY-MM-DD dates where the tools need them.
    - Activities for the last 10-14 days (load, types and the key numbers of each sport, such as power, pace, splits and HR; the commute if it counts as training). Check that each one is paired with its planned event and pair any that aren't (see "Pairing planned and actual activities"). Note any activity that triggers an athlete-specific check (optional, e.g. runs or long walks for an injury program).
@@ -135,6 +135,8 @@ The dashboard's Today, Recovery and Training load pages read files the check-in 
 6. Apply the new rows with the cheap flow in "Dashboard refresh" below: once, at the end of the check-in, only for files that changed (nothing new: no sync).
 
 If the connection isn't reachable, skip it and say the dashboard is as of the last sync.
+
+With the coach data extension and a data folder, `coach_sync` can bring `wellness`, `fitness`, `activities` and `sleep_timing` up to date on the computer without the rows passing through the chat (dry run first, then `dry_run: false`). Those files in the data folder are then the master; copy them into the project only when asked. For chats on a phone, run `coach_snapshot` and save its text as `claude/data/snapshot.md` in the project; phone chats read that file and say that it is a copy as of its date.
 
 ### Dashboard refresh (cheap flow)
 

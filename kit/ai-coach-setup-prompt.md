@@ -122,7 +122,8 @@ Check first what is already connected (my connectors and any local tools), then 
    - Garmin emails about a week before a key expires: create a new key and paste it into the extension's settings.
 4. **Smart scale (optional, free).** Most scale apps don't talk to intervals.icu directly. With an iPhone: let the scale app write weight and body fat to Apple Health, then build an iOS Shortcuts automation that sends the latest values to the intervals.icu wellness API (`PUT https://intervals.icu/api/v1/athlete/0/wellness/{date}`, Basic auth with user `API_KEY` and the intervals.icu API key; check field names in https://intervals.icu/api-docs.html), triggered when the scale app closes. Give me the Shortcut step by step. With Android, find a free equivalent (Health Connect plus an HTTP automation app). Don't suggest paid apps unless I ask.
    - **Renpho scale and a supported Garmin watch:** recommend the free Connect IQ app **Scale Linker** (search for it in the Connect IQ Store, in the Garmin Connect IQ phone app or on the watch; supported watches are listed on its store page: Forerunner 955, 255, 255S and fenix 7, 7S, 7X at the time of writing). It reads the Renpho scale over Bluetooth on the watch (normal, pre-workout and post-workout weigh-ins, with water drunk and a toilet break for the sweat loss) and, after asking me, writes the result to the day's intervals.icu wellness record. It needs my intervals.icu API key in the app's settings (I type it myself; never in the chat). If the store search doesn't show it for my watch or region, skip it and use the options above.
-5. If something can't be connected, say what's missing and carry on: I can report sessions and numbers in chat instead.
+5. **Coach data extension (optional; Claude desktop app on a Mac or Windows).** One file from this kit repository, `extension/coach-data.mcpb`, with install steps in `extension/INSTALL.md`. It gives the check-in a single compact digest (intervals.icu and Garmin merged), keeps the data CSV files up to date in a folder on my computer, and writes a small snapshot for chats on my phone. Offer it once connections 1–3 work, say plainly that it is optional and that everything works without it, and only walk me through it if I want it. If I do: give me the download link and the steps from `INSTALL.md`, tell me where each key goes (never in the chat), then run `coach_status` and show me what it reports.
+6. If something can't be connected, say what's missing and carry on: I can report sessions and numbers in chat instead.
 
 ### 2.3 Training data files
 
@@ -615,4 +616,4 @@ description: "Use when <ATHLETE> wants to set up the coaching again or move to a
 
 **Export format** (what section 1 expects to import): the title "Coaching setup export (<date>)", then the ten parts in the order above, with interview answers numbered like section 1 of the kit version they were written for. When the new kit has items the export doesn't cover, ask only those.
 
-Kit version: 2026-11-12.2. Start now with Step 0.
+Kit version: 2026-11-12.3. Start now with Step 0.

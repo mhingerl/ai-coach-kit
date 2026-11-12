@@ -16,6 +16,7 @@ You don't need to copy files or edit anything. Paste this repository's link into
 - **A daily readiness check-in:** ask "how should I train today?" and Claude rates your readiness green, amber or red (HRV trend, resting heart rate, sleep, training load, how you feel), checks your plan phase and the weather, and recommends (and schedules) the session.
 - **Session debriefs and FTP:** after key sessions Claude checks what you actually did against the plan and decides the next progression step. It keeps your FTP current from your own performance, indoors and outdoors.
 - **An optional weekly review and block reviews (setup asks if you want it):** a scheduled task checks how your training is going against the plan, suggests changes, writes a review at the end of each training phase, and reshapes your dashboard to fit what matters to you now.
+- **Optional coach data extension (Mac or Windows desktop app):** one small digest of your training data instead of many calls, intervals.icu and Garmin merged, your data files kept up to date on your computer, and a small snapshot for phone chats. Setup offers it; install steps are in [`extension/INSTALL.md`](extension/INSTALL.md).
 - **Optional Garmin watch apps:** if you have a Forerunner 955/255/255S or fenix 7/7S/7X, the free Connect IQ apps *Strength Coach Interpreter* (guides your planned strength session set by set from your intervals.icu calendar and logs what you did) and *Scale Linker* (Renpho scale weigh-ins, pre/post-workout sweat loss, to intervals.icu) work with this kit. Claude recommends them during setup where they fit.
 - **Kit news:** the weekly review (or a kit-news check on its own, if you pick that) checks this repository for a newer kit version and tells you what changed. It first reads a one-line `VERSION` file, so a week with no news costs almost nothing, and it never applies anything on its own.
 - **Easy re-setup:** before moving to a new kit version, ask "give me my setup interview answers". Paste the result into the new setup and Claude only asks what's missing.
@@ -47,6 +48,7 @@ You don't need to copy files or edit anything. Paste this repository's link into
 | [`kit/coach-kit-checkin-skill.md`](kit/coach-kit-checkin-skill.md) | Template for your daily readiness check-in skill |
 | [`kit/coach-kit-dashboard.html`](kit/coach-kit-dashboard.html) | Template for the optional training dashboard |
 | [`kit/coach-kit-exercises.csv`](kit/coach-kit-exercises.csv) | Which muscles each exercise trains (for the muscle map) |
+| [`extension/INSTALL.md`](extension/INSTALL.md) and [`extension/coach-data.mcpb`](extension/coach-data.mcpb) | The optional coach data extension: install guide and the file |
 | [`VERSION`](VERSION) | The current kit version (one line; what the weekly kit-news check reads first) |
 | [`CHANGELOG.md`](CHANGELOG.md) | What changed in each kit version |
 
