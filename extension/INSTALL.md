@@ -2,7 +2,7 @@
 
 A Claude Desktop extension that is the kit's connection to your training data: one compact digest instead of many separate calls, intervals.icu and Garmin merged, calendar changes with safety limits, and your kit data files kept up to date on your own computer. From kit 2026-11-12.3 it is required: it replaces the separate intervals.icu connector (icuvisor) and the Garmin extension. The old kit version keeps working with those, but receives no updates.
 
-**File:** [`coach-data.mcpb`](coach-data.mcpb) · **Version:** 0.8.2 · **SHA-256:** `a0463bd66fc42653420529baeb1c281473ce650c3809c13b71f21f801c98f8c7`
+**File:** [`coach-data.mcpb`](coach-data.mcpb) · **Version:** 0.9.0 · **SHA-256:** `66822777596ce45b8c83b72fb9c62e2b76364d9eb7215f29f034b2f8e6be16bf`
 
 It runs only in the Claude desktop app (Mac or Windows), not on the phone or the web. For phone and web chats the extension writes a small snapshot your coach saves into your Project (see below).
 
