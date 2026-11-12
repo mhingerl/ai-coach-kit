@@ -30,6 +30,7 @@ Describe what <ATHLETE> already did from **completed activity and wellness data*
 - **FTP / thresholds:** <SET BY CLAUDE | PROPOSED BY CLAUDE>. Change only threshold values (FTP, indoor FTP, threshold pace or HR), never zone definitions without the athlete's OK.
 - **Signals:** <INTENSITY METHOD, e.g. "power leads for intervals and trainer sessions, an HR cap for long rides, pace for running, RPE as tiebreaker" | "no power meter: HR and RPE lead on the bike, pace for running">. Follow the athlete's stated priority for what is written into workouts (<POWER FIRST: schedule in watts or %FTP and say when HR or feel should lead | HR FIRST | COACH DECIDES per session>); power doesn't automatically win unless they chose it. Disagreement between power, HR and feel is information (fatigue, heat, illness): make a call.
 - **Activity descriptions:** append-only.
+- **Wellness, library and season:** wellness values <ATHLETE> reports may be written with `coach_wellness_update` (preview first, no overwrite without OK); library templates and plans (`coach_workout_save`, `coach_plan_apply`) and season plans (`coach_season_propose`, `coach_season_apply`) only after a preview and go-ahead, and only things Claude created are changed.
 - **Pairing planned and actual activities:** linking allowed without asking; unlinking is not possible for Claude, so wrong pairs are reported for <ATHLETE> to unlink (see "Pairing planned and actual activities").
 
 ## Steps
@@ -39,6 +40,7 @@ Describe what <ATHLETE> already did from **completed activity and wellness data*
    - Wellness (HRV, resting HR, sleep, steps) for the last ~60 days (the readiness baselines) and fitness (CTL/ATL/TSB, ramp rate) for the last 14 days, with explicit YYYY-MM-DD dates where the tools need them.
    - Activities for the last 10-14 days (load, types and the key numbers of each sport, such as power, pace, splits and HR; the commute if it counts as training). Check that each one is paired with its planned event and pair any that aren't (see "Pairing planned and actual activities"). Note any activity that triggers an athlete-specific check (optional, e.g. runs or long walks for an injury program).
    - Planned events from today to about 6 days out.
+   - (Strength Coach watch app users) `coach_watch_log` for the sets actually done since the last check-in; (Scale Linker users) `coach_weighins` for recent weigh-ins.
    - (optional) From the Garmin connection: last night's average heart rate and breathing rate asleep, overnight HRV and sleep duration.
    - `claude/data/key_sessions.csv`, `threshold_history.csv`, `readiness.csv`, `calendar.csv` and the list of `claude/reviews/`: open debriefs, last threshold check, phases ended without a review.
 2. **Read the plan docs and strength data.** Phase today and its focus, goals, the weekly volume ceiling, any special program (optional: <e.g. "`claude/knee-program.md`, read only when composing sessions, after a trigger event or at a re-test">), and from `claude/data/strength_sets.csv` (joined to the `areas` in `exercises.csv`) what's been trained this week against the frequency targets. Flag honestly when the week conflicts with the plan, and suggest revising the plan rather than silently overriding either.
@@ -100,7 +102,7 @@ Whenever a completed session is checked, reported or debriefed (key or not, any 
 
 Key sessions: structured intervals, tests, long sessions (3 h+), hard group sessions or races, heavy strength days. As soon as reported, or at the next check-in:
 
-1. Find the activity and its planned event, make sure they are paired (see "Pairing planned and actual activities"), then read its details and intervals (if the intervals are auto-laps, say so).
+1. Find the activity and its planned event, make sure they are paired (see "Pairing planned and actual activities"), then read its details and intervals with `coach_activity` (if the intervals are auto-laps, say so). For the shape of the session use `coach_streams`, for new bests `coach_best_efforts` and `coach_power_curve`; for a strength session done with the watch app, `coach_watch_log`.
 2. Compliance per work rep against target; reps in range; fade first → last rep; HR drift; decoupling on long steady sessions (under ~5% good); new bests at 1/5/20/60 min vs the last 90 days; fuelling if reported; for strength, sets done vs planned and estimated 1RM vs last time.
 3. Verdict: nailed (all in range, fade ≤ 3%), done (~80% in range), partial, missed. Next step: progress after two "nailed" in a row, repeat after "done", step back after "partial"/"missed" if readiness was green (otherwise repeat).
 4. Append "Debrief (Claude, <date>): …" to the activity description (read first, add below), add a row to `claude/data/key_sessions.csv`, and tell <ATHLETE> in 2-3 lines. Note any threshold evidence.
@@ -112,6 +114,7 @@ Key sessions: structured intervals, tests, long sessions (3 h+), hard group sess
 - **When:** after tests, new 5-60 min bests, debriefs that point to it, the first sessions after a break of 2+ weeks, and at least every 4 weeks. Use the last 90 days, or only the time since the last break if shorter.
 - **Estimates:** 95% of a 20-min test; 75% of the best ramp-test minute; 90% of an 8-min test; best maximal 60-min power; ~0.96 × CP from maximal 3- and 12-min efforts (CP = (P12 × 720 − P3 × 180) / 540); threshold interval evidence; the platform's eFTP as one input. Weight: test > long maximal effort > CP > intervals > eFTP.
 - **Change:** raise when a test says so or two estimates are ≥ 2% higher (max ~5% per step without a test); lower when a test says so or two estimates agree ≥ 3% lower and sessions keep failing while green. Ignore single days, heat, altitude, other power sources and non-maximal efforts.
+- **Evidence tools:** `coach_power_curve` (best power at key durations over the last 90 days, or heart rate or pace for other sports) and `coach_best_efforts` for single sessions give the estimates above without pulling streams through the chat.
 - **Indoor:** from indoor rides, or outdoor minus an offset measured from paired efforts; keep the existing value until evidence says otherwise.
 - **Swimming:** CSS from a 400 m and a 200 m time trial (speed = 200 m ÷ (T400 − T200); retest every 6–8 weeks). **Rowing:** 2 km erg split or the average split of a 30-min maximal piece.
 - **Without power:** keep threshold HR (average HR of the last 20 min of a hard solo 30-min effort, or HR held in threshold intervals with a moderate RPE) and threshold pace for running (30-min time trial). Same rules; log with `setting` threshold_hr or threshold_pace, unit in `notes`.
@@ -136,7 +139,7 @@ The dashboard's Today, Recovery and Training load pages read files the check-in 
 
 If the connection isn't reachable, skip it and say the dashboard is as of the last sync.
 
-With the coach data extension and a data folder, `coach_sync` can bring `wellness`, `fitness`, `activities` and `sleep_timing` up to date on the computer without the rows passing through the chat (dry run first, then `dry_run: false`). Those files in the data folder are then the master; copy them into the project only when asked. For chats on a phone, run `coach_snapshot` and save its text as `claude/data/snapshot.md` in the project; phone chats read that file and say that it is a copy as of its date.
+With the coach data extension and a data folder, `coach_sync` can bring `wellness`, `fitness`, `activities`, `sleep_timing`, `planned` and `planned_steps` up to date on the computer without the rows passing through the chat (dry run first, then `dry_run: false`). Those files in the data folder are then the master: don't keep or back up copies of them in the project (only `activity_extras.csv` stays there), and the dashboard's own copy is refreshed from the data folder files. For chats on a phone, run `coach_snapshot` and save its text as `claude/data/snapshot.md` in the project; phone chats read that file and say that it is a copy as of its date.
 
 ### Dashboard refresh (cheap flow)
 
@@ -147,7 +150,7 @@ No CSV content passes through the chat: save the file to disk, edit it with a sc
 3. Merge with one short script: replace rows whose key exists (date; activity id; event id plus seq), append the rest, keep header, column order and line endings (for the planned files replace the whole window). Check with `head`, `tail`, `wc -l`.
 4. Upload by path: Artifact publish with `url` = the dashboard, `asset: true`, `file_path`. One CSV per call.
 5. One ArtifactData `batch` updating every changed dataset document: `source.url` exactly as returned, `source.name`, `updated: {at: <real current time>, by: "Claude"}`, `if_version` from step 1.
-6. Back up: Projects `project_write` with `path` = `claude/data/<name>.csv` and `local_path` = the merged file. The dashboard's file is the working copy, the project copy the backup; if they differ, take the newer one and say so.
+6. Back up (only files edited by hand; not the six files `coach_sync` keeps in the data folder): Projects `project_write` with `path` = `claude/data/<name>.csv` and `local_path` = the merged file. The dashboard's file is the working copy, the project copy the backup; if they differ, take the newer one and say so.
 7. Don't delete the replaced file on every sync. About every ten syncs, list the dashboard's assets and delete the unreferenced ones one call at a time, checking each result.
 
 For files edited by hand in the project (strength sets, sessions, exercises, calendar, targets), edit the project copy, then do steps 1, 4 and 5 with a disk copy. If saving an asset to disk isn't available, read the project copy, edit and upload it as before, and say it costs more.
@@ -160,6 +163,7 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 - **Activity description on intervals.icu:** read the current description first; if it has content, add the new text below it. Keep it factual: exercises, sets, reps, loads or ride numbers, how it felt, deviations from plan. Key sessions also get the debrief.
 - **Rep shorthand:** parse with the convention in the strength log; ask when ambiguous. It is only for how I report sessions in chat; it is not the format of events written to intervals.icu (those use the per-set lines of the strength event format).
 - **Strength sessions:**
+  0. If <ATHLETE> uses the Strength Coach watch app, read what was done from `coach_watch_log` first and ask only about differences. Body values <ATHLETE> reports (weight, body fat, soreness, mood, sleep, resting HR) go into that day's wellness record with `coach_wellness_update` (dry run first; replacing an existing value needs `confirm_overwrite` and <ATHLETE>'s OK).
   1. Append one row per exercise to `claude/data/strength_sets.csv` and the session to `claude/data/sessions.csv` (conventions in `claude/data/README.md`). Add a missing exercise to `exercises.csv` first, with areas and muscle weights.
   2. Update the lift's progression line in the strength log when a key lift moved.
 - **Session quality:** after rides, runs and key sessions, if <ATHLETE> didn't say how it went, ask once for a 1-5 rating (how it went for the effort: 5 better than expected, 3 as expected, 1 far worse) and write it to the activity's row in `activity_extras.csv`, with any weigh-ins before and after a long session. These ratings let a review test whether markers, sleep, timing or fuelling predict how sessions go.
@@ -175,6 +179,7 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 - Leave one blank line before and after every repeat block (a bare `Nx` line or a label ending in `Nx`). Don't indent step lines inside a repeat; they use the same `- ` prefix as other steps.
 - **Event names:** keep them short and plain for Garmin devices: about 25 characters at most, no colons or brackets and no `(outdoor)` style suffixes (put those in the description). Long names with colons and brackets have synced as a line or underscores with no steps on a Garmin Edge. If an athlete reports that, confirm the event in intervals.icu has its steps and no push errors, then shorten the name and re-save it with the same description.
 - **Strength event format** (intervals.icu, type `WeightTraining`). These rules match the Strength Coach watch app, version 1.2.x. Every strength workout you schedule must follow this format.
+  - **How to write it:** with the coach data extension use `coach_strength_save` (dry run first). It writes this exact format, checks the rules below and always keeps the "Watch log" block the watch app appended; never overwrite or delete that block by hand.
   - **Where:** put the session in the intervals.icu event `description` (event type `WeightTraining`), not in a structured workout (`workout_doc`). Strength events are not parsed by intervals.icu, so there are no `- ` step lines.
   - **One strength event per day:** put the whole session in a single `WeightTraining` event. The watch app reads only the first strength event of the day, so a second one would be ignored.
   - **Line format:** one line per set, in the exact order the sets are done: `N. EXERCISE NAME | TARGET | LOAD | SIDE`
