@@ -2,6 +2,17 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-12.1
+
+*Touches:* setup prompt (what you need, Step 0 interview item 1 and its actions, 2.2 items 1 and 3, the check-in's data pull in section 3) and README. No change to section 4 or 5, so `coaching-principles.md` stays as it is.
+*If you already use the kit (ask your coach "update me to kit 2026-11-12.1"; it should follow these steps and ask before changing anything):*
+1. **Garmin users: connect Claude to Garmin directly if you haven't** (setup prompt 2.2 item 3, the Garmin Personal API extension). Since October 2026 Garmin's terms may stop intervals.icu from passing Garmin-sourced data (activities, FIT files, streams, wellness) on to other apps, including Claude. As of 2026-11-12 intervals.icu still returns full Garmin data, so nothing breaks today, but the direct connection is the only lasting route.
+2. **Update your saved check-in skill card:** in the data-pull step, add: if activities recorded by a Garmin device come back from intervals.icu without their data (no power, heart rate or streams), say so and read them from the Garmin connection.
+3. **If any of your activities reach intervals.icu only through Strava:** their data is withheld from Claude. Link the device's own service to intervals.icu (Settings → Connections) or upload the files.
+
+- New: Strava alone is not enough. Strava's rules stop intervals.icu from passing Strava data on to other apps, so activities that arrive in intervals.icu only via Strava never reach the coach. Setup now says this up front and, if someone only uses Strava, walks them through linking the device's own service instead.
+- New: the direct Garmin connection is no longer "optional but recommended" for Garmin users; setup explains that long term it is the only route, and the check-in falls back to it when intervals.icu returns a Garmin activity without its data.
+
 ## 2026-11-11.7
 
 *Touches:* the whole kit: setup prompt (interview item 1, 10, 11, plan contents, data files table, section 3 "Thresholds", debriefs, section 4 new subsections), check-in skill template (sports line, thresholds section, file name), library (new swimming and rowing parts), README, and one data file rename.

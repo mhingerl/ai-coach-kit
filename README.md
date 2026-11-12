@@ -31,8 +31,8 @@ You don't need to copy files or edit anything. Paste this repository's link into
 4. Answer Claude's questions. Setup takes about 30–45 minutes, and you can stop and continue later.
 
 **You'll need:**
-- A free account at [intervals.icu](https://intervals.icu) linked to your watch or bike computer (Garmin, Wahoo, COROS, Polar, Suunto and others). This is essential; Claude helps you create it if you don't have it yet.
-- A Garmin device is optional (it adds recovery data and some watch apps).
+- A free account at [intervals.icu](https://intervals.icu) linked to your watch or bike computer (Garmin, Wahoo, COROS, Polar, Suunto and others). This is essential; Claude helps you create it if you don't have it yet. Strava alone does not work: Strava's rules stop intervals.icu from passing Strava data on to Claude, so link your device's own service instead.
+- A Garmin device is optional (it adds recovery data and some watch apps). If you have one, connect Claude to Garmin directly: it is the only lasting route, because Garmin's terms may stop intervals.icu from passing Garmin data on to Claude.
 - A Claude account with Projects and connectors. Setup and the weekly review use a fair amount of usage, so a paid plan is the comfortable choice. On a Team or Enterprise plan your organisation's owner must allow the intervals.icu connector.
 
 **Never paste passwords or API keys into the chat.** Claude tells you where each one goes.
