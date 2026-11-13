@@ -51,7 +51,7 @@ You don't need to copy files or edit anything. Paste this repository's link into
 | [`kit/coach-kit-checkin-skill.md`](kit/coach-kit-checkin-skill.md) | Template for your daily readiness check-in skill |
 | [`kit/coach-kit-dashboard.html`](kit/coach-kit-dashboard.html) | Template for the optional training dashboard |
 | [`kit/coach-kit-exercises.csv`](kit/coach-kit-exercises.csv) | Which muscles each exercise trains (for the muscle map) |
-| [`extension/INSTALL.md`](extension/INSTALL.md) and [`extension/coach-data.mcpb`](extension/coach-data.mcpb) | The optional coach data extension: install guide and the file |
+| [`extension/INSTALL.md`](extension/INSTALL.md) and the [latest `coach-data.mcpb`](https://github.com/mhingerl/ai-coach-kit/releases/latest/download/coach-data.mcpb) | The coach data extension: install guide and the file |
 | [`VERSION`](VERSION) | The current kit version (one line; what the weekly kit-news check reads first) |
 | [`CHANGELOG.md`](CHANGELOG.md) | What changed in each kit version |
 
