@@ -1,10 +1,12 @@
 # AI coach kit
 
-> **For Claude:** if a user pasted this repository's link, they want to be set up as an athlete with this kit. Read [`SETUP-FOR-CLAUDE.md`](SETUP-FOR-CLAUDE.md) and follow it; the first thing you ask is whether they have intervals.icu.
+> **For Claude:** if a user pasted this repository's link, they want to be set up as an athlete with this kit. Read [`SETUP-FOR-CLAUDE.md`](SETUP-FOR-CLAUDE.md) and follow it; the first thing you ask is what they can read their training from (intervals.icu is recommended; a Garmin key or own FIT files also work).
 
 A ready-made setup that turns Claude into your personal training coach for strength, endurance sports (cycling, running, swimming, rowing, triathlon) or any mix. It reads your training data, plans your sessions, and logs what you did. A training dashboard is available as an optional extra.
 
 You don't need to copy files or edit anything. Paste this repository's link into Claude and Claude sets everything up with you.
+
+> **Already using this kit?** The newest version needs the coach data extension (Claude desktop app on Mac or Windows). You can stay on the old kit, but first update to its last version, 2026-11-12.2, from the [`kit-legacy` branch](https://github.com/mhingerl/ai-coach-kit/tree/kit-legacy). Ask your coach to check for a new kit version: it reads the notice at the top of [`CHANGELOG.md`](CHANGELOG.md) and asks you which way to go.
 
 ## What you get
 
