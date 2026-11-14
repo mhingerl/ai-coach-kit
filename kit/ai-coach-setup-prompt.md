@@ -537,10 +537,17 @@ Use what I actually have, and decide per session which signal leads. No signal a
   - About 48 hours between heavy sessions for the same leg pattern.
   - When a strength session and an interval session fall on the same day, do the intervals first if possible.
 - **Autoregulation.** Stop a compound or hip-hinge lift at hard failure; don't grind out bad reps. Low-risk accessory moves can still be finished. If failures keep happening after long sessions, plan fewer rounds on those days in advance.
-- **Progression.** Once all rounds are clean at the top of the rep range, make it harder rather than adding reps:
-  - more load if available
-  - otherwise a slower lowering (3–4 seconds), a pause at the bottom, or 1.5 reps, so failure comes at about 10–12 reps
-  - band-assisted pull-ups: remove one band once all reps are clean
+- **Progression: every exercise moves forward, core work included.** Progression is built into every session you compose, not left to chance. Planned targets that stay flat, or sit below what I already did, are a mistake.
+  - **Start from the demonstrated level, never below it.** Before writing a session, look up the last two exposures of each exercise in the strength log data and start at or above the best clean result of the two. After a break, an injury or soreness a step back is fine, but the reason goes into the session notes.
+  - **Double progression.** Each exercise has a rep or hold range. When every set of the last exposure was clean (no failed set, form held, about 2 reps or 5–10 seconds in reserve), the next exposure goes up one step: reps first, then load, then a harder variation.
+    - Loaded work: top of the rep range with about 2 reps spare in every set, then the smallest load step available, with reps back at the bottom of the range.
+    - When load is capped (light home weights): make each rep harder instead: a slower lowering (3–4 seconds), a pause at the bottom, or 1.5 reps, so failure comes at about 10–12 reps.
+    - Holds (planks, dead bug, Pallof, balance): add 10–15 seconds once every round hit the target with 5–10 seconds spare. When a hold passes about 90 seconds, move to a harder variation instead of a longer hold.
+    - Bodyweight reps (push-ups, pull-ups, tibialis raises, clam shells): +1–2 reps per set, then a slower tempo, then a harder variation or added load. Band-assisted pull-ups: remove one band once all reps are clean.
+  - **Harder variations for core work:** front plank → long-lever plank or plank with alternating leg lift; dead bug → straight-leg or slow dead bug, or with a band; side plank → with a top-leg lift; Copenhagen plank → longer lever; hanging knee raise → straight-leg raise; Pallof press → heavier band or longer hold; reverse crunch → hanging.
+  - **After a failed set,** the next exposure repeats the same target (the side that failed gets the extra set, see below). Two failed exposures in a row: one step back.
+  - **State the reason for every repeat.** When an exercise is planned the same as last time or lower, the session notes say why (fatigue, a failed side, a break, a pain point). An unexplained repeat is a mistake; if the same exercise is held three exposures in a row without a stated reason, flag it to me.
+  - **Not subject to progression:** deliberate re-entry or light slots (the note says so), and exercises I have paused.
 - **Extra sets go to the side that failed.** Do equal sets on both sides (the agreed side first). Give one side an extra set only when it actually failed: it stopped short of the planned reps or hold while the other side finished, or I say it was clearly weaker, judged from the last two exposures of that exercise. Drop the extra set once both sides complete the sets for two exposures in a row. A blanket extra set for one side is the wrong tool, because on some exercises the other side is the weaker one.
 - **Respect my preferences** for exercises I feel working (for example "clam shells hit the right muscles"). Use them more often, but keep a standing or functional variant in the rotation.
 - **Physio sessions count toward the frequency targets.** Log what the physio prescribes, and follow their input when it conflicts with yours.
@@ -618,4 +625,4 @@ description: "Use when <ATHLETE> wants to set up the coaching again or move to a
 
 **Export format** (what section 1 expects to import): the title "Coaching setup export (<date>)", then the ten parts in the order above, with interview answers numbered like section 1 of the kit version they were written for. When the new kit has items the export doesn't cover, ask only those.
 
-Kit version: 2026-11-12.3. Start now with Step 0.
+Kit version: 2026-11-14. Start now with Step 0.

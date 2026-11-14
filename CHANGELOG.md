@@ -2,6 +2,15 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-14
+
+*Touches:* setup prompt (section 4, "Strength training", the Progression bullet). Section 4 changed, so regenerate `coaching-principles.md`.
+*If you already use the kit (ask your coach "update me to kit 2026-11-14"; it should follow these steps and ask before changing anything):*
+1. **Regenerate `claude/coaching-principles.md`** from the new setup prompt (2.5, item 3), overwriting the old file.
+2. **Check your strength targets against the rule:** the coach compares the last two exposures of each exercise with the next planned targets and raises anything that sits flat or below what you already did (planks and other core work are the usual ones), or tells you why it stays.
+
+- Changed: the strength progression rule now applies to every exercise, core work included. Targets start at the best clean result of the last two sessions, move up by double progression (reps or seconds first, then load, then a harder variation), step back after two failed exposures, and every repeat or step down has to be explained in the session notes. Added a list of harder variations for core exercises. Found when planks and the dead bug stayed at 60 s and 45 s after the athlete had held 90 s and 60 s.
+
 ## 2026-11-12.3
 
 **Read first: this version needs the coach data extension. You can stay on your current version.** From here the kit works only through its own extension (a Claude desktop app on a Mac or Windows computer), which replaces icuvisor and the separate Garmin extension. Your current kit keeps working with icuvisor and the Garmin extension, but it receives no more updates. Choose one: (a) **update**: install the extension first ([download `coach-data.mcpb`](https://github.com/mhingerl/ai-coach-kit/releases/latest/download/coach-data.mcpb), then the steps below); or (b) **stay on the old kit**: but first bring it up to date, because 2026-11-12.2 is the last version that works without the extension and you may not have it yet. Update to 2026-11-12.2 by applying the changelog entries below this one, up to and including 2026-11-12.2, **and fetch every file for those versions from the `kit-legacy` branch, not from main** (for example `https://raw.githubusercontent.com/mhingerl/ai-coach-kit/kit-legacy/kit/ai-coach-setup-prompt.md`), because main now holds the new files. Once you are on 2026-11-12.2, tell your coach "stay on my kit version" and it stops reminding you. Do not apply this entry (2026-11-12.3) unless you chose (a). Nothing changes in your project until you say so.
