@@ -17,7 +17,7 @@ Progress comes from GPS map-matching to the route, not from ride distance, so st
 
 **How a plan reaches the Edge** (the athlete chooses; a stored or pasted plan is always preferred over a fetched one):
 - **Pasted:** the athlete pastes the `[[RP1:...]]` line into the app's **Pasted plan** setting in Garmin Connect. Works right away.
-- **Fetched:** the field reads the plan NOTE from intervals.icu. This needs the athlete's intervals.icu API key in the app's settings (typed by the athlete, never in the chat). The first fetch can take 5 minutes or more into the ride.
+- **Fetched:** the field reads the plan NOTE from intervals.icu. This needs the athlete's intervals.icu API key in the app's settings (typed by the athlete, never in the chat). Unlike a device app, a data field cannot make web requests itself; it asks the Edge for a background fetch, scheduled about 15 seconds after the field starts, and the Edge may take longer (up to about 5 minutes; not yet measured on a real Edge). Once fetched, the plan is stored on the Edge. Pasting the plan is the instant alternative.
 
 ## When to offer it
 
@@ -39,10 +39,19 @@ Only when the athlete has an Edge 530 and rides outdoors with power or heart rat
 
 1. **Install** RouteCoach from the Connect IQ Store (search "RouteCoach" in the Garmin Connect IQ phone app; Edge 530 only). If the search does not show it yet, or not for the Edge 530, say so, follow "Checking availability" above and stop here.
 2. **Add it on the Edge** to a full-page data screen of the cycling profile. It shows "No plan" until it has one.
-3. **Choose how plans arrive:** paste the `[[RP1:...]]` line into the app's **Pasted plan** setting in Garmin Connect (works right away), and/or enter the intervals.icu API key in the app's settings so the field fetches the NOTE for today. The athlete types the key; never ask for it in the chat.
+3. **Choose how plans arrive** and fill in the settings below in Garmin Connect (phone, app settings). The athlete types the key; never ask for it in the chat.
+
+   | Setting | Needed? | Default | Notes |
+   |---|---|---|---|
+   | **API key** | REQUIRED for the fetch path (not needed if the plan is always pasted) | empty | intervals.icu API key; password-style field |
+   | **Athlete ID** | REQUIRED for the fetch path, but the default is fine | 0 (= the key owner) | only change it for another athlete |
+   | **Pasted plan** | OPTIONAL | empty | manual alternative to the fetch: paste the `[[RP1:...]]` line; works right away and overrides a stored plan |
+   | **Demo mode** | OPTIONAL | off | simulates a ride on a built-in route |
+   | **Window behind / ahead** | OPTIONAL | 750 m / 3250 m | size of the elevation profile window |
+   | **Off-route threshold** | OPTIONAL | 50 m | distance from the route that shows OFF ROUTE |
 4. **Routes:** don't ask for a list of routes. Tell the athlete that whenever they send a GPX file in a chat, you will offer to write a route plan for it (see "When to write a route plan"). Routes the athlete sends are added to the route library (below), with the Garmin Course name.
 5. **For a ride:** load the Garmin Course on the Edge and ride with RouteCoach and WITHOUT the Garmin workout (or the other way round).
-6. **Optional:** a **demo mode** setting in the app simulates a ride on a built-in route, to see what the screen looks like.
+6. **Optional:** switch on **Demo mode** to see what the screen looks like (see the table).
 
 ## What to write for a route ride (three things, always together)
 
