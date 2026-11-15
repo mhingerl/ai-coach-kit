@@ -1,6 +1,6 @@
 # RouteCoach: route-based targets for the Garmin Edge 530
 
-**Status:** new (version 1.0.1, submitted to the Connect IQ Store on 2026-11-15, review pending, so it may not be in the public store yet); supported device: Edge 530 only; so far tested in the simulator only, not yet on a real Edge 530.
+**Status:** new (version 1.0.6, submitted to the Connect IQ Store on 2026-11-15, review pending, so the public store may still show an older version or none); supported device: Edge 530 only. Tested in the simulator and, so far, on one athlete's real Edge 530 (the real device exposed two bugs, fixed in 1.0.5 and 1.0.6, see "Versions"). **Use 1.0.6 or later**: tell the athlete to update the app in the Connect IQ app before relying on it.
 
 **Purpose:** an optional extra for an athlete who has an Edge 530, rides outdoors with power or heart rate and would like route-based targets (for example "threshold intervals on the long climb"). Everything else in the kit works without it. This document tells the coach what RouteCoach is, how to set it up with the athlete, and how to write a plan for it. The three tools in `kit/routecoach/tools/` (Python 3.8+, standard library only) build the plan; `kit/routecoach/examples/` holds a small synthetic route and a matching plan to try them on.
 
@@ -17,7 +17,9 @@ Progress comes from GPS map-matching to the route, not from ride distance, so st
 
 **How a plan reaches the Edge** (priority, highest first: the block in today's workout description, the block in the note, the Pasted plan setting, the last stored plan; a valid fetched plan always replaces a stored one of the same date and route):
 - **Pasted:** the athlete pastes the `[[RP1:...]]` line into the app's **Pasted plan** setting in Garmin Connect. Works right away.
-- **Fetched:** the field reads the plan from the description of today's workout (or, as a fallback, from a NOTE) on intervals.icu. This needs the athlete's intervals.icu API key in the app's settings (typed by the athlete, never in the chat). Unlike a device app, a data field cannot make web requests itself; it asks the Edge for a background fetch, scheduled about 15 seconds after the field starts, and the Edge may take longer (up to about 5 minutes; not yet measured on a real Edge). Once fetched, the plan is stored on the Edge. Pasting the plan is the instant alternative.
+- **Fetched:** the field reads the plan from the description of today's workout (or, as a fallback, from a NOTE) on intervals.icu. This needs the athlete's intervals.icu API key in the app's settings (typed by the athlete, never in the chat). Unlike a device app, a data field cannot make web requests itself; it asks the Edge for a background fetch, requested about 15 seconds after the field starts (on every start since 1.0.5, with a fall-back to the Edge's 5-minute schedule if the Edge refuses; the real delay on a device is not measured). Once fetched, the plan is stored on the Edge (up to three plans, keyed by date and route name). Pasting the plan is the instant alternative.
+
+**Changing a plan later:** rewrite the block in the workout (same date and same route name, which is the Garmin Course name) and it replaces the earlier plan at the next fetch (the same checksum means no change). A different route name or date is a separate plan. A plan that is not dated today is shown as "stored (old)".
 
 ## When to offer it
 
@@ -101,6 +103,14 @@ python3 kit/routecoach/tools/encode_plan.py route.gpx plan.json --png preview.pn
 
 - `find_climbs.py` helps place the segments. `encode_plan.py` validates the plan (overlaps, ranges, target mismatch), prints a size report and a text preview, and writes the single `[[RP1:...]]` line (the last line on standard output, also in `--out`). Exit code 0 is fine (warnings allowed); 2 means invalid input.
 - Run it from wherever the tools are saved; the paths above are the repository's.
+
+## Versions and what the athlete sees on the Edge
+
+- **1.0.4:** fetched the plan from the workout description (two small requests). Bugs found on a real ride: an old stored plan stayed active (a fetched plan was dropped when a pasted plan of the same date and route was stored; the plan was only chosen at the first GPS fix; fetch errors were silent).
+- **1.0.5:** priority rule (workout, note, pasted, stored), re-choice when new plans arrive, fetch status shown, first fetch 15 s after every start.
+- **1.0.6:** plan data is stored as text and read back right after saving (the real Edge 530 had not kept the previous format and showed "stored plan unreadable"); a plan that cannot be read is dropped and the reason is shown. Use this version or later.
+
+The field shows which plan is active and why, so a problem can be diagnosed from the screen (while waiting for GPS, in the first 8 seconds, and as a compact line at the bottom of a full page): the source (`workout`, `note`, `pasted` or `stored`) with the time it arrived, the plan checksum (`Sum ...`, compare it with the checksum of the block you wrote) and the result of the last fetch (for example `OK`, `waiting`, `off (no API key)`, `HTTP 401`, `block invalid`, `no network`, `plan not stored`). When the athlete reports a wrong or missing plan, ask for that text before guessing: `no API key` or `HTTP 401` is the key, `block invalid` is a damaged block (regenerate it with the encoder), `stored (old)` is a plan for another day, `no network` is the phone connection, and a wrong checksum means the Edge has not fetched the newer block yet (wait for the next fetch or paste it).
 
 ## Size limits
 

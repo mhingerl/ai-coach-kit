@@ -2,6 +2,16 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-15.5
+
+*Touches:* RouteCoach only: `kit/coach-kit-routecoach.md` (Status line, fetch timing, new "Versions and what the athlete sees on the Edge" section) and one phrase in the setup prompt (2.7 RouteCoach item). No change to section 3, 4 or 5, so `claude/coaching-principles.md` and the check-in skill card stay as they are.
+*If you already use the kit (ask your coach "update me to kit 2026-11-15.5"; it should follow this step and ask before changing anything):*
+1. Only with RouteCoach: replace the RouteCoach file in your project with the new text, and update the RouteCoach app on the Edge to 1.0.6 or later (Connect IQ app).
+
+- Changed: RouteCoach 1.0.6 is documented (submitted to the Connect IQ Store). Version 1.0.4 could keep showing an old plan; 1.0.5 fixed the priority rule (workout, note, pasted, stored) and shows the fetch status; 1.0.6 fixes plans not being kept on a real Edge 530 ("stored plan unreadable"). The coach now knows what the screen reports (plan source and time, checksum, last fetch result) and uses it to diagnose a missing or wrong plan.
+- Changed: how a plan is replaced is explained: rewriting the block in the workout (same date and route name) replaces the earlier plan at the next fetch; up to three plans are kept on the device.
+- Still not verified: whether the long plan line looks fine in Garmin Connect's workout notes, and the real delay of the first fetch on a ride.
+
 ## 2026-11-15.4
 
 *Touches:* RouteCoach only: `kit/coach-kit-routecoach.md`, the "Route rides" bullet in the setup prompt (section 3) and in the check-in skill card, and the two tools in `kit/routecoach/tools/` (`rp1.py`, `encode_plan.py`).
