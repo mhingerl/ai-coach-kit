@@ -15,7 +15,7 @@ Progress comes from GPS map-matching to the route, not from ride distance, so st
 
 **Usage rule:** the athlete loads the route as a Garmin Course and rides EITHER with the Garmin workout OR with RouteCoach, never both: their power alerts could disagree.
 
-**How a plan reaches the Edge** (the athlete chooses; a stored or pasted plan is always preferred over a fetched one):
+**How a plan reaches the Edge** (priority, highest first: the block in today's workout description, the block in the note, the Pasted plan setting, the last stored plan; a valid fetched plan always replaces a stored one of the same date and route):
 - **Pasted:** the athlete pastes the `[[RP1:...]]` line into the app's **Pasted plan** setting in Garmin Connect. Works right away.
 - **Fetched:** the field reads the plan from the description of today's workout (or, as a fallback, from a NOTE) on intervals.icu. This needs the athlete's intervals.icu API key in the app's settings (typed by the athlete, never in the chat). Unlike a device app, a data field cannot make web requests itself; it asks the Edge for a background fetch, scheduled about 15 seconds after the field starts, and the Edge may take longer (up to about 5 minutes; not yet measured on a real Edge). Once fetched, the plan is stored on the Edge. Pasting the plan is the instant alternative.
 
@@ -45,7 +45,7 @@ Only when the athlete has an Edge 530 and rides outdoors with power or heart rat
    |---|---|---|---|
    | **API key** | REQUIRED for the fetch path (not needed if the plan is always pasted) | empty | intervals.icu API key; password-style field |
    | **Athlete ID** | REQUIRED for the fetch path, but the default is fine | 0 (= the key owner) | only change it for another athlete |
-   | **Pasted plan** | OPTIONAL | empty | manual alternative to the fetch: paste the `[[RP1:...]]` line; works right away and overrides a stored plan |
+   | **Pasted plan** | OPTIONAL | empty | manual alternative to the fetch: paste the `[[RP1:...]]` line; works right away; used only if nothing is fetched and never replaces a fetched plan; clearing it removes the pasted plan from the Edge |
    | **Demo mode** | OPTIONAL | off | simulates a ride on a built-in route |
    | **Window behind / ahead** | OPTIONAL | 750 m / 3250 m | size of the elevation profile window |
    | **Off-route threshold** | OPTIONAL | 50 m | distance from the route that shows OFF ROUTE |
