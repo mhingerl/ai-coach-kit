@@ -1,6 +1,6 @@
 # RouteCoach: route-based targets for the Garmin Edge 530
 
-**Status:** new (version 1.0.1, submitted to the Connect IQ Store on 2026-11-15, review pending); supported device: Edge 530 only; so far tested in the simulator only, not yet on a real Edge 530.
+**Status:** new (version 1.0.1, submitted to the Connect IQ Store on 2026-11-15, review pending, so it may not be in the public store yet); supported device: Edge 530 only; so far tested in the simulator only, not yet on a real Edge 530.
 
 **Purpose:** an optional extra for an athlete who has an Edge 530, rides outdoors with power or heart rate and would like route-based targets (for example "threshold intervals on the long climb"). Everything else in the kit works without it. This document tells the coach what RouteCoach is, how to set it up with the athlete, and how to write a plan for it. The three tools in `kit/routecoach/tools/` (Python 3.8+, standard library only) build the plan; `kit/routecoach/examples/` holds a small synthetic route and a matching plan to try them on.
 
@@ -21,11 +21,19 @@ Progress comes from GPS map-matching to the route, not from ride distance, so st
 
 ## When to offer it
 
-Only when the athlete has an Edge 530 and rides outdoors with power or heart rate and would like route-based targets. The setup prompt (2.7) and the weekly kit-news step say when and how often to mention it. If the Connect IQ Store search does not show RouteCoach for the athlete's Edge 530, say so and skip it for now; do not record it as offered.
+Only when the athlete has an Edge 530 and rides outdoors with power or heart rate and would like route-based targets. The setup prompt (2.7) and the weekly kit-news step say when and how often to mention it. RouteCoach may not be in the public store yet (see Status): check availability first (next section). If it is not listed for the athlete's Edge 530, say so plainly and skip it for now; do not record it as offered.
+
+## Checking availability
+
+**Store link:** not known yet; add the link to the public listing here once it is live.
+
+- **With a web tool:** open the store link above if there is one, otherwise search the Connect IQ Store (apps.garmin.com) for "RouteCoach". It counts as available when its public listing is found and names the Edge 530 among the compatible devices. A search that finds nothing is not proof: say "I could not find it yet", never "it does not exist".
+- **Without a web tool:** ask the athlete to search for RouteCoach in the Garmin Connect IQ phone app with the Edge 530 selected, and don't claim it is available.
+- **Not available yet:** say so in one or two lines (it is announced and submitted for review, not public yet), set the checklist status to `not yet in store`, and re-check only in the weekly kit-news step (setup prompt 2.6, step 5) or when the athlete asks; never in daily check-ins. When it appears, tell the athlete once, set the status to `offered` and ask whether to set it up.
 
 ## How to set it up with the athlete
 
-1. **Install** RouteCoach from the Connect IQ Store (search "RouteCoach" in the Garmin Connect IQ phone app; Edge 530 only). If the search does not show it yet, or not for the Edge 530, say so and stop here.
+1. **Install** RouteCoach from the Connect IQ Store (search "RouteCoach" in the Garmin Connect IQ phone app; Edge 530 only). If the search does not show it yet, or not for the Edge 530, say so, follow "Checking availability" above and stop here.
 2. **Add it on the Edge** to a full-page data screen of the cycling profile. It shows "No plan" until it has one.
 3. **Choose how plans arrive:** paste the `[[RP1:...]]` line into the app's **Pasted plan** setting in Garmin Connect (works right away), and/or enter the intervals.icu API key in the app's settings so the field fetches the NOTE for today. The athlete types the key; never ask for it in the chat.
 4. **Routes:** ask for the Garmin Course names of the usual routes and for their GPX files, so the coach can fill the route library (below).
