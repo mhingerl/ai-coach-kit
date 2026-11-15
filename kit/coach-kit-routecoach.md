@@ -25,7 +25,7 @@ Only when the athlete has an Edge 530 and rides outdoors with power or heart rat
 
 ## Checking availability
 
-**Store link:** not known yet; add the link to the public listing here once it is live.
+**Store link:** https://apps.garmin.com/apps/67fb8f49-f0b9-4346-8994-d30bec5c6ad9?tid=1 (the listing is not public yet while the review is pending: until it opens for you, treat RouteCoach as not yet in store; remove this note once it is live).
 
 - **With a web tool:** open the store link above if there is one, otherwise search the Connect IQ Store (apps.garmin.com) for "RouteCoach". It counts as available when its public listing is found and names the Edge 530 among the compatible devices. A search that finds nothing is not proof: say "I could not find it yet", never "it does not exist".
 - **Without a web tool:** ask the athlete to search for RouteCoach in the Garmin Connect IQ phone app with the Edge 530 selected, and don't claim it is available.
