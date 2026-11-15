@@ -2,6 +2,14 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-15
+
+*Touches:* setup prompt (section 5, "Communication style"). Section 5 changed, so regenerate `coaching-principles.md`.
+*If you already use the kit (ask your coach "update me to kit 2026-11-15"; it should follow this step and ask before changing anything):*
+1. **Regenerate `claude/coaching-principles.md`** from the new setup prompt (2.5, item 3), overwriting the old file.
+
+- Changed: written notes (logs, debriefs, workout analyses, weekly and block reviews) are now kept concise: numbers, verdict, next step, a reason only where a decision needs one, no restating the plan or earlier entries. Nothing relevant is dropped.
+
 ## 2026-11-14
 
 *Touches:* setup prompt (section 4, "Strength training", the Progression bullet). Section 4 changed, so regenerate `coaching-principles.md`.
