@@ -2,7 +2,8 @@
 """encode_plan.py - GPX + segment JSON -> [[RP1:...]] block (stdlib only, Python 3.8+).
 
 Usage:
-  encode_plan.py route.gpx plan.json [--png preview.png] [--tol 15] [--grid 4] [--elev-step 50] [--out block.txt]
+  encode_plan.py route.gpx plan.json [--png preview.png] [--tol 15] [--grid 4] [--elev-step 50] [--out block.txt] [--workout-line]
+  (--workout-line: stdout/--out = blank line + the one block line, to append to the END of a workout description)
 
 plan.json:
 {
@@ -187,6 +188,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("gpx")
     ap.add_argument("plan")
+    ap.add_argument("--workout-line", action="store_true",
+                    help="print a blank line + the single block line, ready to append to the END of a workout description "
+                         "(stdout and --out); the checks and previews on stderr are unchanged")
     ap.add_argument("--png")
     ap.add_argument("--out")
     ap.add_argument("--tol", type=float, default=15.0)
@@ -218,9 +222,10 @@ def main(argv=None):
     if a.png:
         png_preview(a.png, dec)
         eprint("preview written:", a.png)
+    text = ("\n" + block + "\n") if a.workout_line else (block + "\n")
     if a.out:
-        open(a.out, "w").write(block + "\n")
-    print(block)
+        open(a.out, "w").write(text)
+    sys.stdout.write(text if a.workout_line else block + "\n")
     return 0
 
 

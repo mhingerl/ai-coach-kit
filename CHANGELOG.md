@@ -2,6 +2,16 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-15.4
+
+*Touches:* RouteCoach only: `kit/coach-kit-routecoach.md`, the "Route rides" bullet in the setup prompt (section 3) and in the check-in skill card, and the two tools in `kit/routecoach/tools/` (`rp1.py`, `encode_plan.py`).
+*If you already use the kit (ask your coach "update me to kit 2026-11-15.4"; it should follow these steps and ask before changing anything):
+1. Only with RouteCoach: replace the RouteCoach file, the two tools and the "Route rides" bullet in your saved check-in skill card with the new text. The app needs RouteCoach 1.0.4 or later (update it in the Connect IQ app) to read the plan from the workout.
+
+- Changed: the RouteCoach plan line now goes as the last line of the workout description (after a blank line, never inside the steps), and the workout gets the tag `routecoach`; a separate NOTE named `RouteCoach plan` is only the fallback. The coach must keep or regenerate the line whenever it rewrites that description. `encode_plan.py --workout-line` prints the line ready to append.
+- Why: one event instead of two, and the watch now fetches in two small requests (event names and tags first, then only the candidate descriptions), so long nutrition or strength notes on the same day can no longer break it.
+- Not yet verified: how Garmin Connect shows the long line in the workout notes (the steps, duration and load are unchanged in intervals.icu). If the athlete sees a problem, the coach falls back to the NOTE.
+
 ## 2026-11-15.3
 
 *Touches:* RouteCoach wording only: `kit/coach-kit-routecoach.md` (new "When to write a route plan" rule, setup step 4, route library note), setup prompt (2.7 RouteCoach item, section 3 "Route rides" bullet) and the check-in skill template (the "Route rides" bullet). Section 3's "Writing workouts to intervals.icu" subsection changed.

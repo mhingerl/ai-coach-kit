@@ -17,7 +17,7 @@ Progress comes from GPS map-matching to the route, not from ride distance, so st
 
 **How a plan reaches the Edge** (the athlete chooses; a stored or pasted plan is always preferred over a fetched one):
 - **Pasted:** the athlete pastes the `[[RP1:...]]` line into the app's **Pasted plan** setting in Garmin Connect. Works right away.
-- **Fetched:** the field reads the plan NOTE from intervals.icu. This needs the athlete's intervals.icu API key in the app's settings (typed by the athlete, never in the chat). Unlike a device app, a data field cannot make web requests itself; it asks the Edge for a background fetch, scheduled about 15 seconds after the field starts, and the Edge may take longer (up to about 5 minutes; not yet measured on a real Edge). Once fetched, the plan is stored on the Edge. Pasting the plan is the instant alternative.
+- **Fetched:** the field reads the plan from the description of today's workout (or, as a fallback, from a NOTE) on intervals.icu. This needs the athlete's intervals.icu API key in the app's settings (typed by the athlete, never in the chat). Unlike a device app, a data field cannot make web requests itself; it asks the Edge for a background fetch, scheduled about 15 seconds after the field starts, and the Edge may take longer (up to about 5 minutes; not yet measured on a real Edge). Once fetched, the plan is stored on the Edge. Pasting the plan is the instant alternative.
 
 ## When to offer it
 
@@ -57,8 +57,8 @@ Only when the athlete has an Edge 530 and rides outdoors with power or heart rat
 
 Only after the trigger rule above is met (the athlete brought a route and said yes).
 
-1. **The normal time-based workout**, exactly as always (intervals.icu workout syntax, same date). Do not change how workouts are written; load, TSS and the sync to the device depend on it.
-2. **A separate NOTE event** on the same date, category NOTE, named exactly `RouteCoach plan`, whose description is ONE line, `[[RP1:...]]`, and nothing else. Never put the block into the workout description.
+1. **The normal time-based workout**, exactly as always (intervals.icu workout syntax, same date), with the plan block as the **last line of its description**: after the step lines, a blank line, then ONE line `[[RP1:...]]` (`encode_plan.py --workout-line` prints exactly that, ready to append). Never put the block inside or between the step lines and nothing after it. **Add the tag `routecoach`** to that workout (next to your usual tags): the watch reads tagged events first and otherwise only looks at ride-type workouts and the NOTE, so a block in a strength workout without the tag is not found. Whenever you rewrite or update that workout's description, keep the block as the last line or regenerate it, otherwise the plan disappears from the watch. Load, TSS, steps and the sync to the device are unchanged by the block (tested in intervals.icu); that Garmin Connect shows the long line in the workout notes without problems is not yet verified: if the athlete reports a problem there, use the NOTE (2) instead.
+2. **Fallback, still supported: a separate NOTE event** on the same date, category NOTE, named exactly `RouteCoach plan`, whose description is ONE line, `[[RP1:...]]`, and nothing else. Use it only when the workout carries no block. If both exist, the watch uses the workout block.
 3. **One line for the athlete** naming the Garmin Course to load, for example: "Load the course 'Local loop' (74 km) on the Edge, then add the RouteCoach field to a data page. Ride either with the Garmin workout OR with RouteCoach, not both."
 
 Never edit the block by hand: it has a checksum, and a damaged block is rejected ("No plan"). Always regenerate it with the encoder and use its output unchanged.
@@ -104,14 +104,15 @@ python3 kit/routecoach/tools/encode_plan.py route.gpx plan.json --png preview.pn
 
 ## Size limits
 
-The NOTE description must stay **under 5,000 characters**: the Edge 530 fetches it in the background and cannot safely handle more. As a guide the encoder produces about 40 to 70 bytes of binary per km and the text block is about 1.33 times that; a real 98.8 km route with 7 segments came to 4,682 characters. A route too long for the limit needs section plans (one plan per ride section, one NOTE each): ask the athlete before splitting.
+The block (and a NOTE description) must stay **under 5,000 characters**: the Edge 530 fetches it in the background and cannot safely handle more. As a guide the encoder produces about 40 to 70 bytes of binary per km and the text block is about 1.33 times that; a real 98.8 km route with 7 segments came to 4,682 characters. A route too long for the limit needs section plans (one plan per ride section, one NOTE each): ask the athlete before splitting.
 
-## Creating the NOTE
+## Writing the block into the workout
 
-If the coach can create intervals.icu events with a tool, create the NOTE itself after the encoder check; otherwise give the athlete the one line and the NOTE name and date to paste.
-- With the coach data extension use `coach_event_save` (dry run first): a NOTE named exactly `RouteCoach plan` on the ride date, description = the single `[[RP1:...]]` line and nothing else, tag `claude`, `external_id` `claude-YYYY-MM-DD-routecoach` (the date is the event's start date). Short plain event name, as for every event.
-- Read the event back (`coach_events`) and confirm the description is that one line, unchanged. Offer the line in the chat too, so the athlete can paste it into the **Pasted plan** setting.
-- The normal workout is written and previewed as always; the NOTE is an extra, separate event.
+If the coach can create intervals.icu events with a tool, write the workout itself with the block as its last line; otherwise give the athlete the one line to append.
+- With the coach data extension use `coach_event_save` (dry run first): the normal workout description (step lines as always), a blank line, then the single `[[RP1:...]]` line as the very last line; tags: the usual ones plus `routecoach`. Do not shorten or reflow the block.
+- Read the event back (`coach_events`) and confirm the steps and the load are as without the block and the last line is the block, unchanged. Offer the line in the chat too, so the athlete can paste it into the **Pasted plan** setting.
+- Fallback only if the workout cannot carry the block: a NOTE named exactly `RouteCoach plan` on the ride date, description = the single `[[RP1:...]]` line and nothing else, tag `claude`, `external_id` `claude-YYYY-MM-DD-routecoach`. The NOTE is an extra, separate event.
+- What the watch reads (so you know what is and is not found): first a tiny list of today's events (names and tags only), then the descriptions of at most 5 candidates: workouts tagged `routecoach`, then up to 2 other ride workouts, then NOTEs tagged `routecoach` or named `RouteCoach plan`. Strength, nutrition and other events are never read.
 
 ## Route library
 

@@ -347,6 +347,28 @@ def from_block(text):
     return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))
 
 
+def extract_plan(text):
+    """Plan bytes from free text (workout description or note), as the watch does: the first [[RP1:...]] block
+    whose checksum is valid. Tolerates prose before/after, CRLF, spaces or line breaks inside the block, a block
+    that is the last line without newline. Returns None if there is no valid block (damaged block = None)."""
+    pos = 0
+    while True:
+        i = text.find("[[RP1:", pos)
+        if i < 0:
+            return None
+        j = text.find("]]", i + 6)
+        if j < 0:
+            return None
+        s = "".join(text[i + 6:j].split())
+        try:
+            data = base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))
+            if len(data) > 20 and crc16(data[:-2]) == struct.unpack(">H", data[-2:])[0]:
+                return data
+        except Exception:
+            pass
+        pos = i + 6
+
+
 # ---------------------------------------------------------------- decode
 def decode_plan(data):
     if crc16(data[:-2]) != struct.unpack(">H", data[-2:])[0]:

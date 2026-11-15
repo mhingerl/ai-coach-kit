@@ -465,7 +465,7 @@ Every chat, check-in and scheduled run costs me tokens or credits, so work lean:
   1. Schedule the real structure first and note its computed load.
   2. Add a roughly 20-minute block at 0% where the gap will be, so I can skip it on my device with the lap button.
   3. Set the target load back to the original number, because the zero block inflates the automatic estimate.
-- **Route rides (only if I use RouteCoach, the Edge 530 data field):** only when I put a GPX file in the chat or name a saved route for a ride, ask me once whether you should also write a route plan around it, and on a yes follow `kit/coach-kit-routecoach.md`. Without a route from me, write only the normal workout: no route plan, no question about routes. The normal workout is written exactly as above; the route plan is an extra, separate NOTE event named `RouteCoach plan` on the same date whose description is one `[[RP1:...]]` line. Never put that block into the workout description.
+- **Route rides (only if I use RouteCoach, the Edge 530 data field):** only when I put a GPX file in the chat or name a saved route for a ride, ask me once whether you should also write a route plan around it, and on a yes follow `kit/coach-kit-routecoach.md`. Without a route from me, write only the normal workout: no route plan, no question about routes. The normal workout is written exactly as above; the route plan is one `[[RP1:...]]` line added as the last line of that workout's description (after a blank line, never inside the steps), and the workout gets the tag `routecoach`; keep the line whenever the description is rewritten. A separate NOTE named `RouteCoach plan` with that line is only the fallback.
 
 ## 4. Coaching principles
 
