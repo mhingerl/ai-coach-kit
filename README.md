@@ -20,6 +20,7 @@ You don't need to copy files or edit anything. Paste this repository's link into
 - **An optional weekly review and block reviews (setup asks if you want it):** a scheduled task checks how your training is going against the plan, suggests changes, writes a review at the end of each training phase, and reshapes your dashboard to fit what matters to you now.
 - **The coach data extension (Mac or Windows desktop app; needed from kit 2026-11-12.3):** one small digest of your training data instead of many calls, intervals.icu and Garmin merged, calendar changes with safety limits, your data files kept up to date on your computer, and a small snapshot for phone chats. Setup installs it; steps are in [`extension/INSTALL.md`](extension/INSTALL.md).
 - **Optional Garmin watch apps:** if you have a Forerunner 955/255/255S or fenix 7/7S/7X, the free Connect IQ apps *Strength Coach Interpreter* (guides your planned strength session set by set from your intervals.icu calendar and logs what you did) and *Scale Linker* (Renpho scale weigh-ins, pre/post-workout sweat loss, to intervals.icu) work with this kit. Claude recommends them during setup where they fit.
+- **Optional Garmin Edge data field:** if you have an Edge 530 and ride outdoors with power or heart rate, the free Connect IQ data field *RouteCoach* shows your planned targets along the route, as an elevation profile with a target above each segment, while you ride (Edge 530 only; new, so far tested in the simulator only). Claude offers it during setup or in the weekly kit news where it fits.
 - **Kit news:** the weekly review (or a kit-news check on its own, if you pick that) checks this repository for a newer kit version and tells you what changed. It first reads a one-line `VERSION` file, so a week with no news costs almost nothing, and it never applies anything on its own.
 - **Easy re-setup:** before moving to a new kit version, ask "give me my setup interview answers". Paste the result into the new setup and Claude only asks what's missing.
 
@@ -51,9 +52,13 @@ You don't need to copy files or edit anything. Paste this repository's link into
 | [`kit/coach-kit-checkin-skill.md`](kit/coach-kit-checkin-skill.md) | Template for your daily readiness check-in skill |
 | [`kit/coach-kit-dashboard.html`](kit/coach-kit-dashboard.html) | Template for the optional training dashboard |
 | [`kit/coach-kit-exercises.csv`](kit/coach-kit-exercises.csv) | Which muscles each exercise trains (for the muscle map) |
+| [`kit/coach-kit-routecoach.md`](kit/coach-kit-routecoach.md) | Optional: how the coach plans route-based targets for the RouteCoach Edge data field and sets it up with you |
+| [`kit/routecoach/`](kit/routecoach/) | Optional: three small Python tools (GPX and plan in, one pasteable plan line out) and a synthetic example |
 | [`extension/INSTALL.md`](extension/INSTALL.md) and the [latest `coach-data.mcpb`](https://github.com/mhingerl/ai-coach-kit/releases/latest/download/coach-data.mcpb) | The coach data extension: install guide and the file |
 | [`VERSION`](VERSION) | The current kit version (one line; what the weekly kit-news check reads first) |
 | [`CHANGELOG.md`](CHANGELOG.md) | What changed in each kit version |
+
+The five files in `kit/` are the kit. The RouteCoach document and `kit/routecoach/` are optional extras for Edge 530 riders; they are only added to a project when you adopt RouteCoach.
 
 **Prefer to do it by hand?** Add the five files in `kit/` to your Project's knowledge and write "Start" in a chat.
 

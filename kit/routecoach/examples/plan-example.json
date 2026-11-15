@@ -1,0 +1,21 @@
+{
+  "plan_name": "Threshold climbs",
+  "date": "2026-11-17",
+  "route_name": "Synthetic 20",
+  "ftp": 250,
+  "lthr": 165,
+  "segments": [
+    {"start_m": 0,     "end_m": 4200,  "targets": {"P": [130, 160]},                 "label": "Warm-up",     "step": 0},
+    {"start_m": 4200,  "end_m": 8700,  "targets": {"P": [235, 255], "C": [85, 95]},  "label": "Threshold 1", "step": 1},
+    {"start_m": 8700,  "end_m": 13400, "targets": {"P": [130, 150], "H": [0, 140]},  "label": "Recover",     "step": 2},
+    {"start_m": 13400, "end_m": 19200, "targets": {"P": [240, 255]},                 "label": "Threshold 2", "step": 3},
+    {"start_m": 19200, "end_m": 19900, "targets": {"H": [110, 130]},                 "label": "Cool-down",   "step": 4}
+  ],
+  "workout_steps": [
+    {"index": 0, "targets": {"P": [130, 160]}},
+    {"index": 1, "targets": {"P": [235, 255]}},
+    {"index": 2, "targets": {"P": [130, 150], "H": [0, 140]}},
+    {"index": 3, "targets": {"P": [240, 255]}},
+    {"index": 4, "targets": {"H": [110, 130]}}
+  ]
+}
