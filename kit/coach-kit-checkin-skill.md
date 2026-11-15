@@ -269,7 +269,7 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
   - A `max` set has no rep target: the Watch log shows the reps actually done as a normal `N reps`. Judge it against that exercise's reps in the last session, not against a number in the plan.
 - Validate structured workout text before writing it (if the tools offer validation): the estimated duration must match the intended total, and repeats must show their rep count. Set moving time to the validated duration.
 - Add `claude` to the tags of every event created or changed, and give new events an `external_id` starting `claude-` (e.g. `claude-2026-11-04-threshold`).
-- **Route rides (only if the checklist says RouteCoach is `installed`):** when I ask for a route-based session, follow `kit/coach-kit-routecoach.md`: the normal workout as above, plus an extra NOTE event named `RouteCoach plan` with one `[[RP1:...]]` line, never in the workout description. Otherwise write normal workouts. Don't mention RouteCoach in a check-in unless I ask or I am planning an outdoor ride with a long climb and it is `installed`.
+- **Route rides (only if the checklist says RouteCoach is `installed`):** only when I put a GPX file in the chat or name a saved route for a ride, ask me once whether you should also write a route plan around it. On a yes follow `kit/coach-kit-routecoach.md`: the normal workout as above, plus an extra NOTE event named `RouteCoach plan` with one `[[RP1:...]]` line, never in the workout description. Without a route from me, write only the normal workout (no route plan, no question about routes). Don't mention RouteCoach in a check-in unless I ask or I am planning an outdoor ride with a long climb and it is `installed`.
 
 ## Group sessions with unpredictable timing
 
@@ -280,4 +280,4 @@ When <ATHLETE> reports a completed session (inside a check-in or not):
 
 ---
 
-Kit version: 2026-11-15.2.
+Kit version: 2026-11-15.3.

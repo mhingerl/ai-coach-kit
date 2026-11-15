@@ -23,6 +23,10 @@ Progress comes from GPS map-matching to the route, not from ride distance, so st
 
 Only when the athlete has an Edge 530 and rides outdoors with power or heart rate and would like route-based targets. The setup prompt (2.7) and the weekly kit-news step say when and how often to mention it. RouteCoach may not be in the public store yet (see Status): check availability first (next section). If it is not listed for the athlete's Edge 530, say so plainly and skip it for now; do not record it as offered.
 
+## When to write a route plan (trigger rule)
+
+**Only when the athlete brings a route.** A route plan is written only after the athlete has put a GPX file in the chat (or named a route that is already in the route library) for a ride. Then ask once, in one line, whether you should also write a RouteCoach plan around that route, and build it only on a yes. If the athlete doesn't mention a route, write the normal workout and nothing else: no RouteCoach NOTE, no `[[RP1:...]]` line, no question about routes, no request for GPX files, and no mention of RouteCoach in check-ins or when planning rides. Never pick a route yourself, and never turn a normal planned ride into a route plan unasked. A GPX that arrives for another reason (for example "what do you think of this route?") is not a request for a plan: answer the question, and offer the plan once only if it fits.
+
 ## Checking availability
 
 **Store link:** https://apps.garmin.com/apps/67fb8f49-f0b9-4346-8994-d30bec5c6ad9?tid=1 (the listing is not public yet while the review is pending: until it opens for you, treat RouteCoach as not yet in store; remove this note once it is live).
@@ -36,11 +40,13 @@ Only when the athlete has an Edge 530 and rides outdoors with power or heart rat
 1. **Install** RouteCoach from the Connect IQ Store (search "RouteCoach" in the Garmin Connect IQ phone app; Edge 530 only). If the search does not show it yet, or not for the Edge 530, say so, follow "Checking availability" above and stop here.
 2. **Add it on the Edge** to a full-page data screen of the cycling profile. It shows "No plan" until it has one.
 3. **Choose how plans arrive:** paste the `[[RP1:...]]` line into the app's **Pasted plan** setting in Garmin Connect (works right away), and/or enter the intervals.icu API key in the app's settings so the field fetches the NOTE for today. The athlete types the key; never ask for it in the chat.
-4. **Routes:** ask for the Garmin Course names of the usual routes and for their GPX files, so the coach can fill the route library (below).
+4. **Routes:** don't ask for a list of routes. Tell the athlete that whenever they send a GPX file in a chat, you will offer to write a route plan for it (see "When to write a route plan"). Routes the athlete sends are added to the route library (below), with the Garmin Course name.
 5. **For a ride:** load the Garmin Course on the Edge and ride with RouteCoach and WITHOUT the Garmin workout (or the other way round).
 6. **Optional:** a **demo mode** setting in the app simulates a ride on a built-in route, to see what the screen looks like.
 
 ## What to write for a route ride (three things, always together)
+
+Only after the trigger rule above is met (the athlete brought a route and said yes).
 
 1. **The normal time-based workout**, exactly as always (intervals.icu workout syntax, same date). Do not change how workouts are written; load, TSS and the sync to the device depend on it.
 2. **A separate NOTE event** on the same date, category NOTE, named exactly `RouteCoach plan`, whose description is ONE line, `[[RP1:...]]`, and nothing else. Never put the block into the workout description.
@@ -50,7 +56,7 @@ Never edit the block by hand: it has a checksum, and a damaged block is rejected
 
 ## How to build the plan
 
-1. **Route:** pick it from the route library below, or ask for a GPX file. The encoder needs the GPX file.
+1. **Route:** the one the athlete sent or named (from the route library below). The encoder needs its GPX file; if the athlete named a library route whose GPX is not saved, ask for that file. Never choose a route on your own.
 2. **Segments** are measured by DISTANCE ALONG THE ROUTE in metres from the route start (not ride distance).
    - Sorted, non-overlapping, `start_m < end_m`, the last `end_m` at most the route length.
    - Gaps are allowed but show "no target"; prefer contiguous segments covering the whole route.
@@ -100,7 +106,7 @@ If the coach can create intervals.icu events with a tool, create the NOTE itself
 
 ## Route library
 
-Keep the athlete's own copy of this table in the project (for example `claude/routecoach/route-library.md`, with the GPX files next to it). Fill it from the GPX files with `find_climbs.py`; the route name is the Garmin Course name.
+Keep the athlete's own copy of this table in the project, filled only with routes the athlete sent (for example `claude/routecoach/route-library.md`, with the GPX files next to it). Fill it from the GPX files with `find_climbs.py`; the route name is the Garmin Course name.
 
 | Route name (= Garmin Course name) | Length km | Total ascent m | Longest climb (km, avg %) | Start (lat, lon) | GPX file |
 |---|---|---|---|---|---|

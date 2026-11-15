@@ -2,6 +2,14 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-15.3
+
+*Touches:* RouteCoach wording only: `kit/coach-kit-routecoach.md` (new "When to write a route plan" rule, setup step 4, route library note), setup prompt (2.7 RouteCoach item, section 3 "Route rides" bullet) and the check-in skill template (the "Route rides" bullet). Section 3's "Writing workouts to intervals.icu" subsection changed.
+*If you already use the kit (ask your coach "update me to kit 2026-11-15.3"; it should follow these steps and ask before changing anything):* only relevant if you use RouteCoach.
+1. Replace the RouteCoach file in your project and the "Route rides" bullet in your saved check-in skill card with the new text, and regenerate `claude/coaching-principles.md` (2.5, item 3).
+
+- Changed: a route plan is written only when you bring a route (a GPX file in the chat, or a saved route you name). The coach then asks once whether to write a RouteCoach plan around it. Without a route from you it writes the normal workout only: no route plan, no questions about routes, no requests for GPX files. Setup no longer asks for a list of routes.
+
 ## 2026-11-15.2
 
 *Touches:* setup prompt (2.6 weekly review, step 5 kit-news: RouteCoach news; 2.7 optional extras: new RouteCoach item; 2.8 hand over: a RouteCoach checklist line; section 3 "Writing workouts to intervals.icu": new "Route rides" bullet; section 6 setup export skill), the check-in skill template (one "Route rides" bullet), and new optional files `kit/coach-kit-routecoach.md` and `kit/routecoach/` (three tools and a small example). Section 3's "Writing workouts to intervals.icu" subsection changed.
