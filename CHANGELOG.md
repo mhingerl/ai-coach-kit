@@ -4,7 +4,7 @@ The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entrie
 
 ## 2026-11-17.1
 
-*Touches:* setup prompt section 3 ("Food logging": new "Daily totals in the wellness row" paragraph, so `claude/coaching-principles.md` changes), the version footers of the setup prompt and the check-in skill template, `extension/INSTALL.md` (complete tool table, update link), README (RouteCoach status) and one formatting fix in this changelog. The extension file itself is unchanged (still 0.10.1).
+*Touches:* setup prompt section 3 ("Food logging": new "Daily totals in the wellness row" paragraph, so `claude/coaching-principles.md` changes), the version footers of the setup prompt and the check-in skill template, `extension/INSTALL.md` (complete tool table, update link), README (RouteCoach status) and one formatting fix in this changelog. The extension file in the releases is now 0.13.2 (adds `coach_checkin` and `coach_log_append`, morning feel in the digest, a 21:00 late-session cut-off).
 *If you already use the kit (ask your coach "update me to kit 2026-11-17.1"; it should follow these steps and ask before changing anything):*
 1. Only if you log food: regenerate `claude/coaching-principles.md` from the new setup prompt (setup item 2.5.3) so it carries the daily-totals rule, and from now on put the day's kcal, carbs, protein and fat into the intervals.icu wellness row with `coach_wellness_update` each time food is logged.
 2. Nothing else to change. The version footers in the saved check-in skill card are only labels.
