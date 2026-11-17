@@ -2,6 +2,17 @@
 
 The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entries from 2026-11-05 on start with a *Touches:* line (what the change affects) and an *If you already use the kit:* line.
 
+## 2026-11-17.1
+
+*Touches:* setup prompt section 3 ("Food logging": new "Daily totals in the wellness row" paragraph, so `claude/coaching-principles.md` changes), the version footers of the setup prompt and the check-in skill template, `extension/INSTALL.md` (complete tool table, update link), README (RouteCoach status) and one formatting fix in this changelog. The extension file itself is unchanged (still 0.10.1).
+*If you already use the kit (ask your coach "update me to kit 2026-11-17.1"; it should follow these steps and ask before changing anything):*
+1. Only if you log food: regenerate `claude/coaching-principles.md` from the new setup prompt (setup item 2.5.3) so it carries the daily-totals rule, and from now on put the day's kcal, carbs, protein and fat into the intervals.icu wellness row with `coach_wellness_update` each time food is logged.
+2. Nothing else to change. The version footers in the saved check-in skill card are only labels.
+
+- Added: the daily food totals rule (`kcalConsumed`, `carbohydrates`, `protein`, `fatTotal`) that was missing from the kit although it worked well in practice.
+- Fixed: the version footers still said 2026-11-15.3; INSTALL.md listed only part of the tools and sent people to "this folder" instead of the releases page; README said RouteCoach was tested in the simulator only; one unclosed italic in the 2026-11-15.4 entry.
+- Added: `scripts/check-kit.sh` and a GitHub Actions workflow that fail when VERSION, the two footers and the top changelog entry disagree, when a changelog entry has no *Touches:* or *If you already use the kit* line, or when a RouteCoach tool does not compile.
+
 ## 2026-11-15.5
 
 *Touches:* RouteCoach only: `kit/coach-kit-routecoach.md` (Status line, fetch timing, new "Versions and what the athlete sees on the Edge" section) and one phrase in the setup prompt (2.7 RouteCoach item). No change to section 3, 4 or 5, so `claude/coaching-principles.md` and the check-in skill card stay as they are.
@@ -15,7 +26,7 @@ The newest kit version is also in the one-line [`VERSION`](VERSION) file. Entrie
 ## 2026-11-15.4
 
 *Touches:* RouteCoach only: `kit/coach-kit-routecoach.md`, the "Route rides" bullet in the setup prompt (section 3) and in the check-in skill card, and the two tools in `kit/routecoach/tools/` (`rp1.py`, `encode_plan.py`).
-*If you already use the kit (ask your coach "update me to kit 2026-11-15.4"; it should follow these steps and ask before changing anything):
+*If you already use the kit (ask your coach "update me to kit 2026-11-15.4"; it should follow these steps and ask before changing anything):*
 1. Only with RouteCoach: replace the RouteCoach file, the two tools and the "Route rides" bullet in your saved check-in skill card with the new text. The app needs RouteCoach 1.0.4 or later (update it in the Connect IQ app) to read the plan from the workout.
 
 - Changed: the RouteCoach plan line now goes as the last line of the workout description (after a blank line, never inside the steps), and the workout gets the tag `routecoach`; a separate NOTE named `RouteCoach plan` is only the fallback. The coach must keep or regenerate the line whenever it rewrites that description. `encode_plan.py --workout-line` prints the line ready to append.

@@ -290,6 +290,8 @@ For every meal I send (photo or text):
 5. The running total for the day after each meal.
 6. A closing note on which numbers are typical values rather than label values, and which weights were scale weights versus eyeballed.
 
+**Daily totals in the wellness row:** besides the note, put the day's running totals into that day's intervals.icu wellness row with `coach_wellness_update` (values `kcalConsumed` in kcal, `carbohydrates`, `protein` and `fatTotal` in grams; the wellness row has no field for fibre, sugars, saturated fat or salt, so those stay in the note, and `comments` is not used for food). Each call replaces the day's totals with the new running total, so do it every time food is logged, right after the note. If that isn't possible, do it when I say the day is closed, or the next day at the latest.
+
 Regular foods and supplements: keep a list of what I use regularly (product, usual amount in grams, label values) in memory, or if there is no memory in a short `claude/regular-foods.md` project document. Check it before asking. When I say "my usual scoop" or "same as last time", use the saved amount and look at earlier Nutrition log notes instead of asking again. Ask only when a portion differs or a product is new, then save it, and update the entry when the product or portion changes.
 
 Rules:
@@ -629,4 +631,4 @@ description: "Use when <ATHLETE> wants to set up the coaching again or move to a
 
 **Export format** (what section 1 expects to import): the title "Coaching setup export (<date>)", then the ten parts in the order above, with interview answers numbered like section 1 of the kit version they were written for. When the new kit has items the export doesn't cover, ask only those.
 
-Kit version: 2026-11-15.3. Start now with Step 0.
+Kit version: 2026-11-17.1. Start now with Step 0.

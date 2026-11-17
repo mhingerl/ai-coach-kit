@@ -32,6 +32,12 @@ Check the file first if you like: on a Mac, `shasum -a 256 ~/Downloads/coach-dat
 | `coach_sync` | Brings `wellness`, `fitness`, `activities` and `sleep_timing` CSV files in your data folder up to date (dry run first; never deletes) |
 | `coach_snapshot` | A 3 KB summary of those files for phone and web chats |
 | `coach_status`, `coach_selftest` | What is connected and whether the data looks right |
+| `coach_wellness_update`, `coach_weighins` | Write any wellness field of a day (weight, mood, food totals, comments; overwrite protection, read-back); read Scale Linker weigh-ins |
+| `coach_strength_save`, `coach_watch_log` | Write a strength session in the Strength Coach watch app's format; compare the plan with the Watch log |
+| `coach_streams`, `coach_best_efforts`, `coach_power_curve` | Second-by-second data of an activity; best efforts; power curve for threshold checks |
+| `coach_season`, `coach_season_propose`, `coach_season_apply` | Season view; a deterministic season plan (phases, weekly load); write it to the calendar as notes |
+| `coach_library`, `coach_workout_save`, `coach_workout_delete`, `coach_plan_apply` | The intervals.icu workout library and library plans |
+| `coach_icu_get` | Read-only access to other intervals.icu data (allowlisted paths, your own data only) |
 
 Your keys stay in the system keychain and the extension talks only to intervals.icu and, if you added a key, Garmin. It can change your calendar only in the ways listed above, and only events it created can be edited or deleted.
 
@@ -45,4 +51,4 @@ Ask your coach to "update my snapshot" on the computer. It runs `coach_sync` and
 
 ## Updating
 
-When a new version is announced in the changelog, download the new file from this folder and install it the same way; your settings stay.
+When a new version is announced in the changelog, download the latest file from the [releases page](https://github.com/mhingerl/ai-coach-kit/releases/latest) (the link at the top always points to it) and install it the same way; your settings stay.
